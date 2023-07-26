@@ -1,0 +1,69 @@
+version: "3.7"
+services:
+  db:
+    image: postgres:15
+    container_name: db_app_vpn
+    ports:
+      - "5436:5436"
+    env_file:
+      - .env-non-dev
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7
+    container_name: redis_app_vpn
+    command: --port 5370
+    expose:
+      - 5370
+    env_file:
+      - .env-non-dev
+
+
+  app:
+    build:
+      context: .
+    container_name: vpn_app
+    env_file:
+      - .env-non-dev
+    command: ["/vpn_app/docker/app.sh"]
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+      - redis
+
+  celery:
+    build:
+      context: .
+    env_file:
+      - .env-non-dev
+    container_name: celery_app_vpn
+    command: ["/vpn_app/docker/celery.sh", "celery"]
+    depends_on:
+      - redis
+
+
+  flower:
+    build:
+      context: .
+    env_file:
+      - .env-non-dev
+    container_name: flower_app_vpn
+    command: ["/vpn_app/docker/celery.sh", "flower"]
+    depends_on:
+      - redis
+      - celery
+    ports:
+      - 8888:5555
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_vpn
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "5050:5050"
+    env_file:
+      - .env-non-dev

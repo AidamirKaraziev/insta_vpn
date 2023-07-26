@@ -1,0 +1,6 @@
+/.idea
+.env
+.env-non-dev
+.pytest_cache
+venv
+/static/*
