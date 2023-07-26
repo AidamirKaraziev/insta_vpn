@@ -2,9 +2,9 @@ version: "3.7"
 services:
   db:
     image: postgres:15
-    container_name: db_app_vpn
+    container_name: db_insta
     ports:
-      - "5436:5436"
+      - "55300:55300"
     env_file:
       - .env-non-dev
     depends_on:
@@ -12,10 +12,10 @@ services:
 
   redis:
     image: redis:7
-    container_name: redis_app_vpn
-    command: --port 5370
+    container_name: redis_insta
+    command: --port 5380
     expose:
-      - 5370
+      - 5380
     env_file:
       - .env-non-dev
 
@@ -23,12 +23,12 @@ services:
   app:
     build:
       context: .
-    container_name: vpn_app
+    container_name: app_insta_vpn
     env_file:
       - .env-non-dev
-    command: ["/vpn_app/docker/app.sh"]
+    command: ["/insta_vpn/docker/app.sh"]
     ports:
-      - 8000:8000
+      - 55713:55713
     depends_on:
       - db
       - redis
@@ -38,8 +38,8 @@ services:
       context: .
     env_file:
       - .env-non-dev
-    container_name: celery_app_vpn
-    command: ["/vpn_app/docker/celery.sh", "celery"]
+    container_name: celery_insta
+    command: ["/insta_vpn/docker/celery.sh", "celery"]
     depends_on:
       - redis
 
@@ -49,21 +49,21 @@ services:
       context: .
     env_file:
       - .env-non-dev
-    container_name: flower_app_vpn
-    command: ["/vpn_app/docker/celery.sh", "flower"]
+    container_name: flower_insta
+    command: ["/insta_vpn/docker/celery.sh", "flower"]
     depends_on:
       - redis
       - celery
     ports:
-      - 8888:5555
+      - 8889:5555
 
   pgadmin:
     image: dpage/pgadmin4
-    container_name: pgadmin_vpn
+    container_name: pgadmin_insta
     depends_on:
       - db
       - redis
     ports:
-      - "5050:5050"
+      - "5060:5060"
     env_file:
       - .env-non-dev

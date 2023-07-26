@@ -27,7 +27,7 @@ from old_code.order.router import router as router_order
 current_user = fastapi_users.current_user()
 
 app = FastAPI(
-    title="Delivery App"
+    title="Insta VPN"
 )
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
