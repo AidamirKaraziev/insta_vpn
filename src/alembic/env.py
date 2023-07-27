@@ -5,14 +5,14 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from src.config import DB_HOST, DB_PORT, DB_USER, DB_NAME, DB_PASS
-from src.role.models import metadata as metadata_role
-from src.auth.models import metadata as metadata_auth
-from src.tariff.models import metadata as metadata_tariff
-from src.account.models import metadata as metadata_account
-from src.payments.models import metadata as metadata_payments
-from src.ip_address.models import metadata as metadata_ip_address
-from src.profiles.models import metadata as metadata_profile
+from config import DB_HOST, DB_PORT, DB_USER, DB_NAME, DB_PASS
+from role.models import metadata as metadata_role
+from auth.models import metadata as metadata_auth
+from tariff.models import metadata as metadata_tariff
+from account.models import metadata as metadata_account
+from payments.models import metadata as metadata_payments
+from ip_address.models import metadata as metadata_ip_address
+from profiles.models import metadata as metadata_profile
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
