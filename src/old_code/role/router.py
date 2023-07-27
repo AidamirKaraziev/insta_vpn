@@ -1,14 +1,14 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth.base_config import fastapi_users
-from auth.models import User
-from role.crud import crud_role
-from role.getters import getting_role
+from old_code.auth.base_config import fastapi_users
+from old_code.auth.models import User
+from old_code.role.crud import crud_role
+from old_code.role.getters import getting_role
 
-from core.response import SingleEntityResponse, ListOfEntityResponse, Meta
+from core.response import SingleEntityResponse, ListOfEntityResponse
 from database import get_async_session
 
 current_active_user = fastapi_users.current_user(active=True)

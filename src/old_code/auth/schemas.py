@@ -3,7 +3,7 @@ from typing import Optional
 
 from fastapi_users import schemas
 
-from role.schemas import RoleGet
+from old_code.role.schemas import RoleGet
 
 
 class UserRead(schemas.BaseUser[int]):

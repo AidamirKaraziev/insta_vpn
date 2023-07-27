@@ -5,7 +5,7 @@ from sqlalchemy import Column, Integer, String, TIMESTAMP, ForeignKey, Boolean, 
 from sqlalchemy.orm import relationship
 
 from database import Base
-from role.models import Role
+from old_code.role.models import Role
 
 metadata = MetaData()
 

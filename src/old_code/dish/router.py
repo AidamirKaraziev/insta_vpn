@@ -4,8 +4,8 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth.base_config import fastapi_users
-from auth.models import User
+from old_code.auth.base_config import fastapi_users
+from old_code.auth.models import User
 from core.response import SingleEntityResponse, ListOfEntityResponse
 from database import get_async_session
 from old_code.dish.crud import crud_dish

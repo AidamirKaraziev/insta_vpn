@@ -4,7 +4,7 @@ import time
 import os
 from typing import Optional, Type
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status,  UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, Request, status,  UploadFile, File
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_users import exceptions, models
@@ -13,15 +13,15 @@ from fastapi_users.router.common import ErrorCode, ErrorModel
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth.base_config import fastapi_users
-from auth.manager import get_user_manager
-from auth.models import User
-from auth.schemas import UserCreate, UserRead, UserUpdate
+from old_code.auth.base_config import fastapi_users
+from old_code.auth.manager import get_user_manager
+from old_code.auth.models import User
+from old_code.auth.schemas import UserCreate, UserRead, UserUpdate
 from core.response import ListOfEntityResponse, SingleEntityResponse
 from database import get_async_session
 
-from user.crud import crud_user
-from user.getters import getting_user
+from old_code.user.crud import crud_user
+from old_code.user.getters import getting_user
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

@@ -6,8 +6,8 @@ from sqlalchemy import pool
 from alembic import context
 
 from config import DB_HOST, DB_PORT, DB_USER, DB_NAME, DB_PASS
-from role.models import metadata as metadata_role
-from auth.models import metadata as metadata_auth
+# from old_code.role.models import metadata as metadata_role
+# from old_code.auth.models import metadata as metadata_auth
 from tariff.models import metadata as metadata_tariff
 from account.models import metadata as metadata_account
 from payments.models import metadata as metadata_payments
@@ -33,8 +33,8 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = [metadata_role, metadata_auth, metadata_tariff, metadata_ip_address, metadata_account,
-                   metadata_payments, metadata_profile]
+target_metadata = [metadata_tariff, metadata_ip_address, metadata_account,
+                   metadata_profile, metadata_payments]
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

@@ -1,8 +1,8 @@
 from typing import Optional
 from fastapi import Request
 
-from auth.schemas import UserRead
-from role.getters import getting_role
+from old_code.auth.schemas import UserRead
+from old_code.role.getters import getting_role
 
 
 def getting_user(obj: UserRead,  request: Optional[Request]) -> Optional[UserRead]:

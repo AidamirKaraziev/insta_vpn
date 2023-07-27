@@ -9,4 +9,5 @@ class IpAddress(Base):
 
     metadata = metadata
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False, unique=True)
+    is_active = Column(Boolean, default=False)

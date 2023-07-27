@@ -3,8 +3,8 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth.base_config import fastapi_users
-from auth.models import User
+from old_code.auth.base_config import fastapi_users
+from old_code.auth.models import User
 from old_code.our_status.crud import crud_status
 from old_code.our_status.getters import getting_status
 
