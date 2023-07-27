@@ -9,6 +9,7 @@ from old_code.auth.base_config import fastapi_users
 # from old_code.auth.models import User
 from config import REDIS_HOST, REDIS_PORT
 from ip_address.router import router as router_ip_address
+from tariff.router import router as router_tariff
 
 current_user = fastapi_users.current_user()
 
@@ -54,6 +55,8 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # app.include_router(router_role)
 app.include_router(router_ip_address)
+app.include_router(router_tariff)
+
 origins = ["*"]
 
 app.add_middleware(

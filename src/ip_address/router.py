@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.raise_template import get_raise
 from ip_address.crud import crud_ip_address
 from ip_address.getters import getting_ip_address
-from ip_address.shcemas import IpAddressCreate, IpAddressUpdate
+from ip_address.schemas import IpAddressCreate, IpAddressUpdate
 from core.response import SingleEntityResponse, ListOfEntityResponse
 from database import get_async_session
 
@@ -49,7 +49,7 @@ async def get_ip_address(
         # user: User = Depends(current_active_user),
         session: AsyncSession = Depends(get_async_session),
 ):
-    obj, code, indexes = await crud_ip_address.get_ip_address_by_id(db=session, ip_address_id=ip_address_id)
+    obj, code, indexes = await crud_ip_address.get_ip_address_by_id(db=session, id=ip_address_id)
     if code != 0:
         await get_raise(num=code["num"], message=code["message"])
     return SingleEntityResponse(data=getting_ip_address(obj=obj))
@@ -83,7 +83,7 @@ async def update_ip_address(
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_ip_address.update_ip_address(db=session, update_data=update_data,
-                                                                 ip_address_id=ip_address_id)
+                                                                 id=ip_address_id)
     if code != 0:
         await get_raise(num=code["num"], message=code["message"])
     return SingleEntityResponse(data=getting_ip_address(obj=obj))

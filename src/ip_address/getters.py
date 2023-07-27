@@ -1,5 +1,5 @@
 from typing import Optional
-from ip_address.shcemas import IpAddressGet
+from ip_address.schemas import IpAddressGet
 
 
 def getting_ip_address(obj: IpAddressGet) -> Optional[IpAddressGet]:
