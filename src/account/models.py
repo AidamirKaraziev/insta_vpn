@@ -13,8 +13,7 @@ class Account(Base):
     metadata = metadata
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    number = Column(String)
-    telegram_id = Column(Integer)
+    number = Column(String, unique=True)
+    telegram_id = Column(Integer, unique=True)
     created_at = Column(TIMESTAMP, default=datetime.utcnow())
     time_zone = Column(String)
-
