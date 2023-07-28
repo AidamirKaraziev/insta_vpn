@@ -29,15 +29,15 @@ class CrudPayment(CRUDBase[Payment, PaymentCreate, PaymentUpdate]):
         tariff, code, indexes = await crud_tariff.get_tariff_by_id(db=db, id=new_data.tariff_id)
         if code != 0:
             return None, code, None
-
+        # определяю корректную дату отсчета: либо сегодня, либо дата окончания. Что новее
         unix_today = to_timestamp(datetime.datetime.today())
         unix_date_end = to_timestamp(profile.date_end)
         largest_date = max([unix_date_end, unix_today])
         new_unix_date = largest_date + tariff.period_unix
         date = date_from_timestamp(new_unix_date)
 
-        date_end = datetime.date(date.year, date.month, date.day)
-        update_profile_date_end = {"date_end": date_end}
+        new_date_end = datetime.date(date.year, date.month, date.day)
+        update_profile_date_end = {"date_end": new_date_end}
 
         obj, code, indexes = await crud_profile.update_profile(db=db, update_data=update_profile_date_end, id=profile.id)
         if code != 0:
