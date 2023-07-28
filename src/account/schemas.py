@@ -8,7 +8,7 @@ class AccountGet(BaseModel):
     name: Optional[str]
     number: Optional[str]
     telegram_id: int
-    created_at: Optional[Timestamp]
+    created_at: Optional[int]
     time_zone: Optional[str]
 
 

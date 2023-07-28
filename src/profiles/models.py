@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Table, Column, Integer, String, TIMESTAMP, ForeignKey, JSON, Boolean, MetaData
+from sqlalchemy import Table, Column, Integer, String, TIMESTAMP, ForeignKey, JSON, Boolean, MetaData, DateTime, Date
 from sqlalchemy.orm import relationship
 
 from account.models import Account
@@ -19,8 +19,8 @@ class Profile(Base):
     account_id = Column(Integer, ForeignKey(Account.id, ondelete="SET NULL"))
     ip_address_id = Column(Integer, ForeignKey(IpAddress.id, ondelete="SET NULL"))
     peer_name = Column(String, unique=True)
-    date_end = Column(TIMESTAMP)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    date_end = Column(Date, default=datetime.today())
+    created_at = Column(Date, default=datetime.today())
     is_active = Column(Boolean, default=True)
 
     account = relationship(Account, backref="profiles", lazy="joined")

@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 867e434a20c2
+Revision ID: 6500e7dec34f
 Revises: 
-Create Date: 2023-07-27 14:47:21.212668
+Create Date: 2023-07-28 06:44:10.845140
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '867e434a20c2'
+revision = '6500e7dec34f'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -23,29 +23,35 @@ def upgrade() -> None:
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('price', sa.Integer(), nullable=True),
     sa.Column('period_day', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
+    sa.Column('is_active', sa.Boolean(), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name')
     )
     op.create_table('ips_addresses',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
-    sa.PrimaryKeyConstraint('id')
+    sa.Column('is_active', sa.Boolean(), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name')
     )
     op.create_table('account',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=True),
     sa.Column('number', sa.String(), nullable=True),
     sa.Column('telegram_id', sa.Integer(), nullable=True),
-    sa.Column('created_at', sa.TIMESTAMP(), nullable=True),
+    sa.Column('created_at', sa.TIMESTAMP(timezone=True), nullable=True),
     sa.Column('time_zone', sa.String(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('number'),
+    sa.UniqueConstraint('telegram_id')
     )
     op.create_table('profile',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('account_id', sa.Integer(), nullable=True),
     sa.Column('ip_address_id', sa.Integer(), nullable=True),
     sa.Column('peer_name', sa.String(), nullable=True),
-    sa.Column('date_end', sa.TIMESTAMP(), nullable=True),
-    sa.Column('created_at', sa.TIMESTAMP(), nullable=True),
+    sa.Column('date_end', sa.Date(), nullable=True),
+    sa.Column('created_at', sa.Date(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['account_id'], ['account.id'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['ip_address_id'], ['ips_addresses.id'], ondelete='SET NULL'),

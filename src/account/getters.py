@@ -5,8 +5,8 @@ from utils.time_stamp import to_timestamp
 
 
 def getting_account(obj: AccountGet) -> Optional[AccountGet]:
-    # if obj.created_at is not None:
-    #     obj.created_at = to_timestamp(obj.created_at)
+    if obj.created_at is not None:
+        obj.created_at = to_timestamp(obj.created_at)
     return AccountGet(
         id=obj.id,
         name=obj.name,

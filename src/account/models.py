@@ -15,5 +15,5 @@ class Account(Base):
     name = Column(String)
     number = Column(String, unique=True)
     telegram_id = Column(Integer, unique=True)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow())
+    created_at = Column(TIMESTAMP(timezone=True), default=datetime.utcnow())
     time_zone = Column(String)
