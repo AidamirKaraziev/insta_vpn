@@ -7,10 +7,10 @@ from utils.time_stamp import to_timestamp
 
 
 def getting_profile(obj: ProfileGet) -> Optional[ProfileGet]:
-    if obj.created_at is not None:
-        obj.created_at = to_timestamp(obj.created_at)
-    if obj.date_end is not None:
-        obj.date_end = to_timestamp(obj.date_end)
+    # if obj.created_at is not None:
+    #     obj.created_at = to_timestamp(obj.created_at)
+    # if obj.date_end is not None:
+    #     obj.date_end = to_timestamp(obj.date_end)
     return ProfileGet(
         id=obj.id,
         account_id=getting_account(obj.account) if obj.account is not None else None,

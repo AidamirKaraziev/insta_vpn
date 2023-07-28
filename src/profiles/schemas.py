@@ -12,8 +12,8 @@ class ProfileGet(BaseModel):
     account_id: AccountGet
     ip_address_id: IpAddressGet
     peer_name: str
-    date_end: Optional[int]
-    created_at: Optional[int]
+    date_end: Optional[Date]
+    created_at: Optional[Date]
     is_active: Optional[bool]
 
 

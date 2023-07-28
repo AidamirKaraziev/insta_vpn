@@ -1,4 +1,4 @@
-from sqlite3 import Timestamp
+from sqlite3 import Timestamp, Date
 from typing import Optional
 from pydantic import BaseModel
 
@@ -8,7 +8,7 @@ class AccountGet(BaseModel):
     name: Optional[str]
     number: Optional[str]
     telegram_id: int
-    created_at: Optional[int]
+    created_at: Optional[Date]
     time_zone: Optional[str]
 
 
