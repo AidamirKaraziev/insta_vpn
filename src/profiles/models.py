@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from sqlalchemy import Table, Column, Integer, String, TIMESTAMP, ForeignKey, JSON, Boolean, MetaData, DateTime, Date
+from sqlalchemy import Table, Column, Integer, String, TIMESTAMP, ForeignKey, JSON, Boolean, MetaData, DateTime, Date, \
+    UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from account.models import Account
@@ -25,3 +26,7 @@ class Profile(Base):
 
     account = relationship(Account, backref="profiles", lazy="joined")
     ip_address = relationship(IpAddress, backref="profiles", lazy="joined")
+
+    __table_args__ = (UniqueConstraint("account_id", "ip_address_id", "peer_name",
+                                       name='_account_ip_address_peer_name_uc'),
+                      )
