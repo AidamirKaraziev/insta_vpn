@@ -7,6 +7,6 @@ def getting_tariff(obj: TariffGet) -> Optional[TariffGet]:
         id=obj.id,
         name=obj.name,
         price=obj.price,
-        period_day=obj.period_day,
+        period_unix=obj.period_unix,
         is_active=obj.is_active,
     )

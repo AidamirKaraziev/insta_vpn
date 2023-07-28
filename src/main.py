@@ -12,6 +12,7 @@ from ip_address.router import router as router_ip_address
 from tariff.router import router as router_tariff
 from account.router import router as router_account
 from profiles.router import router as router_profile
+from payments.router import router as router_payment
 
 
 current_user = fastapi_users.current_user()
@@ -61,6 +62,7 @@ app.include_router(router_ip_address)
 app.include_router(router_tariff)
 app.include_router(router_account)
 app.include_router(router_profile)
+app.include_router(router_payment)
 
 origins = ["*"]
 
