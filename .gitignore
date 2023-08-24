@@ -4,3 +4,6 @@
 .pytest_cache
 venv
 /static/*
+comand.txt
+dump.rdb
+задачи.txt

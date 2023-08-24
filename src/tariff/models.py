@@ -9,6 +9,7 @@ class Tariff(Base):
 
     metadata = metadata
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False, unique=True)
     price = Column(Integer)
-    period_day = Column(Integer)
+    period_unix = Column(Integer)
+    is_active = Column(Boolean, default=True)

@@ -1,8 +1,8 @@
 FROM python:3.8
 
-RUN mkdir /vpn_app
+RUN mkdir /insta_vpn
 
-WORKDIR /vpn_app
+WORKDIR /insta_vpn
 
 COPY requirements.txt .
 

@@ -1,8 +1,4 @@
-import pytest
-from sqlalchemy import insert, select
-
-from role.models import Role
-from conftest import client, async_session_maker
+from conftest import client
 
 
 def test_register():

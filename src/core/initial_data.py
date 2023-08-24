@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 
-from role.models import Role
+from old_code.role.models import Role
 from old_code.order_status.models import Status
 from database import get_async_session
 

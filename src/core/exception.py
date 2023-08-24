@@ -17,7 +17,7 @@ class UnfoundEntity(EntityError):
     http_status = 404
 
 
-# Недоступная сущность
+# Недоступный объект
 class InaccessibleEntity(EntityError):
     http_status = 403
 
