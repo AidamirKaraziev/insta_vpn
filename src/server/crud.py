@@ -1,26 +1,26 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from ip_address.models import IpAddress
-from ip_address.schemas import IpAddressCreate, IpAddressUpdate
 from core.base_crud import CRUDBase
+from server.models import Server
+from server.schemas import ServerCreate, ServerUpdate
 
 
-class CrudIpAddress(CRUDBase[IpAddress, IpAddressCreate, IpAddressUpdate]):
-    obj_name = "ip address"
+class CrudServer(CRUDBase[Server, ServerCreate, ServerUpdate]):
+    obj_name = "Server"
     not_found_id = {"num": 404, "message": f"Not found {obj_name} with this id"}
     name_is_exist = {"num": 403, "message": f"А {obj_name} with that name already exists"}
 
-    async def get_ip_address_by_id(self, *, db: AsyncSession, id: int):
+    async def get_server_by_id(self, *, db: AsyncSession, id: int):
         obj = await super().get(db=db, id=id)
         if obj is None:
             return None, self.not_found_id, None
         return obj, 0, None
 
-    async def get_all_ips_addresses(self, *, db: AsyncSession, skip: int, limit: int):
+    async def get_all_servers(self, *, db: AsyncSession, skip: int, limit: int):
         objects = await super().get_multi(db_session=db, skip=skip, limit=limit)
         return objects, 0, None
 
-    async def add_ip_address(self, *, db: AsyncSession, new_data: IpAddressCreate):
+    async def add_server(self, *, db: AsyncSession, new_data: ServerCreate):
         # check name
         query = select(self.model).where(self.model.name == new_data.name)
         response = await db.execute(query)
@@ -29,7 +29,7 @@ class CrudIpAddress(CRUDBase[IpAddress, IpAddressCreate, IpAddressUpdate]):
         objects = await super().create(db_session=db, obj_in=new_data)
         return objects, 0, None
 
-    async def update_ip_address(self, *, db: AsyncSession, update_data: IpAddressUpdate, id: int):
+    async def update_server(self, *, db: AsyncSession, update_data: ServerUpdate, id: int):
         # check id
         query = select(self.model).where(self.model.id == id)
         resp = await db.execute(query)
@@ -46,4 +46,4 @@ class CrudIpAddress(CRUDBase[IpAddress, IpAddressCreate, IpAddressUpdate]):
         return objects, 0, None
 
 
-crud_ip_address = CrudIpAddress(IpAddress)
+crud_server = CrudServer(Server)

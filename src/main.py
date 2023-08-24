@@ -8,11 +8,12 @@ from redis import asyncio as aioredis
 from old_code.auth.base_config import fastapi_users
 # from old_code.auth.models import User
 from config import REDIS_HOST, REDIS_PORT
-from ip_address.router import router as router_ip_address
+from server.router import router as router_server
 from tariff.router import router as router_tariff
 from account.router import router as router_account
 from profiles.router import router as router_profile
 from payments.router import router as router_payment
+from test_outline.router import router as router_outline
 
 
 current_user = fastapi_users.current_user()
@@ -58,11 +59,12 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # )
 
 # app.include_router(router_role)
-app.include_router(router_ip_address)
+app.include_router(router_server)
 app.include_router(router_tariff)
 app.include_router(router_account)
 app.include_router(router_profile)
 app.include_router(router_payment)
+app.include_router(router_outline)
 
 origins = ["*"]
 

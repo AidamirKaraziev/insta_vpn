@@ -11,7 +11,7 @@ from config import DB_HOST, DB_PORT, DB_USER, DB_NAME, DB_PASS
 from tariff.models import metadata as metadata_tariff
 from account.models import metadata as metadata_account
 from payments.models import metadata as metadata_payments
-from ip_address.models import metadata as metadata_ip_address
+from server.models import metadata as metadata_server
 from profiles.models import metadata as metadata_profile
 
 # this is the Alembic Config object, which provides
@@ -33,7 +33,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = [metadata_tariff, metadata_ip_address, metadata_account,
+target_metadata = [metadata_tariff, metadata_server, metadata_account,
                    metadata_profile, metadata_payments]
 
 # other values from the config, defined by the needs of env.py,

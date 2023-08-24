@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from account.crud import crud_account
 from core.base_crud import CRUDBase
-from ip_address.crud import crud_ip_address
 from profiles.models import Profile
 from profiles.schemas import ProfileCreate, ProfileUpdate
+from server.crud import crud_server
 
 
 class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
@@ -26,7 +26,7 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         obj, code, indexes = await crud_account.get_account_by_id(db=db, id=new_data.account_id)
         if code != 0:
             return None, code, None
-        obj, code, indexes = await crud_ip_address.get_ip_address_by_id(db=db, id=new_data.ip_address_id)
+        obj, code, indexes = await crud_server.get_server_by_id(db=db, id=new_data.server_id)
         if code != 0:
             return None, code, None
         objects = await super().create(db_session=db, obj_in=new_data)
