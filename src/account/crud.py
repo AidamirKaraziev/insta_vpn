@@ -9,7 +9,6 @@ from core.base_crud import CRUDBase
 class CrudAccount(CRUDBase[Account, AccountCreate, AccountUpdate]):
     obj_name = "Account"
     not_found_id = {"num": 404, "message": f"Not found {obj_name} with this id"}
-    number_is_exist = {"num": 403, "message": f"А {obj_name} with that number already exists"}
     telegram_id_is_exist = {"num": 403, "message": f"А {obj_name} with that telegram id already exists"}
 
     async def get_account_by_id(self, *, db: AsyncSession, id: int):
@@ -23,16 +22,10 @@ class CrudAccount(CRUDBase[Account, AccountCreate, AccountUpdate]):
         return objects, 0, None
 
     async def add_account(self, *, db: AsyncSession, new_data: AccountCreate):
-        query = select(self.model).where(self.model.number == new_data.number)
-        response = await db.execute(query)
-        if response.scalar_one_or_none() is not None:
-            return None, self.number_is_exist, None
-
-        query = select(self.model).where(self.model.telegram_id == new_data.telegram_id)
+        query = select(self.model).where(self.model.id == new_data.id)
         response = await db.execute(query)
         if response.scalar_one_or_none() is not None:
             return None, self.telegram_id_is_exist, None
-
         objects = await super().create(db_session=db, obj_in=new_data)
         return objects, 0, None
 
@@ -43,12 +36,6 @@ class CrudAccount(CRUDBase[Account, AccountCreate, AccountUpdate]):
         this_obj = resp.scalar_one_or_none()
         if this_obj is None:
             return None, self.not_found_id, None
-        # check name
-        if update_data.name is not None:
-            query = select(self.model).where(self.model.number == update_data.number, self.model.id != id)
-            response = await db.execute(query)
-            if response.scalar_one_or_none() is not None:
-                return None, self.number_is_exist, None
 
         objects = await super().update(db_session=db, obj_current=this_obj, obj_new=update_data)
         return objects, 0, None
