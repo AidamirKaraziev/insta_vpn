@@ -13,3 +13,5 @@ class Server(Base):
     api_url = Column(String, nullable=False, unique=True)
     cert_sha256 = Column(String)
     max_client = Column(Integer)
+    fact_client = Column(Integer)
+    is_active = Column(Boolean, default=True)

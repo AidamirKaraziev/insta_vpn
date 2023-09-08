@@ -18,22 +18,20 @@ class Profile(Base):
     id = Column(Integer, primary_key=True)
     account_id = Column(Integer, ForeignKey(Account.id, ondelete="SET NULL"))
     server_id = Column(Integer, ForeignKey(Server.id, ondelete="SET NULL"))
-    peer_name = Column(String, unique=True)
-    date_end = Column(Date, default=datetime.today())
-    # created_at = Column(Date, default=datetime.today())
-    is_active = Column(Boolean, default=True)
+
+    key_id = Column(Integer)
+    name = Column(String)
+    port = Column(Integer)
+    method = Column(String)
+    access_url = Column(String)
+    used_bytes = Column(Integer)
+    data_limit = Column(Integer)
+
+    date_end = Column(TIMESTAMP(timezone=True), default=datetime.utcnow())
+    is_active = Column(Boolean, default=False)
 
     account = relationship(Account, backref="profiles", lazy="joined")
     server = relationship(Server, backref="profiles", lazy="joined")
-    wg_id = Column(String)
-    name = Column(String)
-    address = Column(String)
-    public_key = Column(String)
-    created_at = Column(DateTime)
-    updated_at = Column(DateTime)
-    persistent_keepa_live = Column(String)
-    latest_handshake_at = Column(String)
-
-    __table_args__ = (UniqueConstraint("account_id", "server_id", "peer_name",
-                                       name='_account_server_peer_name_uc'),
+    __table_args__ = (UniqueConstraint("server_id", "access_url",
+                                       name='_server_access_url_uc'),
                       )

@@ -10,12 +10,6 @@ from server.crud import crud_server
 from server.getters import getting_server
 from server.schemas import ServerCreate, ServerUpdate
 
-
-# from old_code.auth.base_config import fastapi_users
-# from old_code.auth.models import User
-# current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
-# current_active_user = fastapi_users.current_user(active=True)
-
 router = APIRouter(
     prefix="/server",
     tags=["Server"]
@@ -30,11 +24,11 @@ router = APIRouter(
             )
 async def get_servers(
         skip: int = 0,
-        limit: int = 100,
+        limit: int = 500,
         # user: User = Depends(current_active_user),
         session: AsyncSession = Depends(get_async_session),
 ):
-    objects, code, indexes = await crud_server.get_all_ips_addresses(db=session, skip=skip, limit=limit)
+    objects, code, indexes = await crud_server.get_all_servers(db=session, skip=skip, limit=limit)
     return ListOfEntityResponse(data=[getting_server(obj) for obj in objects])
 
 
@@ -88,5 +82,21 @@ async def update_server(
     return SingleEntityResponse(data=getting_server(obj=obj))
 
 
+@router.get(
+            path='/good-server/',
+            response_model=SingleEntityResponse,
+            name='get_good_server',
+            description='Получение нужного сервера'
+            )
+async def get_good_server(
+        skip: int = 0,
+        limit: int = 500,
+        # user: User = Depends(current_active_user),
+        session: AsyncSession = Depends(get_async_session),
+):
+    server, code, indexes = await crud_server.get_good_server(db=session)
+    if code != 0:
+        await get_raise(num=code["num"], message=code["message"])
+    return SingleEntityResponse(data=getting_server(obj=server))
 if __name__ == "__main__":
     logging.info('Running...')

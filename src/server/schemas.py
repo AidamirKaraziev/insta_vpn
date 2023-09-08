@@ -8,6 +8,8 @@ class ServerGet(BaseModel):
     api_url: str
     cert_sha256: str
     max_client: Optional[int]
+    fact_client: Optional[int]
+    is_active: Optional[bool]
 
 
 class ServerCreate(BaseModel):
@@ -16,6 +18,8 @@ class ServerCreate(BaseModel):
     api_url: str
     cert_sha256: str
     max_client: Optional[int]
+    fact_client: Optional[int]
+    is_active: Optional[bool]
 
 
 class ServerUpdate(BaseModel):
@@ -24,3 +28,5 @@ class ServerUpdate(BaseModel):
     api_url: Optional[str]
     cert_sha256: Optional[str]
     max_client: Optional[int]
+    fact_client: Optional[int]
+    is_active: Optional[bool]

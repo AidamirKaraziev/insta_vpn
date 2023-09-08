@@ -63,7 +63,7 @@ app.include_router(router_server)
 app.include_router(router_tariff)
 app.include_router(router_account)
 app.include_router(router_profile)
-app.include_router(router_payment)
+# app.include_router(router_payment)
 app.include_router(router_outline)
 
 origins = ["*"]

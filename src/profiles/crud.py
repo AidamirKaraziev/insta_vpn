@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from account.crud import crud_account
 from core.base_crud import CRUDBase
 from profiles.models import Profile
-from profiles.schemas import ProfileCreate, ProfileUpdate
+from profiles.schemas import ProfileCreate, ProfileUpdate, ProfileActivate
 from server.crud import crud_server
 
 
@@ -16,6 +16,18 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         obj = await super().get(db=db, id=id)
         if obj is None:
             return None, self.not_found_id, None
+        return obj, 0, None
+
+    async def get_profiles_by_account_id(self, *, db: AsyncSession, id: int):
+        account, code, indexes = await crud_account.get_account_by_id(db=db, id=id)
+        if code != 0:
+            return None, code, None
+
+        query = select(self.model).order_by(self.model.account_id == id)
+        response = await db.execute(query)
+        obj = response.scalars().all()
+        # if obj is None:
+        #     return None, self.not_found_id, None
         return obj, 0, None
 
     async def get_all_profiles(self, *, db: AsyncSession, skip: int, limit: int):
@@ -40,6 +52,23 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         if this_obj is None:
             return None, self.not_found_id, None
         objects = await super().update(db_session=db, obj_current=this_obj, obj_new=update_data)
+        return objects, 0, None
+
+    async def delete_profile(self, *, db: AsyncSession, id: int):
+        obj, code, indexes = await self.get_profile_by_id(db=db, id=id)
+        if code != 0:
+            return None, code, None
+        obj = await super().delete(db=db, id=id)
+        return obj, 0, None
+
+    async def activate_profile(self, *, db: AsyncSession, activate_data: ProfileActivate, id: int):
+        # check id
+        query = select(self.model).where(self.model.id == id)
+        resp = await db.execute(query)
+        this_obj = resp.scalar_one_or_none()
+        if this_obj is None:
+            return None, self.not_found_id, None
+        objects = await super().update(db_session=db, obj_current=this_obj, obj_new=activate_data)
         return objects, 0, None
 
 
