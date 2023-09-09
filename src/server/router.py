@@ -9,7 +9,7 @@ from database import get_async_session
 from server.crud import crud_server
 from server.getters import getting_server
 from server.schemas import ServerCreate, ServerUpdate
-from utils import deactivate_profile
+from utils import utils
 
 router = APIRouter(
     prefix="/server",

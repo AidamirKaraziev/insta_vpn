@@ -26,7 +26,7 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         account, code, indexes = await crud_account.get_account_by_id(db=db, id=id)
         if code != 0:
             return None, code, None
-        query = select(self.model).order_by(self.model.account_id == id)
+        query = select(self.model).where(self.model.account_id == id)
         response = await db.execute(query)
         obj = response.scalars().all()
         return obj, 0, None

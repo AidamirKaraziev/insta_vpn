@@ -12,7 +12,7 @@ from profiles.crud import crud_profile
 from profiles.getters import getting_profile
 from profiles.schemas import ProfileCreate, ProfileUpdate, ProfileActivate
 from server.crud import crud_server
-from utils.deactivate_profile import update_data_in_profiles, outline_error
+from utils.utils import update_data_in_profiles, outline_error
 
 router = APIRouter(
     prefix="/profile",
