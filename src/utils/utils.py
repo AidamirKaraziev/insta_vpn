@@ -35,7 +35,7 @@ async def update_data_in_profiles(db: AsyncSession, skip: int = 0):
                         db=db, update_data=update_data, id=profile.id)
         except Exception as ex:
             return None, outline_error(ex=ex), None
-        return in_db, 0, None
+    return in_db, 0, None
 
 
 # max_client
