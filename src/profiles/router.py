@@ -12,6 +12,7 @@ from profiles.crud import crud_profile
 from profiles.getters import getting_profile
 from profiles.schemas import ProfileCreate, ProfileUpdate, ProfileActivate
 from server.crud import crud_server
+from utils.deactivate_profile import update_data_in_profiles, outline_error
 
 router = APIRouter(
     prefix="/profile",
@@ -88,10 +89,13 @@ async def add_profile(
     if code != 0:
         await get_raise(num=code["num"], message=code["message"])
     name = f"Профиль {len(objects) + 1}"
-    # создать пир
-    client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
-    new_key = client.create_key()
-    client.add_data_limit(key_id=new_key.key_id, limit_bytes=FREE_TRAFFIC)
+    try:
+        # создать пир
+        client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
+        new_key = client.create_key()
+        client.add_data_limit(key_id=new_key.key_id, limit_bytes=FREE_TRAFFIC)
+    except Exception as ex:
+        return None, outline_error(ex), None
     # сделать запись в базу данных
     profile = ProfileCreate(account_id=account_id, server_id=server.id, key_id=new_key.key_id, name=name,
                             port=new_key.port, method=new_key.method, access_url=new_key.access_url,
@@ -161,6 +165,37 @@ async def delete_profile(
     if code != 0:
         await get_raise(num=code["num"], message=code["message"])
     return OkResponse()
+
+
+@router.get(
+            path="/deactivate-account/",
+            response_model=ListOfEntityResponse,
+            name='deactivate_account',
+            description='Деактивировать неоплаченные аккаунты'
+            )
+async def deactivate_account(
+        session: AsyncSession = Depends(get_async_session),
+):
+    objects, code, indexes = await crud_profile.deactivate_profile(db=session)
+    if code != 0:
+        await get_raise(num=code["num"], message=code["message"])
+    return ListOfEntityResponse(data=[getting_profile(obj) for obj in objects])
+
+
+@router.get(
+            path="/used-bytes/",
+            response_model=ListOfEntityResponse,
+            name='update_used_bytes_in_profile',
+            description='Обновить used_bytes во всех профилях'
+            )
+async def update_used_bytes_in_profile(
+        session: AsyncSession = Depends(get_async_session),
+):
+    objects, code, indexes = await update_data_in_profiles(db=session, skip=0)
+    if code != 0:
+        await get_raise(num=code["num"], message=code["message"])
+    return ListOfEntityResponse(data=[getting_profile(obj) for obj in objects])
+
 
 if __name__ == "__main__":
     logging.info('Running...')

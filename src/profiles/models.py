@@ -32,6 +32,6 @@ class Profile(Base):
 
     account = relationship(Account, backref="profiles", lazy="joined")
     server = relationship(Server, backref="profiles", lazy="joined")
-    __table_args__ = (UniqueConstraint("server_id", "access_url",
-                                       name='_server_access_url_uc'),
+    __table_args__ = (UniqueConstraint("server_id", "key_id",
+                                       name='_server_key_uc'),
                       )

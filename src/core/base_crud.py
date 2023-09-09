@@ -169,6 +169,9 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         else:
             return {path_type: path_for_db}
 
+    def outline_error(self, ex: Exception):
+        return {"num": 403, "message": f"Error in outline Server {ex}"}
+
     # async def get_count(
     #     self, db_session: AsyncSession | None = None
     # ) -> ModelType | None:

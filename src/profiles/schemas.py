@@ -55,4 +55,4 @@ class ProfileUpdate(BaseModel):
 class ProfileActivate(BaseModel):
     data_limit: int = None
     date_end: Optional[Timestamp]
-    is_activate: Optional[bool] = True
+    is_active: Optional[bool] = True

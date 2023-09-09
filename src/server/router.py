@@ -4,11 +4,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.raise_template import get_raise
-from core.response import SingleEntityResponse, ListOfEntityResponse
+from core.response import SingleEntityResponse, ListOfEntityResponse, OkResponse
 from database import get_async_session
 from server.crud import crud_server
 from server.getters import getting_server
 from server.schemas import ServerCreate, ServerUpdate
+from utils import deactivate_profile
 
 router = APIRouter(
     prefix="/server",
@@ -98,5 +99,21 @@ async def get_good_server(
     if code != 0:
         await get_raise(num=code["num"], message=code["message"])
     return SingleEntityResponse(data=getting_server(obj=server))
+
+
+@router.get(path="/update-fact-client/",
+            response_model=SingleEntityResponse,
+            name='update_fact_client',
+            description='Записать в БД фактическое количество клиентов'
+            )
+async def update_fact_client(
+        session: AsyncSession = Depends(get_async_session),
+):
+    servers, code, indexes = await crud_server.update_fact_client(db=session)
+    if code != 0:
+        await get_raise(num=code["num"], message=code["message"])
+    return ListOfEntityResponse(data=[getting_server(obj) for obj in servers])
+
+
 if __name__ == "__main__":
     logging.info('Running...')
