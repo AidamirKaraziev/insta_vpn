@@ -9,7 +9,7 @@ from database import get_async_session
 from server.crud import crud_server
 from server.getters import getting_server
 from server.schemas import ServerCreate, ServerUpdate
-from utils import utils
+from utils.utils import update_fact_clients
 
 router = APIRouter(
     prefix="/server",
@@ -109,7 +109,7 @@ async def get_good_server(
 async def update_fact_client(
         session: AsyncSession = Depends(get_async_session),
 ):
-    servers, code, indexes = await crud_server.update_fact_client(db=session)
+    servers, code, indexes = await update_fact_clients(db=session)
     if code != 0:
         await get_raise(num=code["num"], message=code["message"])
     return ListOfEntityResponse(data=[getting_server(obj) for obj in servers])

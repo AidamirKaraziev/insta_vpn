@@ -1,7 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from config import LIMIT_SERVERS
 from core.base_crud import CRUDBase
 from outline.outline.outline_vpn.outline_vpn import OutlineVPN
 from server.models import Server
@@ -60,20 +59,6 @@ class CrudServer(CRUDBase[Server, ServerCreate, ServerUpdate]):
             return None, self.no_good_server, None
         except Exception as ex:
             return None, self.outline_error(ex=ex), None
-
-    async def update_fact_client(self, *, skip: int = 0, db: AsyncSession):
-        # get all server
-        servers, code, indexes = await self.get_all_servers(db=db, skip=skip, limit=LIMIT_SERVERS)
-        for server in servers:
-            try:
-                client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
-                fact_client = len(client.get_keys())
-            except Exception as ex:
-                return None, self.outline_error(ex=ex), None
-            update_data = ServerUpdate(fact_client=fact_client)
-            server, code, indexes = await crud_server.update_server(db=db, id=server.id,
-                                                                    update_data=update_data)
-        return servers, 0, None
 
 
 crud_server = CrudServer(Server)

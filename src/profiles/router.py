@@ -12,7 +12,7 @@ from profiles.crud import crud_profile
 from profiles.getters import getting_profile
 from profiles.schemas import ProfileCreate, ProfileUpdate, ProfileActivate
 from server.crud import crud_server
-from utils.utils import update_data_in_profiles, outline_error
+from utils.utils import update_used_bytes_in_profiles, outline_error, deactivate_profile, deleting_an_outdated_account
 
 router = APIRouter(
     prefix="/profile",
@@ -176,7 +176,7 @@ async def delete_profile(
 async def deactivate_account(
         session: AsyncSession = Depends(get_async_session),
 ):
-    objects, code, indexes = await crud_profile.deactivate_profile(db=session)
+    objects, code, indexes = await deactivate_profile(db=session)
     if code != 0:
         await get_raise(num=code["num"], message=code["message"])
     return ListOfEntityResponse(data=[getting_profile(obj) for obj in objects])
@@ -191,11 +191,26 @@ async def deactivate_account(
 async def update_used_bytes_in_profile(
         session: AsyncSession = Depends(get_async_session),
 ):
-    objects, code, indexes = await update_data_in_profiles(db=session, skip=0)
+    objects, code, indexes = await update_used_bytes_in_profiles(db=session, skip=0)
     if code != 0:
         await get_raise(num=code["num"], message=code["message"])
     return ListOfEntityResponse(data=[getting_profile(obj) for obj in objects])
 
+
+# delete old profiles
+@router.get(
+            path="/delete-old/",
+            response_model=SingleEntityResponse,
+            name='delete_old',
+            description='Удалить устаревшие профили!'
+            )
+async def delete_old(
+        session: AsyncSession = Depends(get_async_session),
+):
+    obj, code, indexes = await deleting_an_outdated_account(db=session)
+    if code != 0:
+        await get_raise(num=code["num"], message=code["message"])
+    return SingleEntityResponse(data=obj)
 
 if __name__ == "__main__":
     logging.info('Running...')

@@ -70,22 +70,6 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         objects = await super().update(db_session=db, obj_current=profile, obj_new=activate_data)
         return objects, 0, None
 
-    async def deactivate_profile(self, *, db: AsyncSession, skip: int = 0):
-        # get all profiles
-        profiles, code, indexes = await self.get_all_profiles(db=db, skip=skip, limit=LIMIT_PROFILES)
-        for profile in profiles:
-            if profile.date_end <= datetime.date(datetime.now()):
-                # add data_limit
-                server, code, indexes = await crud_server.get_server_by_id(db=db, id=profile.server_id)
-                try:
-                    client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
-                    client.add_data_limit(key_id=profile.key_id, limit_bytes=FREE_TRAFFIC)
-                except Exception as ex:
-                    return None, self.outline_error(ex=ex), None
-                update_data = ProfileUpdate(data_limit=FREE_TRAFFIC, is_active=False)
-                obj, code, indexes = await self.update_profile(db=db, update_data=update_data, id=profile.id)
-        return profiles, code, indexes
-
     async def activate_paid_profiles(self, db: AsyncSession, skip: int = 0):
         # get all profiles
         profiles, code, indexes = await self.get_all_profiles(db=db, skip=skip, limit=LIMIT_PROFILES)
