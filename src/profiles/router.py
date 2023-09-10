@@ -168,12 +168,12 @@ async def delete_profile(
 
 
 @router.get(
-            path="/deactivate-account/",
+            path="/deactivate-old-profiles/",
             response_model=ListOfEntityResponse,
-            name='deactivate_account',
-            description='Деактивировать неоплаченные аккаунты'
+            name='deactivate_old_profiles',
+            description='Деактивировать неоплаченные профили'
             )
-async def deactivate_account(
+async def deactivate_old_profiles(
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await deactivate_profile(db=session)
