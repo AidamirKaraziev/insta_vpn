@@ -168,7 +168,7 @@ async def delete_profile(
 
 
 @router.get(
-            path="/deactivate-old-profiles/",
+            path="/deactivate-old/",
             response_model=ListOfEntityResponse,
             name='deactivate_old_profiles',
             description='Деактивировать неоплаченные профили'
