@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import Table, Column, Integer, String, TIMESTAMP, ForeignKey, JSON, Boolean, MetaData, DateTime, Date, \
-    UniqueConstraint
+    UniqueConstraint, BigInteger
 from sqlalchemy.orm import relationship
 
 from account.models import Account
@@ -16,7 +16,7 @@ class Profile(Base):
 
     metadata = metadata
     id = Column(Integer, primary_key=True)
-    account_id = Column(Integer, ForeignKey(Account.id, ondelete="SET NULL"))
+    account_id = Column(BigInteger, ForeignKey(Account.id, ondelete="SET NULL"))
     server_id = Column(Integer, ForeignKey(Server.id, ondelete="SET NULL"))
 
     key_id = Column(Integer)
