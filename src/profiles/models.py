@@ -15,7 +15,7 @@ class Profile(Base):
     __tablename__ = "profile"
 
     metadata = metadata
-    id = Column(Integer, primary_key=True)
+    id = Column(BigInteger, primary_key=True)
     account_id = Column(BigInteger, ForeignKey(Account.id, ondelete="SET NULL"))
     server_id = Column(Integer, ForeignKey(Server.id, ondelete="SET NULL"))
 
