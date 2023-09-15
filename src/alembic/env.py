@@ -10,7 +10,7 @@ from config import DB_HOST, DB_PORT, DB_USER, DB_NAME, DB_PASS
 # from old_code.auth.models import metadata as metadata_auth
 from tariff.models import metadata as metadata_tariff
 from account.models import metadata as metadata_account
-from payments.models import metadata as metadata_payments
+# from payments.models import metadata as metadata_payments
 from server.models import metadata as metadata_server
 from profiles.models import metadata as metadata_profile
 
@@ -34,7 +34,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = [metadata_tariff, metadata_server, metadata_account,
-                   metadata_profile, metadata_payments]
+                   metadata_profile]
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

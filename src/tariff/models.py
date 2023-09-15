@@ -12,4 +12,5 @@ class Tariff(Base):
     name = Column(String, nullable=False, unique=True)
     price = Column(Integer)
     period_unix = Column(Integer)
+    photo_url = Column(String)
     is_active = Column(Boolean, default=True)

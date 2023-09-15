@@ -4,7 +4,7 @@ services:
     image: postgres:15
     container_name: db_insta
     ports:
-      - "55300:55300"
+      - "5432:5432"
     env_file:
       - .env-non-dev
     depends_on:
@@ -64,6 +64,6 @@ services:
       - db
       - redis
     ports:
-      - "5060:5060"
+      - "5050:5050"
     env_file:
       - .env-non-dev

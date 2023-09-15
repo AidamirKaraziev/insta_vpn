@@ -7,3 +7,4 @@ venv
 comand.txt
 dump.rdb
 задачи.txt
+/block_schemas/*

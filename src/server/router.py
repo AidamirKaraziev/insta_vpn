@@ -4,17 +4,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.raise_template import get_raise
-from core.response import SingleEntityResponse, ListOfEntityResponse
+from core.response import SingleEntityResponse, ListOfEntityResponse, OkResponse
 from database import get_async_session
 from server.crud import crud_server
 from server.getters import getting_server
 from server.schemas import ServerCreate, ServerUpdate
-
-
-# from old_code.auth.base_config import fastapi_users
-# from old_code.auth.models import User
-# current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
-# current_active_user = fastapi_users.current_user(active=True)
+from utils.utils import update_fact_clients
 
 router = APIRouter(
     prefix="/server",
@@ -30,11 +25,11 @@ router = APIRouter(
             )
 async def get_servers(
         skip: int = 0,
-        limit: int = 100,
+        limit: int = 500,
         # user: User = Depends(current_active_user),
         session: AsyncSession = Depends(get_async_session),
 ):
-    objects, code, indexes = await crud_server.get_all_ips_addresses(db=session, skip=skip, limit=limit)
+    objects, code, indexes = await crud_server.get_all_servers(db=session, skip=skip, limit=limit)
     return ListOfEntityResponse(data=[getting_server(obj) for obj in objects])
 
 
@@ -86,6 +81,38 @@ async def update_server(
     if code != 0:
         await get_raise(num=code["num"], message=code["message"])
     return SingleEntityResponse(data=getting_server(obj=obj))
+
+
+@router.get(
+            path='/good-server/',
+            response_model=SingleEntityResponse,
+            name='get_good_server',
+            description='Получение нужного сервера'
+            )
+async def get_good_server(
+        skip: int = 0,
+        limit: int = 500,
+        # user: User = Depends(current_active_user),
+        session: AsyncSession = Depends(get_async_session),
+):
+    server, code, indexes = await crud_server.get_good_server(db=session)
+    if code != 0:
+        await get_raise(num=code["num"], message=code["message"])
+    return SingleEntityResponse(data=getting_server(obj=server))
+
+
+@router.get(path="/update-fact-client/",
+            response_model=SingleEntityResponse,
+            name='update_fact_client',
+            description='Записать в БД фактическое количество клиентов'
+            )
+async def update_fact_client(
+        session: AsyncSession = Depends(get_async_session),
+):
+    servers, code, indexes = await update_fact_clients(db=session)
+    if code != 0:
+        await get_raise(num=code["num"], message=code["message"])
+    return ListOfEntityResponse(data=[getting_server(obj) for obj in servers])
 
 
 if __name__ == "__main__":
