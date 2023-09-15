@@ -8,6 +8,7 @@ from core.response import SingleEntityResponse, ListOfEntityResponse, OkResponse
 from database import get_async_session
 from profiles.getters import getting_profile
 from server.crud import crud_server
+from server.getters import getting_server
 from utils import utils
 
 
@@ -28,7 +29,7 @@ async def get_the_broken_servers(
 ):
     objs, code, indexes = await crud_server.get_all_servers(db=session, skip=0, limit=LIMIT_SERVERS)
     servers_no_online = utils.check_server(objs)
-    return ListOfEntityResponse(data=[getting_profile(obj) for obj in servers_no_online])
+    return ListOfEntityResponse(data=[getting_server(obj) for obj in servers_no_online])
 
 
 if __name__ == "__main__":
