@@ -1,4 +1,5 @@
 from datetime import datetime
+import subprocess
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,6 +17,7 @@ from server.schemas import ServerUpdate
 3. Функция деактивации устаревших профилей
 4. Функция удаления устаревших профилей 
 5. Функция установки максимального количества клиентов на сервер
+6. Функция вывода неработающих серверов 
 """
 
 
@@ -104,3 +106,14 @@ async def deleting_an_outdated_account(db: AsyncSession):
             pofile, code, indexes = await crud_profile.delete_profile(db=db, id=profile.id)
             deleted_prof = count_prof - 1
     return f"Было: {count_prof} | Стало: {deleted_prof}", 0, None
+
+
+def check_server(servers_address):
+    no_online = []
+    for server_address in servers_address:
+        try:
+            # Выполняем ping-запрос
+            subprocess.check_output(["ping", "-c", "1", str(server_address.address)])
+        except subprocess.CalledProcessError:
+            no_online.append(server_address)
+    return no_online

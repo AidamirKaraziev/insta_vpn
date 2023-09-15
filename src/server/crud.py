@@ -11,6 +11,7 @@ class CrudServer(CRUDBase[Server, ServerCreate, ServerUpdate]):
     obj_name = "Server"
     not_found_id = {"num": 404, "message": f"Not found {obj_name} with this id"}
     name_is_exist = {"num": 403, "message": f"А {obj_name} with that name already exists"}
+    address_is_exist = {"num": 403, "message": f"А {obj_name} with that address already exists"}
     no_good_server = {"num": 403, "message": f"There is not a single free space on the servers"}
 
     async def get_server_by_id(self, *, db: AsyncSession, id: int):
@@ -30,6 +31,11 @@ class CrudServer(CRUDBase[Server, ServerCreate, ServerUpdate]):
         if response.scalar_one_or_none() is not None:
             return None, self.name_is_exist, None
         objects = await super().create(db_session=db, obj_in=new_data)
+        if new_data.address is not None:
+            query = select(self.model).where(self.model.address == new_data.address)
+            response = await db.execute(query)
+            if response.scalar_one_or_none() is not None:
+                return None, self.address_is_exist, None
         return objects, 0, None
 
     async def update_server(self, *, db: AsyncSession, update_data: ServerUpdate, id: int):
@@ -45,6 +51,11 @@ class CrudServer(CRUDBase[Server, ServerCreate, ServerUpdate]):
             response = await db.execute(query)
             if response.scalar_one_or_none() is not None:
                 return None, self.name_is_exist, None
+        if update_data.address is not None:
+            query = select(self.model).where(self.model.address == update_data.address)
+            response = await db.execute(query)
+            if response.scalar_one_or_none() is not None:
+                return None, self.address_is_exist, None
         objects = await super().update(db_session=db, obj_current=this_obj, obj_new=update_data)
         return objects, 0, None
 

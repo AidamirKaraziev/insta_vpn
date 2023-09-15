@@ -9,6 +9,8 @@ class ServerGet(BaseModel):
     cert_sha256: str
     max_client: Optional[int]
     fact_client: Optional[int]
+    address: Optional[str]
+    port: Optional[str]
     is_active: Optional[bool]
 
 
@@ -19,6 +21,8 @@ class ServerCreate(BaseModel):
     cert_sha256: str
     max_client: Optional[int]
     fact_client: Optional[int]
+    address: Optional[str]
+    port: Optional[str]
     is_active: Optional[bool]
 
 
@@ -29,4 +33,6 @@ class ServerUpdate(BaseModel):
     cert_sha256: Optional[str]
     max_client: Optional[int]
     fact_client: Optional[int]
+    address: Optional[str]
+    port: Optional[str]
     is_active: Optional[bool]

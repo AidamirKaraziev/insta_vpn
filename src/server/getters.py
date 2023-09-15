@@ -10,5 +10,7 @@ def getting_server(obj: ServerGet) -> Optional[ServerGet]:
         cert_sha256=obj.cert_sha256,
         max_client=obj.max_client,
         fact_client=obj.fact_client,
+        address=obj.address,
+        port=obj.port,
         is_active=obj.is_active,
     )

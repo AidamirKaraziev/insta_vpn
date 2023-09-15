@@ -12,6 +12,7 @@ from server.router import router as router_server
 from tariff.router import router as router_tariff
 from account.router import router as router_account
 from profiles.router import router as router_profile
+from tools.router import router as router_tools
 
 from test_outline.router import router as router_outline
 
@@ -64,6 +65,7 @@ app.include_router(router_tariff)
 app.include_router(router_account)
 app.include_router(router_profile)
 app.include_router(router_outline)
+app.include_router(router_tools)
 
 origins = ["*"]
 
