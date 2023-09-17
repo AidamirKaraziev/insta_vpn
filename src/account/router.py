@@ -9,12 +9,10 @@ from account.schemas import AccountCreate, AccountUpdate
 from core.raise_template import get_raise
 from core.response import SingleEntityResponse, ListOfEntityResponse
 from database import get_async_session
+from auth.base_config import fastapi_users
+from auth.models import User
 
-
-# from old_code.auth.base_config import fastapi_users
-# from old_code.auth.models import User
-# current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
-# current_active_user = fastapi_users.current_user(active=True)
+current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
 
 
 router = APIRouter(
@@ -32,7 +30,7 @@ router = APIRouter(
 async def get_accounts(
         skip: int = 0,
         limit: int = 100,
-        # user: User = Depends(current_active_user),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_account.get_all_accounts(db=session, skip=skip, limit=limit)
@@ -47,7 +45,7 @@ async def get_accounts(
             )
 async def get_account(
         account_id: int,
-        # user: User = Depends(current_active_user),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_account.get_account_by_id(db=session, id=account_id)
@@ -63,7 +61,7 @@ async def get_account(
              )
 async def add_account(
         new_data: AccountCreate,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_account.add_account(db=session, new_data=new_data)
@@ -80,7 +78,7 @@ async def add_account(
 async def update_account(
         update_data: AccountUpdate,
         account_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_account.update_account(db=session, update_data=update_data, id=account_id)

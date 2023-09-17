@@ -62,7 +62,7 @@ app.include_router(
 )
 
 # app.include_router(router_role)
-app.include_router(router_user)
+# app.include_router(router_user)
 app.include_router(router_server)
 app.include_router(router_tariff)
 app.include_router(router_account)

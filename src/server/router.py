@@ -10,6 +10,11 @@ from server.crud import crud_server
 from server.getters import getting_server
 from server.schemas import ServerCreate, ServerUpdate
 from utils.utils import update_fact_clients
+from auth.base_config import fastapi_users
+from auth.models import User
+
+current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
+
 
 router = APIRouter(
     prefix="/server",
@@ -26,7 +31,7 @@ router = APIRouter(
 async def get_servers(
         skip: int = 0,
         limit: int = 500,
-        # user: User = Depends(current_active_user),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_server.get_all_servers(db=session, skip=skip, limit=limit)
@@ -41,7 +46,7 @@ async def get_servers(
             )
 async def get_server(
         server_id: int,
-        # user: User = Depends(current_active_user),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_server.get_server_by_id(db=session, id=server_id)
@@ -57,7 +62,7 @@ async def get_server(
              )
 async def add_server(
         new_data: ServerCreate,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_server.add_server(db=session, new_data=new_data)
@@ -74,7 +79,7 @@ async def add_server(
 async def update_server(
         update_data: ServerUpdate,
         server_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_server.update_server(db=session, update_data=update_data, id=server_id)
@@ -92,7 +97,7 @@ async def update_server(
 async def get_good_server(
         skip: int = 0,
         limit: int = 500,
-        # user: User = Depends(current_active_user),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     server, code, indexes = await crud_server.get_good_server(db=session)
@@ -107,6 +112,7 @@ async def get_good_server(
             description='Записать в БД фактическое количество клиентов'
             )
 async def update_fact_client(
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     servers, code, indexes = await update_fact_clients(db=session)

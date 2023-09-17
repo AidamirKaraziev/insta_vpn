@@ -13,6 +13,11 @@ from profiles.getters import getting_profile
 from profiles.schemas import ProfileCreate, ProfileUpdate, ProfileActivate
 from server.crud import crud_server
 from utils.utils import update_used_bytes_in_profiles, outline_error, deactivate_profile, deleting_an_outdated_account
+from auth.base_config import fastapi_users
+from auth.models import User
+
+current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
+
 
 router = APIRouter(
     prefix="/profile",
@@ -29,7 +34,7 @@ router = APIRouter(
 async def get_profiles(
         skip: int = 0,
         limit: int = 100,
-        # user: User = Depends(current_active_user),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_profile.get_all_profiles(db=session, skip=skip, limit=limit)
@@ -44,7 +49,7 @@ async def get_profiles(
             )
 async def get_profile(
         profile_id: int,
-        # user: User = Depends(current_active_user),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_profile.get_profile_by_id(db=session, id=profile_id)
@@ -61,7 +66,7 @@ async def get_profile(
             )
 async def get_profiles_by_account_id(
         account_id: int,
-        # user: User = Depends(current_active_user),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_profile.get_profiles_by_account_id(db=session, id=account_id)
@@ -77,7 +82,7 @@ async def get_profiles_by_account_id(
              )
 async def add_profile(
         account_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     # выбрать сервер
@@ -114,7 +119,7 @@ async def add_profile(
 async def activate_profile(
         activate_data: ProfileActivate,
         profile_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     # найти профиль
@@ -144,7 +149,7 @@ async def activate_profile(
                )
 async def delete_profile(
         profile_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     # проверить профиль
@@ -174,6 +179,7 @@ async def delete_profile(
             description='Деактивировать неоплаченные профили'
             )
 async def deactivate_old_profiles(
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await deactivate_profile(db=session)
@@ -189,6 +195,7 @@ async def deactivate_old_profiles(
             description='Обновить used_bytes во всех профилях'
             )
 async def update_used_bytes_in_profile(
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await update_used_bytes_in_profiles(db=session, skip=0)
@@ -205,6 +212,7 @@ async def update_used_bytes_in_profile(
             description='Удалить устаревшие профили!'
             )
 async def delete_old(
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await deleting_an_outdated_account(db=session)

@@ -6,15 +6,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.raise_template import get_raise
 from core.response import SingleEntityResponse, ListOfEntityResponse
 from database import get_async_session
-
-
-# from old_code.auth.base_config import fastapi_users
-# from old_code.auth.models import User
-# current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
-# current_active_user = fastapi_users.current_user(active=True)
 from tariff.crud import crud_tariff
 from tariff.getters import getting_tariff
 from tariff.schemas import TariffCreate, TariffUpdate
+from auth.base_config import fastapi_users
+from auth.models import User
+
+current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
+
 
 router = APIRouter(
     prefix="/tariff",
@@ -31,7 +30,7 @@ router = APIRouter(
 async def get_tariffs(
         skip: int = 0,
         limit: int = 100,
-        # user: User = Depends(current_active_user),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_tariff.get_all_tariffs(db=session, skip=skip, limit=limit)
@@ -46,7 +45,7 @@ async def get_tariffs(
             )
 async def get_tariff(
         tariff_id: int,
-        # user: User = Depends(current_active_user),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_tariff.get_tariff_by_id(db=session, id=tariff_id)
@@ -62,7 +61,7 @@ async def get_tariff(
              )
 async def add_tariff(
         new_data: TariffCreate,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_tariff.add_tariff(db=session, new_data=new_data)
@@ -79,7 +78,7 @@ async def add_tariff(
 async def update_tariff(
         update_data: TariffUpdate,
         tariff_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_tariff.update_tariff(db=session, update_data=update_data, id=tariff_id)
