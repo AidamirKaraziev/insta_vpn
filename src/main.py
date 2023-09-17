@@ -5,14 +5,17 @@ from fastapi_cache.backends.redis import RedisBackend
 from fastapi.middleware.cors import CORSMiddleware
 
 from redis import asyncio as aioredis
-from old_code.auth.base_config import fastapi_users
+from auth.base_config import fastapi_users, auth_backend
 # from old_code.auth.models import User
+from auth.manager import get_user_manager
+from auth.schemas import UserReadOld, UserCreate, UserRead, UserUpdate
 from config import REDIS_HOST, REDIS_PORT
 from server.router import router as router_server
 from tariff.router import router as router_tariff
 from account.router import router as router_account
 from profiles.router import router as router_profile
 from tools.router import router as router_tools
+from user.router import router as router_user, get_users_router
 
 from test_outline.router import router as router_outline
 
@@ -24,42 +27,42 @@ app = FastAPI(
 )
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# app.include_router(
-#     fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["Bearer-auth"]
-#                   )
+app.include_router(
+    fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["Bearer-auth"]
+                  )
 
-# app.include_router(
-#     fastapi_users.get_auth_router(auth_backend),
-#     prefix="/auth",
-#     tags=["Auth"],
-# )
+app.include_router(
+    fastapi_users.get_auth_router(auth_backend),
+    prefix="/auth",
+    tags=["Auth"],
+)
 
-# app.include_router(
-#     fastapi_users.get_register_router(UserReadOld, UserCreate),
-#     prefix="/auth",
-#     tags=["Auth"],
-# )
-#
-# app.include_router(router_user)
-# app.include_router(
-#     get_users_router(user_schema=UserRead, user_update_schema=UserUpdate, get_user_manager=get_user_manager),
-#     prefix="/users",
-#     tags=["users"],
-# )
-#
-# app.include_router(
-#     fastapi_users.get_verify_router(UserReadOld),
-#     prefix="/auth",
-#     tags=["auth"],
-# )
-#
-# app.include_router(
-#     fastapi_users.get_reset_password_router(),
-#     prefix="/auth",
-#     tags=["auth"],
-# )
+app.include_router(
+    fastapi_users.get_register_router(UserReadOld, UserCreate),
+    prefix="/auth",
+    tags=["Auth"],
+)
+
+app.include_router(
+    get_users_router(user_schema=UserRead, user_update_schema=UserUpdate, get_user_manager=get_user_manager),
+    prefix="/users",
+    tags=["users"],
+)
+
+app.include_router(
+    fastapi_users.get_verify_router(UserReadOld),
+    prefix="/auth",
+    tags=["auth"],
+)
+
+app.include_router(
+    fastapi_users.get_reset_password_router(),
+    prefix="/auth",
+    tags=["auth"],
+)
 
 # app.include_router(router_role)
+app.include_router(router_user)
 app.include_router(router_server)
 app.include_router(router_tariff)
 app.include_router(router_account)
@@ -106,4 +109,3 @@ async def startup_event():
 #     return f"Hello, {user.email}"
 
 # необходимо для отображения ошибок в формате exception
-from core import errors

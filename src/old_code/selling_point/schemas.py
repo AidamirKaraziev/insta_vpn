@@ -1,7 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel
 
-from old_code.auth.schemas import UserRead
+from auth.schemas import UserRead
 from old_code.selling_point_type.schemas import SellingPointTypeGet
 
 

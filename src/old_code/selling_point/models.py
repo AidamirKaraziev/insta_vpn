@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, MetaData, Boolean
 from sqlalchemy.orm import relationship
 from database import Base
 
-from old_code.auth.models import User
+from auth.models import User
 from old_code.selling_point_type.models import SellingPointType
 
 metadata = MetaData()

@@ -3,7 +3,7 @@ from fastapi import Request
 
 from old_code.selling_point.schemas import SellingPointGet
 from old_code.selling_point_type.getters import getting_selling_point_type
-from old_code.user.getters import getting_user
+from user.getters import getting_user
 
 
 def getting_selling_point(obj: SellingPointGet, request: Optional[Request] = None) -> Optional[SellingPointGet]:
