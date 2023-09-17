@@ -6,7 +6,7 @@ class TariffGet(BaseModel):
     id: int
     name: str
     price: int
-    period_unix: int
+    period_days: int
     photo_url: Optional[str]
     is_active: bool
 
@@ -14,7 +14,7 @@ class TariffGet(BaseModel):
 class TariffCreate(BaseModel):
     name: str = Field(..., title="tariff")
     price: int
-    period_unix: int
+    period_days: int
     photo_url: Optional[str]
     is_active: Optional[bool]
 
@@ -23,6 +23,6 @@ class TariffUpdate(BaseModel):
     name: Optional[str]
     is_active: Optional[bool]
     price: Optional[int]
-    period_unix: Optional[int]
+    period_days: Optional[int]
     photo_url: Optional[str]
     is_active: Optional[bool]
