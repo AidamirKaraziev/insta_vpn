@@ -117,3 +117,7 @@ def check_server(servers_address):
         except subprocess.CalledProcessError:
             no_online.append(server_address)
     return no_online
+
+# TODO написать функцию которая перезапускает сервера удаленно
+# TODO написать функцию которая проверяет работает ли впн
+# TODO настроить сервера таким образом чтобы после перезагрузки сервера контейнеры сразу работали
