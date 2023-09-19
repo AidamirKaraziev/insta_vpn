@@ -85,16 +85,17 @@ async def deactivate_profile(*, db: AsyncSession, skip: int = 0):
 # max_client
 
 
-async def deleting_an_outdated_account(db: AsyncSession):
+async def deleting_an_outdated_profile(db: AsyncSession):
     # получить profile
     profiles, code, indexes = await crud_profile.get_all_profiles(db=db, skip=0, limit=LIMIT_PROFILES)
     count_prof = len(profiles)
     deleted_prof = 0
     for profile in profiles:
         # calculation time
-        date_end = datetime.strptime(str(profile.date_end), '%Y-%m-%d').date()
+        date_end = datetime.strptime(str(profile.date_end), '%Y-%m-%d %H:%M:%S.%f%z').date()
         days = datetime.date(datetime.utcnow()) - date_end
         seconds = days.total_seconds()
+
         if seconds >= PAYMENT_WAITING_TIME:
             # удалить устаревший профиль
             server, code, indexes = await crud_server.get_server_by_id(db=db, id=profile.server_id)
@@ -121,3 +122,5 @@ def check_server(servers_address):
 # TODO написать функцию которая перезапускает сервера удаленно
 # TODO написать функцию которая проверяет работает ли впн
 # TODO настроить сервера таким образом чтобы после перезагрузки сервера контейнеры сразу работали
+
+

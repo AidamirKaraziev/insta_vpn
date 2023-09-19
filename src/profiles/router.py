@@ -12,7 +12,7 @@ from profiles.crud import crud_profile
 from profiles.getters import getting_profile
 from profiles.schemas import ProfileCreate, ProfileUpdate, ProfileActivate
 from server.crud import crud_server
-from utils.utils import update_used_bytes_in_profiles, outline_error, deactivate_profile, deleting_an_outdated_account
+from utils.utils import update_used_bytes_in_profiles, outline_error, deactivate_profile, deleting_an_outdated_profile
 from auth.base_config import fastapi_users
 from auth.models import User
 
@@ -215,7 +215,7 @@ async def delete_old(
         user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
-    obj, code, indexes = await deleting_an_outdated_account(db=session)
+    obj, code, indexes = await deleting_an_outdated_profile(db=session)
     if code != 0:
         await get_raise(num=code["num"], message=code["message"])
     return SingleEntityResponse(data=obj)
