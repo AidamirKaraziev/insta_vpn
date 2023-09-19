@@ -94,5 +94,15 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
             return None, self.not_found_id, {"key_id": key_id, "server_id": server_id}
         return res, 0, None
 
+    async def get_name_for_profile(self, *, db: AsyncSession, account_id: int):
+        profiles, code, indexes = await self.get_profiles_by_account_id(db=db, id=account_id)
+        if code != 0:
+            return None, code, None
+        num = 1
+        for profile in profiles:
+            if profile.name == f"Профиль {num}":
+                num += 1
+            return f"Профиль {num+1}", 0, None
+
 
 crud_profile = CrudProfile(Profile)

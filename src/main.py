@@ -109,3 +109,4 @@ async def startup_event():
 #     return f"Hello, {user.email}"
 
 # необходимо для отображения ошибок в формате exception
+from core.errors import *

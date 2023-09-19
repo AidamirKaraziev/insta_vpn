@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import FREE_TRAFFIC
-from core.raise_template import get_raise
+from core.raise_template import get_raise, get_raise_new
 from core.response import SingleEntityResponse, ListOfEntityResponse, OkResponse
 from database import get_async_session
 from outline.outline.outline_vpn.outline_vpn import OutlineVPN
@@ -49,12 +49,11 @@ async def get_profiles(
             )
 async def get_profile(
         profile_id: int,
-        user: User = Depends(current_active_superuser),
+        # user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_profile.get_profile_by_id(db=session, id=profile_id)
-    if code != 0:
-        await get_raise(num=code["num"], message=code["message"])
+    await get_raise_new(code)
     return SingleEntityResponse(data=getting_profile(obj=obj))
 
 
@@ -70,8 +69,7 @@ async def get_profiles_by_account_id(
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_profile.get_profiles_by_account_id(db=session, id=account_id)
-    if code != 0:
-        await get_raise(num=code["num"], message=code["message"])
+    await get_raise_new(code)
     return ListOfEntityResponse(data=[getting_profile(obj) for obj in objects])
 
 
@@ -87,13 +85,13 @@ async def add_profile(
 ):
     # выбрать сервер
     server, code, indexes = await crud_server.get_good_server(db=session)
-    if code != 0:
-        await get_raise(num=code["num"], message=code["message"])
+    await get_raise_new(code)
     # проверка сколько у аккаунта пиров, дать имя пиру
     objects, code, indexes = await crud_profile.get_profiles_by_account_id(db=session, id=account_id)
-    if code != 0:
-        await get_raise(num=code["num"], message=code["message"])
-    name = f"Профиль {len(objects) + 1}"
+    await get_raise_new(code)
+    # получение имени для профиля
+    name, code, indexes = await crud_profile.get_name_for_profile(db=session, account_id=account_id)
+    await get_raise_new(code)
     try:
         # создать пир
         client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
@@ -216,9 +214,11 @@ async def delete_old(
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await deleting_an_outdated_profile(db=session)
+    await get_raise_new(code)
     if code != 0:
         await get_raise(num=code["num"], message=code["message"])
     return SingleEntityResponse(data=obj)
+
 
 if __name__ == "__main__":
     logging.info('Running...')
