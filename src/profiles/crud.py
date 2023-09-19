@@ -99,10 +99,15 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         if code != 0:
             return None, code, None
         num = 1
+        name_list = []
         for profile in profiles:
+            name_list.append(profile.name)
             if profile.name == f"Профиль {num}":
                 num += 1
-            return f"Профиль {num+1}", 0, None
+        for num in range(1, len(name_list)+2):
+            if f"Профиль {num}" not in name_list:
+                return f"Профиль {num}", 0, None
+        return f"Профиль {num}", 0, None
 
 
 crud_profile = CrudProfile(Profile)

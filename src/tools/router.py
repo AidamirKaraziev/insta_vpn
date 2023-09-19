@@ -39,5 +39,19 @@ async def get_the_broken_servers(
     return ListOfEntityResponse(data=[getting_server(obj) for obj in servers_no_online])
 
 
+@router.post(path="/test/{account_id}",
+             response_model=SingleEntityResponse,
+             name='test',
+             description='Test'
+             )
+async def test(
+        account_id: int,
+        # user: User = Depends(current_active_superuser),
+        session: AsyncSession = Depends(get_async_session),
+):
+    object, code, indexes = await crud_profile.get_name_for_profile(db=session, account_id=account_id)
+    await get_raise_new(code)
+    return SingleEntityResponse(data=object)
+
 if __name__ == "__main__":
     logging.info('Running...')
