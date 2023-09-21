@@ -220,5 +220,44 @@ async def delete_old(
     return SingleEntityResponse(data=obj)
 
 
+@router.put(path="/replacement/{profile_id}",
+            response_model=SingleEntityResponse,
+            name='replacement_profile',
+            description='Заменить ключ для профиля'
+            )
+async def replacement_profile(
+        profile_id: int,
+        user: User = Depends(current_active_superuser),
+        session: AsyncSession = Depends(get_async_session),
+):
+    # проверить профиль
+    profile, code, indexes = await crud_profile.get_profile_by_id(db=session, id=profile_id)
+    await get_raise_new(code)
+    # найти сервер
+    server, code, indexes = await crud_server.get_server_by_id(db=session, id=profile.server_id)
+    await get_raise_new(code)
+
+    client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
+    try:
+        client.delete_key(key_id=profile.key_id)
+    except Exception as ex:
+        return f"не получилось удалить ключ потому что: {ex}"
+    # создание нового ключа
+    new_server, code, indexes = await crud_server.get_good_server(db=session)
+    await get_raise_new(code)
+    # присвоение профилю новых данных
+    try:
+        client = OutlineVPN(api_url=new_server.api_url, cert_sha256=new_server.cert_sha256)
+        new_key = client.create_key()
+    except Exception as ex:
+        return None, outline_error(ex), None
+    # сделать запись в базу данных
+    update_data = ProfileUpdate(key_id=new_key.key_id, port=new_key.port, method=new_key.method,
+                                access_url=new_key.access_url, used_bytes=new_key.used_bytes, data_limit=0)
+    profile, code, indexes = await crud_profile.update_profile(db=session, update_data=update_data, id=profile.id)
+    await get_raise_new(code)
+    return SingleEntityResponse(data=getting_profile(obj=profile))
+
+
 if __name__ == "__main__":
     logging.info('Running...')

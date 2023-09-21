@@ -82,8 +82,6 @@ async def deactivate_profile(*, db: AsyncSession, skip: int = 0):
             obj, code, indexes = await crud_profile.update_profile(db=db, update_data=update_data, id=profile.id)
     return profiles, code, indexes
 
-# max_client
-
 
 async def deleting_an_outdated_profile(db: AsyncSession):
     # получить profile
@@ -109,6 +107,7 @@ async def deleting_an_outdated_profile(db: AsyncSession):
     return f"Было: {count_prof} | Стало: {deleted_prof}", 0, None
 
 
+# TODO сделать асинхронной или удалить
 def check_server(servers_address):
     no_online = []
     for server_address in servers_address:
@@ -119,4 +118,11 @@ def check_server(servers_address):
             no_online.append(server_address)
     return no_online
 
-    # TODO написать функцию которая проверяет работает ли впн
+
+# TODO написать функцию которая проверяет работает ли впн
+# TODO почистить алембик миграции
+"""необходимо написать такую функцию,
+которая если если ключ оплачен, но его нет на сервере выдает новый ключ пользователю"""
+
+
+# TODO написать функцию которая если не пир еще оплачем но на сервере его нет
