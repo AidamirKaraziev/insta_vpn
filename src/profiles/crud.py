@@ -15,6 +15,8 @@ from server.crud import crud_server
 class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
     obj_name = "Profile"
     not_found_id = {"num": 404, "message": f"Not found {obj_name} with this id"}
+    not_found_by_key_id_server_id = {"num": 404, "message": f"Not found a {obj_name} with this key_id and server_id"}
+    not_found_by_server_id = {"num": 404, "message": f"Not found a {obj_name + 's'} with this server_id"}
 
     async def get_profile_by_id(self, *, db: AsyncSession, id: int):
         obj = await super().get(db=db, id=id)
@@ -70,6 +72,7 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         objects = await super().update(db_session=db, obj_current=profile, obj_new=activate_data)
         return objects, 0, None
 
+    # перестраховка проходится по базе данных и активирует все оплаченные аккаунты
     async def activate_paid_profiles(self, db: AsyncSession, skip: int = 0):
         # get all profiles
         profiles, code, indexes = await self.get_all_profiles(db=db, skip=skip, limit=LIMIT_PROFILES)
@@ -91,7 +94,7 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         response = await db.execute(query)
         res = response.scalar_one_or_none()
         if res is None:
-            return None, self.not_found_id, {"key_id": key_id, "server_id": server_id}
+            return None, self.not_found_by_key_id_server_id, {"key_id": key_id, "server_id": server_id}
         return res, 0, None
 
     async def get_name_for_profile(self, *, db: AsyncSession, account_id: int):
@@ -108,6 +111,18 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
             if f"Профиль {num}" not in name_list:
                 return f"Профиль {num}", 0, None
         return f"Профиль {num}", 0, None
+
+    async def get_profiles_by_server_id(self, *, db: AsyncSession, id: int):
+        server, code, indexes = await crud_server.get_server_by_id(db=db, id=id)
+        if code != 0:
+            return None, code, None
+        query = select(self.model).where(self.model.server_id == id)
+        response = await db.execute(query)
+        obj = response.scalars().all()
+        if response is None:
+            return None, self.not_found_by_server_id, None
+        objects = await super().get_multi(db_session=db, skip=0, limit=LIMIT_PROFILES)
+        return objects, 0, None
 
 
 crud_profile = CrudProfile(Profile)

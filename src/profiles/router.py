@@ -61,7 +61,7 @@ async def get_profile(
             path="/by-account/{account_id}",
             response_model=ListOfEntityResponse,
             name='get_profiles_by_account_id',
-            description='Вывод профиля по идентификатору'
+            description='Вывод профиля по аккаунт идентификатору'
             )
 async def get_profiles_by_account_id(
         account_id: int,
@@ -69,6 +69,22 @@ async def get_profiles_by_account_id(
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_profile.get_profiles_by_account_id(db=session, id=account_id)
+    await get_raise_new(code)
+    return ListOfEntityResponse(data=[getting_profile(obj) for obj in objects])
+
+
+@router.get(
+            path="/by-server/{server_id}",
+            response_model=ListOfEntityResponse,
+            name='get_profiles_by_server_id',
+            description='Вывод профиля по сервер идентификатору'
+            )
+async def get_profiles_by_server_id(
+        server_id: int,
+        user: User = Depends(current_active_superuser),
+        session: AsyncSession = Depends(get_async_session),
+):
+    objects, code, indexes = await crud_profile.get_profiles_by_server_id(db=session, id=server_id)
     await get_raise_new(code)
     return ListOfEntityResponse(data=[getting_profile(obj) for obj in objects])
 
