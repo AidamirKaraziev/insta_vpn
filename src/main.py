@@ -17,7 +17,7 @@ from profiles.router import router as router_profile
 from tools.router import router as router_tools
 from user.router import router as router_user, get_users_router
 
-from test_outline.router import router as router_outline
+from outline_apis.router import router as router_outline
 
 
 current_user = fastapi_users.current_user()

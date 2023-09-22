@@ -3,7 +3,7 @@ from typing import Optional
 from account.getters import getting_account
 from outline.outline.outline_vpn.outline_vpn import OutlineKey
 from profiles.schemas import ProfileGet
-from test_outline.schemas import OutlineGet
+from outline_apis.schemas import OutlineGet
 from utils.time_stamp import to_timestamp
 
 

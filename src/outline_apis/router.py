@@ -15,8 +15,8 @@ from profiles.getters import getting_profile
 from profiles.schemas import ProfileCreate
 from server.crud import crud_server
 from tariff.crud import crud_tariff
-from test_outline.getters import getting_outline
-from test_outline.schemas import OutlineCreate, OutlineUpdate
+from outline_apis.getters import getting_outline
+from outline_apis.schemas import OutlineCreate, OutlineUpdate
 
 router = APIRouter(
     prefix="/outline",
