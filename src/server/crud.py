@@ -34,12 +34,12 @@ class CrudServer(CRUDBase[Server, ServerCreate, ServerUpdate]):
         response = await db.execute(query)
         if response.scalar_one_or_none() is not None:
             return None, self.name_is_exist, None
-        objects = await super().create(db_session=db, obj_in=new_data)
         if new_data.address is not None:
             query = select(self.model).where(self.model.address == new_data.address, self.model.id != new_data.id)
             response = await db.execute(query)
             if response.scalar_one_or_none() is not None:
                 return None, self.address_is_exist, None
+        objects = await super().create(db_session=db, obj_in=new_data)
         return objects, 0, None
 
     async def update_server(self, *, db: AsyncSession, update_data: ServerUpdate, id: int):
