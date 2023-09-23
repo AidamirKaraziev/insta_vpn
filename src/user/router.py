@@ -13,15 +13,15 @@ from fastapi_users.router.common import ErrorCode, ErrorModel
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from old_code.auth.base_config import fastapi_users
-from old_code.auth.manager import get_user_manager
-from old_code.auth.models import User
-from old_code.auth.schemas import UserCreate, UserRead, UserUpdate
+from auth.base_config import fastapi_users
+from auth.manager import get_user_manager
+from auth.models import User
+from auth.schemas import UserCreate, UserRead, UserUpdate
 from core.response import ListOfEntityResponse, SingleEntityResponse
 from database import get_async_session
 
-from old_code.user.crud import crud_user
-from old_code.user.getters import getting_user
+from user.crud import crud_user
+from user.getters import getting_user
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

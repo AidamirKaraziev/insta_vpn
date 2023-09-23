@@ -3,8 +3,8 @@ from typing import Optional, Dict, Any
 from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, IntegerIDMixin, exceptions, models, schemas
 
-from old_code.auth.models import User
-from old_code.auth.utils import get_user_db
+from auth.models import User
+from auth.utils import get_user_db
 
 from config import SECRET_AUTH
 from tasks.tasks import send_email_report_forgot_password, send_email_request_verify
@@ -60,7 +60,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
         )
         password = user_dict.pop("password")
         user_dict["hashed_password"] = self.password_helper.hash(password)
-        user_dict["role_id"] = 2
+        # user_dict["role_id"] = 2
 
         created_user = await self.user_db.create(user_dict)
 
@@ -87,7 +87,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
         )
         password = user_dict.pop("password")
         user_dict["hashed_password"] = self.password_helper.hash(password)
-        user_dict["role_id"] = 1
+        # user_dict["role_id"] = 1
         user_dict["is_superuser"] = True
 
         created_user = await self.user_db.create(user_dict)

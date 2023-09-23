@@ -34,3 +34,8 @@ async def get_raise(num: int, message: str):
             description=f"АЙДАМИР ВНЕСИ RAISE {message, num}",
             path="$.body"
             )
+
+
+async def get_raise_new(code):
+    if code != 0:
+        await get_raise(num=code["num"], message=code["message"])

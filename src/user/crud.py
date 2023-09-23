@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from old_code.auth.models import User
-from old_code.auth.schemas import UserCreate, UserUpdate
+from auth.models import User
+from auth.schemas import UserCreate, UserUpdate
 from core.base_crud import CRUDBase
 
 

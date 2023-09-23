@@ -82,19 +82,18 @@ async def deactivate_profile(*, db: AsyncSession, skip: int = 0):
             obj, code, indexes = await crud_profile.update_profile(db=db, update_data=update_data, id=profile.id)
     return profiles, code, indexes
 
-# max_client
 
-
-async def deleting_an_outdated_account(db: AsyncSession):
+async def deleting_an_outdated_profile(db: AsyncSession):
     # получить profile
     profiles, code, indexes = await crud_profile.get_all_profiles(db=db, skip=0, limit=LIMIT_PROFILES)
     count_prof = len(profiles)
     deleted_prof = 0
     for profile in profiles:
         # calculation time
-        date_end = datetime.strptime(str(profile.date_end), '%Y-%m-%d').date()
+        date_end = datetime.strptime(str(profile.date_end), '%Y-%m-%d %H:%M:%S.%f%z').date()
         days = datetime.date(datetime.utcnow()) - date_end
         seconds = days.total_seconds()
+
         if seconds >= PAYMENT_WAITING_TIME:
             # удалить устаревший профиль
             server, code, indexes = await crud_server.get_server_by_id(db=db, id=profile.server_id)
@@ -108,6 +107,7 @@ async def deleting_an_outdated_account(db: AsyncSession):
     return f"Было: {count_prof} | Стало: {deleted_prof}", 0, None
 
 
+# TODO сделать асинхронной или удалить
 def check_server(servers_address):
     no_online = []
     for server_address in servers_address:
@@ -117,3 +117,38 @@ def check_server(servers_address):
         except subprocess.CalledProcessError:
             no_online.append(server_address)
     return no_online
+
+
+# TODO написать функцию которая проверяет работает ли впн
+# TODO почистить алембик миграции
+
+
+# TODO: функции передается список пиров которые перезаписываются и отправляются на фронт сообщением
+# async def replace_profile(db: AsyncSession, profiles: list):
+#     for profile in profiles:
+#         # проверить профиль
+#         profile, code, indexes = await crud_profile.get_profile_by_id(db=db, id=profile.id)
+#         await get_raise_new(code)
+#         # найти сервер
+#         server, code, indexes = await crud_server.get_server_by_id(db=session, id=profile.server_id)
+#         await get_raise_new(code)
+#         client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
+#         try:
+#             client.delete_key(key_id=profile.key_id)
+#         except Exception as ex:
+#             return f"не получилось удалить ключ потому что: {ex}"
+#         # создание нового ключа
+#         new_server, code, indexes = await crud_server.get_good_server(db=session)
+#         await get_raise_new(code)
+#         # присвоение профилю новых данных
+#         try:
+#             client = OutlineVPN(api_url=new_server.api_url, cert_sha256=new_server.cert_sha256)
+#             new_key = client.create_key()
+#         except Exception as ex:
+#             return None, outline_error(ex), None
+#         # сделать запись в базу данных
+#         update_data = ProfileUpdate(key_id=new_key.key_id, port=new_key.port, method=new_key.method,
+#                                     access_url=new_key.access_url, used_bytes=new_key.used_bytes, data_limit=0)
+#         profile, code, indexes = await crud_profile.update_profile(db=session, update_data=update_data, id=profile.id)
+#         await get_raise_new(code)
+#     pass

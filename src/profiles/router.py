@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import FREE_TRAFFIC
-from core.raise_template import get_raise
+from core.raise_template import get_raise, get_raise_new
 from core.response import SingleEntityResponse, ListOfEntityResponse, OkResponse
 from database import get_async_session
 from outline.outline.outline_vpn.outline_vpn import OutlineVPN
@@ -12,7 +12,12 @@ from profiles.crud import crud_profile
 from profiles.getters import getting_profile
 from profiles.schemas import ProfileCreate, ProfileUpdate, ProfileActivate
 from server.crud import crud_server
-from utils.utils import update_used_bytes_in_profiles, outline_error, deactivate_profile, deleting_an_outdated_account
+from utils.utils import update_used_bytes_in_profiles, outline_error, deactivate_profile, deleting_an_outdated_profile
+from auth.base_config import fastapi_users
+from auth.models import User
+
+current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
+
 
 router = APIRouter(
     prefix="/profile",
@@ -29,7 +34,7 @@ router = APIRouter(
 async def get_profiles(
         skip: int = 0,
         limit: int = 100,
-        # user: User = Depends(current_active_user),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_profile.get_all_profiles(db=session, skip=skip, limit=limit)
@@ -44,12 +49,11 @@ async def get_profiles(
             )
 async def get_profile(
         profile_id: int,
-        # user: User = Depends(current_active_user),
+        # user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_profile.get_profile_by_id(db=session, id=profile_id)
-    if code != 0:
-        await get_raise(num=code["num"], message=code["message"])
+    await get_raise_new(code)
     return SingleEntityResponse(data=getting_profile(obj=obj))
 
 
@@ -57,16 +61,31 @@ async def get_profile(
             path="/by-account/{account_id}",
             response_model=ListOfEntityResponse,
             name='get_profiles_by_account_id',
-            description='Вывод профиля по идентификатору'
+            description='Вывод профиля по аккаунт идентификатору'
             )
 async def get_profiles_by_account_id(
         account_id: int,
-        # user: User = Depends(current_active_user),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_profile.get_profiles_by_account_id(db=session, id=account_id)
-    if code != 0:
-        await get_raise(num=code["num"], message=code["message"])
+    await get_raise_new(code)
+    return ListOfEntityResponse(data=[getting_profile(obj) for obj in objects])
+
+
+@router.get(
+            path="/by-server/{server_id}",
+            response_model=ListOfEntityResponse,
+            name='get_profiles_by_server_id',
+            description='Вывод профиля по сервер идентификатору'
+            )
+async def get_profiles_by_server_id(
+        server_id: int,
+        user: User = Depends(current_active_superuser),
+        session: AsyncSession = Depends(get_async_session),
+):
+    objects, code, indexes = await crud_profile.get_profiles_by_server_id(db=session, id=server_id)
+    await get_raise_new(code)
     return ListOfEntityResponse(data=[getting_profile(obj) for obj in objects])
 
 
@@ -77,18 +96,18 @@ async def get_profiles_by_account_id(
              )
 async def add_profile(
         account_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     # выбрать сервер
     server, code, indexes = await crud_server.get_good_server(db=session)
-    if code != 0:
-        await get_raise(num=code["num"], message=code["message"])
+    await get_raise_new(code)
     # проверка сколько у аккаунта пиров, дать имя пиру
     objects, code, indexes = await crud_profile.get_profiles_by_account_id(db=session, id=account_id)
-    if code != 0:
-        await get_raise(num=code["num"], message=code["message"])
-    name = f"Профиль {len(objects) + 1}"
+    await get_raise_new(code)
+    # получение имени для профиля
+    name, code, indexes = await crud_profile.get_name_for_profile(db=session, account_id=account_id)
+    await get_raise_new(code)
     try:
         # создать пир
         client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
@@ -114,7 +133,7 @@ async def add_profile(
 async def activate_profile(
         activate_data: ProfileActivate,
         profile_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     # найти профиль
@@ -144,7 +163,7 @@ async def activate_profile(
                )
 async def delete_profile(
         profile_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     # проверить профиль
@@ -174,6 +193,7 @@ async def delete_profile(
             description='Деактивировать неоплаченные профили'
             )
 async def deactivate_old_profiles(
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await deactivate_profile(db=session)
@@ -189,6 +209,7 @@ async def deactivate_old_profiles(
             description='Обновить used_bytes во всех профилях'
             )
 async def update_used_bytes_in_profile(
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await update_used_bytes_in_profiles(db=session, skip=0)
@@ -205,12 +226,54 @@ async def update_used_bytes_in_profile(
             description='Удалить устаревшие профили!'
             )
 async def delete_old(
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
-    obj, code, indexes = await deleting_an_outdated_account(db=session)
+    obj, code, indexes = await deleting_an_outdated_profile(db=session)
+    await get_raise_new(code)
     if code != 0:
         await get_raise(num=code["num"], message=code["message"])
     return SingleEntityResponse(data=obj)
+
+
+@router.put(path="/replacement/{profile_id}",
+            response_model=SingleEntityResponse,
+            name='replacement_profile',
+            description='Заменить ключ для профиля'
+            )
+async def replacement_profile(
+        profile_id: int,
+        user: User = Depends(current_active_superuser),
+        session: AsyncSession = Depends(get_async_session),
+):
+    # проверить профиль
+    profile, code, indexes = await crud_profile.get_profile_by_id(db=session, id=profile_id)
+    await get_raise_new(code)
+    # найти сервер
+    server, code, indexes = await crud_server.get_server_by_id(db=session, id=profile.server_id)
+    await get_raise_new(code)
+
+    client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
+    try:
+        client.delete_key(key_id=profile.key_id)
+    except Exception as ex:
+        return f"не получилось удалить ключ потому что: {ex}"
+    # создание нового ключа
+    new_server, code, indexes = await crud_server.get_good_server(db=session)
+    await get_raise_new(code)
+    # присвоение профилю новых данных
+    try:
+        client = OutlineVPN(api_url=new_server.api_url, cert_sha256=new_server.cert_sha256)
+        new_key = client.create_key()
+    except Exception as ex:
+        return None, outline_error(ex), None
+    # сделать запись в базу данных
+    update_data = ProfileUpdate(key_id=new_key.key_id, port=new_key.port, method=new_key.method,
+                                access_url=new_key.access_url, used_bytes=new_key.used_bytes, data_limit=0)
+    profile, code, indexes = await crud_profile.update_profile(db=session, update_data=update_data, id=profile.id)
+    await get_raise_new(code)
+    return SingleEntityResponse(data=getting_profile(obj=profile))
+
 
 if __name__ == "__main__":
     logging.info('Running...')
