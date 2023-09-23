@@ -213,9 +213,8 @@ async def update_used_bytes_in_profile(
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await update_used_bytes_in_profiles(db=session, skip=0)
-    if code != 0:
-        await get_raise(num=code["num"], message=code["message"])
-    return ListOfEntityResponse(data=[getting_profile(obj) for obj in objects])
+    await get_raise_new(code)
+    return ListOfEntityResponse(data=objects)
 
 
 # delete old profiles
@@ -254,6 +253,7 @@ async def replacement_profile(
     await get_raise_new(code)
 
     client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
+    # TODO переделать этот момент чувствую тут жопка
     try:
         client.delete_key(key_id=profile.key_id)
     except Exception as ex:

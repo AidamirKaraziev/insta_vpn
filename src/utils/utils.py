@@ -22,48 +22,54 @@ from server.schemas import ServerUpdate
 
 
 def outline_error(ex: Exception):
-    return {"num": 403, "message": f"Error in outline Server {ex}"}
+    return {"num": 403, "message": f"{ex}"}
 
 
 async def update_used_bytes_in_profiles(db: AsyncSession, skip: int = 0):
-    # get all servers
-    servers, code, indexes = await crud_server.get_all_servers(db=db, skip=skip, limit=LIMIT_SERVERS)
     not_in_db = []
-    in_db = []
+    unavailable_server = {}
+    bad_servers = []
+    servers, code, indexes = await crud_server.get_all_servers(db=db, skip=skip, limit=LIMIT_SERVERS)
     for server in servers:
         try:
+            # проверка серверов, если не достучались до сервера -> показать его
             client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
             keys = client.get_keys()
             for key in keys:
-                # get profile
                 profile, code, indexes = await crud_profile.get_profile_by_key_id_server_id(db=db,
                                                                                             key_id=int(key.key_id),
                                                                                             server_id=int(server.id))
-                if indexes is not None:
+                if profile is None:
                     not_in_db.append(indexes)
                 if profile is not None:
-                    in_db.append(profile)
                     update_data = ProfileUpdate(used_bytes=key.used_bytes)
                     obj, code, indexes = await crud_profile.update_profile(
                         db=db, update_data=update_data, id=profile.id)
         except Exception as ex:
-            return None, outline_error(ex=ex), None
-    return in_db, 0, None
+            # добавить плохой сервер сюда
+            unavailable_server[f"{server.id}, {server.name}"] = f"{ex}"
+    bad_servers.append(unavailable_server)
+    not_in_db.append(bad_servers)
+    return not_in_db, 0, None
 
 
 async def update_fact_clients(*, skip: int = 0, db: AsyncSession):
     # get all server
+    bad_servers = {}
+    good_servers = []
     servers, code, indexes = await crud_server.get_all_servers(db=db, skip=skip, limit=LIMIT_SERVERS)
     for server in servers:
         try:
             client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
             fact_client = len(client.get_keys())
+            update_data = ServerUpdate(fact_client=fact_client)
+            server, code, indexes = await crud_server.update_server(db=db, id=server.id,
+                                                                    update_data=update_data)
+            good_servers.append(server)
         except Exception as ex:
-            return None, outline_error(ex=ex), None
-        update_data = ServerUpdate(fact_client=fact_client)
-        server, code, indexes = await crud_server.update_server(db=db, id=server.id,
-                                                                update_data=update_data)
-    return servers, 0, None
+            bad_servers[f"{server.id}, {server.name}"] = f"{ex}"
+    good_servers.append(bad_servers)
+    return good_servers, 0, None
 
 
 async def deactivate_profile(*, db: AsyncSession, skip: int = 0):
@@ -120,7 +126,6 @@ def check_server(servers_address):
 
 
 # TODO написать функцию которая проверяет работает ли впн
-# TODO почистить алембик миграции
 
 
 # TODO: функции передается список пиров которые перезаписываются и отправляются на фронт сообщением
