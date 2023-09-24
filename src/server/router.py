@@ -3,7 +3,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.raise_template import get_raise
+from core.raise_template import get_raise, get_raise_new
 from core.response import SingleEntityResponse, ListOfEntityResponse, OkResponse
 from database import get_async_session
 from server.crud import crud_server
@@ -116,9 +116,8 @@ async def update_fact_client(
         session: AsyncSession = Depends(get_async_session),
 ):
     servers, code, indexes = await update_fact_clients(db=session)
-    if code != 0:
-        await get_raise(num=code["num"], message=code["message"])
-    return ListOfEntityResponse(data=[getting_server(obj) for obj in servers])
+    await get_raise_new(code)
+    return SingleEntityResponse(data=servers)
 
 
 if __name__ == "__main__":

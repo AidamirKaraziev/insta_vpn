@@ -22,72 +22,104 @@ from server.schemas import ServerUpdate
 
 
 def outline_error(ex: Exception):
-    return {"num": 403, "message": f"Error in outline Server {ex}"}
+    return {"num": 403, "message": f"{ex}"}
 
 
 async def update_used_bytes_in_profiles(db: AsyncSession, skip: int = 0):
-    # get all servers
     servers, code, indexes = await crud_server.get_all_servers(db=db, skip=skip, limit=LIMIT_SERVERS)
-    not_in_db = []
-    in_db = []
     for server in servers:
         try:
+            # проверка серверов, если не достучались до сервера -> показать его
             client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
             keys = client.get_keys()
             for key in keys:
-                # get profile
-                profile, code, indexes = await crud_profile.get_profile_by_key_id_server_id(db=db,
-                                                                                            key_id=int(key.key_id),
-                                                                                            server_id=int(server.id))
-                if indexes is not None:
-                    not_in_db.append(indexes)
+                profile, code, indexes = await crud_profile.get_profile_by_key_id_server_id(db=db,                                                                         server_id=int(server.id))
                 if profile is not None:
-                    in_db.append(profile)
                     update_data = ProfileUpdate(used_bytes=key.used_bytes)
                     obj, code, indexes = await crud_profile.update_profile(
                         db=db, update_data=update_data, id=profile.id)
         except Exception as ex:
-            return None, outline_error(ex=ex), None
-    return in_db, 0, None
+            pass
+    return None, 0, None
+
+
+async def get_keys_without_a_profile_and_bad_server(db: AsyncSession, skip: int = 0):
+    not_in_db = []
+    unavailable_server = {}
+    bad_servers = []
+    servers, code, indexes = await crud_server.get_all_servers(db=db, skip=skip, limit=LIMIT_SERVERS)
+    for server in servers:
+        try:
+            # проверка серверов, если не достучались до сервера -> показать его
+            client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
+            keys = client.get_keys()
+            for key in keys:
+                profile, code, indexes = await crud_profile.get_profile_by_key_id_server_id(db=db,
+                                                                                            key_id=int(key.key_id),
+                                                                                            server_id=int(server.id))
+                if profile is None:
+                    not_in_db.append(indexes)
+                if profile is not None:
+                    update_data = ProfileUpdate(used_bytes=key.used_bytes)
+                    obj, code, indexes = await crud_profile.update_profile(
+                        db=db, update_data=update_data, id=profile.id)
+        except Exception as ex:
+            # добавить плохой сервер сюда
+            unavailable_server[f"{server.id}, {server.name}"] = f"{ex}"
+    bad_servers.append(unavailable_server)
+    not_in_db.append(bad_servers)
+    return not_in_db, 0, None
 
 
 async def update_fact_clients(*, skip: int = 0, db: AsyncSession):
     # get all server
+    bad_servers = {}
+    good_servers = []
     servers, code, indexes = await crud_server.get_all_servers(db=db, skip=skip, limit=LIMIT_SERVERS)
     for server in servers:
         try:
             client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
             fact_client = len(client.get_keys())
+            update_data = ServerUpdate(fact_client=fact_client)
+            server, code, indexes = await crud_server.update_server(db=db, id=server.id,
+                                                                    update_data=update_data)
+            good_servers.append(server)
         except Exception as ex:
-            return None, outline_error(ex=ex), None
-        update_data = ServerUpdate(fact_client=fact_client)
-        server, code, indexes = await crud_server.update_server(db=db, id=server.id,
-                                                                update_data=update_data)
-    return servers, 0, None
+            bad_servers[f"{server.id}, {server.name}"] = f"{ex}"
+    good_servers.append(bad_servers)
+    return good_servers, 0, None
 
 
 async def deactivate_profile(*, db: AsyncSession, skip: int = 0):
+    good_profile = []
+    bad_profile = []
+    res = {}
     # get all profiles
     profiles, code, indexes = await crud_profile.get_all_profiles(db=db, skip=skip, limit=LIMIT_PROFILES)
     for profile in profiles:
-        if profile.date_end <= datetime.date(datetime.now()):
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f%z")
+        if str(profile.date_end) <= now:
             # add data_limit
             server, code, indexes = await crud_server.get_server_by_id(db=db, id=profile.server_id)
             try:
                 client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
-                client.add_data_limit(key_id=profile.key_id, limit_bytes=FREE_TRAFFIC)
+                obj = client.add_data_limit(key_id=profile.key_id, limit_bytes=FREE_TRAFFIC)
+                if obj is True:
+                    good_profile.append(profile.id)
+                else:
+                    bad_profile.append(profile.id)
             except Exception as ex:
-                return None, outline_error(ex=ex), None
+                pass
             update_data = ProfileUpdate(data_limit=FREE_TRAFFIC, is_active=False)
             obj, code, indexes = await crud_profile.update_profile(db=db, update_data=update_data, id=profile.id)
-    return profiles, code, indexes
+        res[f"Не деактивировались:"] = f"{bad_profile}"
+    return res, code, indexes
 
 
 async def deleting_an_outdated_profile(db: AsyncSession):
     # получить profile
     profiles, code, indexes = await crud_profile.get_all_profiles(db=db, skip=0, limit=LIMIT_PROFILES)
-    count_prof = len(profiles)
-    deleted_prof = 0
+    deleted_profiles = []
     for profile in profiles:
         # calculation time
         date_end = datetime.strptime(str(profile.date_end), '%Y-%m-%d %H:%M:%S.%f%z').date()
@@ -99,12 +131,15 @@ async def deleting_an_outdated_profile(db: AsyncSession):
             server, code, indexes = await crud_server.get_server_by_id(db=db, id=profile.server_id)
             try:
                 client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
-                client.delete_key(key_id=profile.key_id)
+                deleted = client.delete_key(key_id=profile.key_id)
+                if deleted is True:
+                    deleted_profiles.append(profile.id)
+                    pofile, code, indexes = await crud_profile.delete_profile(db=db, id=profile.id)
+                    if code != 0:
+                        return None, code, None
             except Exception as ex:
-                return None, outline_error(ex=ex), None
-            pofile, code, indexes = await crud_profile.delete_profile(db=db, id=profile.id)
-            deleted_prof = count_prof - 1
-    return f"Было: {count_prof} | Стало: {deleted_prof}", 0, None
+                pass
+    return f"Удалил профили: {deleted_profiles} | В количестве: {len(deleted_profiles)}", 0, None
 
 
 # TODO сделать асинхронной или удалить
@@ -120,7 +155,6 @@ def check_server(servers_address):
 
 
 # TODO написать функцию которая проверяет работает ли впн
-# TODO почистить алембик миграции
 
 
 # TODO: функции передается список пиров которые перезаписываются и отправляются на фронт сообщением
@@ -152,3 +186,6 @@ def check_server(servers_address):
 #         profile, code, indexes = await crud_profile.update_profile(db=session, update_data=update_data, id=profile.id)
 #         await get_raise_new(code)
 #     pass
+
+
+# TODO Функция которая удаляет все ключи у которых нет профиля. Чистка мусорных неоплаченных ключей. Отложенная задача.
