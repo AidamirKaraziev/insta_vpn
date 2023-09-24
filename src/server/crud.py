@@ -77,5 +77,24 @@ class CrudServer(CRUDBase[Server, ServerCreate, ServerUpdate]):
         except Exception as ex:
             return None, self.outline_error(ex=ex), None
 
+    async def get_replacement_server(self, *, db: AsyncSession, server_id: int):
+        query = select(self.model).where(self.model.id != server_id, self.model.is_active != False)
+        response = await db.execute(query)
+        good_servers = response.scalars().all()
+        if not good_servers:
+            return None, self.no_good_server, None
+        elif good_servers is not None:
+            for server in good_servers:
+                try:
+                    print(server.id)
+                    client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
+                    fact_client = len(client.get_keys())
+                    print(fact_client)
+                    if fact_client <= server.max_client:
+                        return server, 0, None
+                except:
+                    pass
+            return None, self.no_good_server, None
+
 
 crud_server = CrudServer(Server)
