@@ -66,6 +66,7 @@ class CrudServer(CRUDBase[Server, ServerCreate, ServerUpdate]):
         return objects, 0, None
 
     async def get_good_server(self, *, db: AsyncSession):
+        # дописать проверку на is_active
         objects = await super().get_multi(db_session=db, skip=0, limit=10000)
         try:
             for server in objects:

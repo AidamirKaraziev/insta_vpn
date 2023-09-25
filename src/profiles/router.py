@@ -123,7 +123,7 @@ async def add_profile(
     return SingleEntityResponse(data=getting_profile(obj=profile))
 
 
-@router.put(path="/activate/{profile_id}/",
+@router.put(path="/activate/{profile_id}",
             response_model=SingleEntityResponse,
             name='activate_profile',
             description='Активировать профиль'
