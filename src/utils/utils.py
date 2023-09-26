@@ -7,7 +7,7 @@ from config import LIMIT_SERVERS, LIMIT_PROFILES, FREE_TRAFFIC, PAYMENT_WAITING_
 from outline.outline.outline_vpn.outline_vpn import OutlineVPN
 from profiles.crud import crud_profile
 from profiles.schemas import ProfileUpdate
-from server.crud import crud_server
+from server.crud import crud_server, check_server_availability
 from server.schemas import ServerUpdate
 
 """
@@ -71,21 +71,23 @@ async def get_keys_without_a_profile_and_bad_server(db: AsyncSession, skip: int 
     return not_in_db, 0, None
 
 
-async def update_fact_clients(*, skip: int = 0, db: AsyncSession):
+async def update_fact_clients(*, db: AsyncSession):
     # get all server
     bad_servers = {}
     good_servers = []
-    servers, code, indexes = await crud_server.get_all_servers(db=db, skip=skip, limit=LIMIT_SERVERS)
+    servers, code, indexes = await crud_server.get_active_servers(db=db)
+
     for server in servers:
-        try:
-            client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
-            fact_client = len(client.get_keys())
-            update_data = ServerUpdate(fact_client=fact_client)
-            server, code, indexes = await crud_server.update_server(db=db, id=server.id,
-                                                                    update_data=update_data)
-            good_servers.append(server)
-        except Exception as ex:
-            bad_servers[f"{server.id}, {server.name}"] = f"{ex}"
+        if check_server_availability(server.address):
+            try:
+                client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
+                fact_client = len(client.get_keys())
+                update_data = ServerUpdate(fact_client=fact_client)
+                server, code, indexes = await crud_server.update_server(db=db, id=server.id,
+                                                                        update_data=update_data)
+                good_servers.append(server)
+            except Exception as ex:
+                bad_servers[f"{server.id}, {server.name}"] = f"{ex}"
     good_servers.append(bad_servers)
     return good_servers, 0, None
 

@@ -5,6 +5,15 @@ from core.base_crud import CRUDBase
 from outline.outline.outline_vpn.outline_vpn import OutlineVPN
 from server.models import Server
 from server.schemas import ServerCreate, ServerUpdate
+import subprocess
+
+
+def check_server_availability(server):
+    # Выполняем ping команду
+    result = subprocess.call(['ping', '-c', '1', server])
+
+    # Возвращаем True, если сервер доступен, False в противном случае
+    return result == 0
 
 
 class CrudServer(CRUDBase[Server, ServerCreate, ServerUpdate]):
@@ -12,7 +21,7 @@ class CrudServer(CRUDBase[Server, ServerCreate, ServerUpdate]):
     not_found_id = {"num": 404, "message": f"Not found {obj_name} with this id"}
     name_is_exist = {"num": 403, "message": f"А {obj_name} with that name already exists"}
     address_is_exist = {"num": 403, "message": f"А {obj_name} with that address already exists"}
-    no_good_server = {"num": 403, "message": f"There is not a single free space on the servers"}
+    no_good_server = {"num": 403, "message": f"На серверах нет ни одного свободного места"}
     id_is_exist = {"num": 403, "message": f"А {obj_name} with that id already exists"}
 
     async def get_server_by_id(self, *, db: AsyncSession, id: int):
@@ -24,6 +33,12 @@ class CrudServer(CRUDBase[Server, ServerCreate, ServerUpdate]):
     async def get_all_servers(self, *, db: AsyncSession, skip: int, limit: int):
         objects = await super().get_multi(db_session=db, skip=skip, limit=limit)
         return objects, 0, None
+
+    async def get_active_servers(self, *, db: AsyncSession):
+        query = select(self.model).where(self.model.is_active == True)
+        response = await db.execute(query)
+        good_servers = response.scalars().all()
+        return good_servers, 0, None
 
     async def add_server(self, *, db: AsyncSession, new_data: ServerCreate):
         server, code, indexes = await self.get_server_by_id(db=db, id=new_data.id)
@@ -66,14 +81,18 @@ class CrudServer(CRUDBase[Server, ServerCreate, ServerUpdate]):
         return objects, 0, None
 
     async def get_good_server(self, *, db: AsyncSession):
-        # дописать проверку на is_active
-        objects = await super().get_multi(db_session=db, skip=0, limit=10000)
+        good_servers, code, indexes = await self.get_active_servers(db=db)
         try:
-            for server in objects:
-                client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
-                fact_client = len(client.get_keys())
-                if fact_client <= server.max_client:
-                    return server, 0, None
+            for server in good_servers:
+                if check_server_availability(server.address):
+                    try:
+                        client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
+                        if client:
+                            fact_client = len(client.get_keys())
+                            if fact_client <= server.max_client:
+                                return server, 0, None
+                    except:
+                        pass
             return None, self.no_good_server, None
         except Exception as ex:
             return None, self.outline_error(ex=ex), None
@@ -86,14 +105,15 @@ class CrudServer(CRUDBase[Server, ServerCreate, ServerUpdate]):
             return None, self.no_good_server, None
         elif good_servers is not None:
             for server in good_servers:
-                try:
-                    print(server.id)
-                    client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
-                    fact_client = len(client.get_keys())
-                    print(fact_client)
-                    if fact_client <= server.max_client:
-                        return server, 0, None
-                except:
+                if check_server_availability(server.address):
+                    try:
+                        client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
+                        fact_client = len(client.get_keys())
+                        if fact_client <= server.max_client:
+                            return server, 0, None
+                    except:
+                        pass
+                else:
                     pass
             return None, self.no_good_server, None
 

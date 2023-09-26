@@ -168,8 +168,7 @@ async def delete_profile(
     await get_raise_new(code)
     try:
         client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
-        a = client.delete_key(key_id=profile.key_id)
-        print(a)
+        client.delete_key(key_id=profile.key_id)
     except Exception as ex:
         return f"не получилось удалить ключ потому что: {ex}"
 
