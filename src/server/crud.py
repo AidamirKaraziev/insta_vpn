@@ -5,15 +5,14 @@ from core.base_crud import CRUDBase
 from outline.outline.outline_vpn.outline_vpn import OutlineVPN
 from server.models import Server
 from server.schemas import ServerCreate, ServerUpdate
-import subprocess
+from ping3 import ping
 
 
-def check_server_availability(server):
-    # Выполняем ping команду
-    result = subprocess.call(['ping', '-c', '1', '-t', '1', server])
-
-    # Возвращаем True, если сервер доступен, False в противном случае
-    return result == 0
+async def check_server_availability(address: str):
+    result = ping(address)
+    if result:
+        return True
+    return False
 
 
 class CrudServer(CRUDBase[Server, ServerCreate, ServerUpdate]):
@@ -84,7 +83,7 @@ class CrudServer(CRUDBase[Server, ServerCreate, ServerUpdate]):
         good_servers, code, indexes = await self.get_active_servers(db=db)
         try:
             for server in good_servers:
-                if check_server_availability(server.address):
+                if await check_server_availability(server.address):
                     try:
                         client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
                         if client:
@@ -105,7 +104,7 @@ class CrudServer(CRUDBase[Server, ServerCreate, ServerUpdate]):
             return None, self.no_good_server, None
         elif good_servers is not None:
             for server in good_servers:
-                if check_server_availability(server.address):
+                if await check_server_availability(server.address):
                     try:
                         client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
                         fact_client = len(client.get_keys())
