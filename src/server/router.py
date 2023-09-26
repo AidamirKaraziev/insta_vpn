@@ -50,8 +50,7 @@ async def get_server(
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_server.get_server_by_id(db=session, id=server_id)
-    if code != 0:
-        await get_raise(num=code["num"], message=code["message"])
+    await get_raise_new(code)
     return SingleEntityResponse(data=getting_server(obj=obj))
 
 
@@ -66,8 +65,7 @@ async def add_server(
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_server.add_server(db=session, new_data=new_data)
-    if code != 0:
-        await get_raise(num=code["num"], message=code["message"])
+    await get_raise_new(code)
     return SingleEntityResponse(data=getting_server(obj=obj))
 
 
@@ -83,8 +81,7 @@ async def update_server(
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_server.update_server(db=session, update_data=update_data, id=server_id)
-    if code != 0:
-        await get_raise(num=code["num"], message=code["message"])
+    await get_raise_new(code)
     return SingleEntityResponse(data=getting_server(obj=obj))
 
 
@@ -95,14 +92,11 @@ async def update_server(
             description='Получение нужного сервера'
             )
 async def get_good_server(
-        skip: int = 0,
-        limit: int = 500,
         user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     server, code, indexes = await crud_server.get_good_server(db=session)
-    if code != 0:
-        await get_raise(num=code["num"], message=code["message"])
+    await get_raise_new(code)
     return SingleEntityResponse(data=getting_server(obj=server))
 
 
