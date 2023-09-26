@@ -10,7 +10,7 @@ import subprocess
 
 def check_server_availability(server):
     # Выполняем ping команду
-    result = subprocess.call(['ping', '-c', '1', server])
+    result = subprocess.call(['ping', '-c', '1', '-t', '1', server])
 
     # Возвращаем True, если сервер доступен, False в противном случае
     return result == 0
