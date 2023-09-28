@@ -190,4 +190,15 @@ def check_server(servers_address):
 #     pass
 
 
+async def deactivation_bab_servers(db=AsyncSession, ):
+    servers, code, indexes = await crud_server.get_active_servers(db=db)
+
+    for server in servers:
+        res = await check_server_availability(server.address)
+        if not res:
+            update_data = ServerUpdate(is_active=False)
+            obj, code, indexes = await crud_server.update_server(db=db, id=server.id, update_data=update_data)
+    return servers, 0, None
+
+
 # TODO Функция которая удаляет все ключи у которых нет профиля. Чистка мусорных неоплаченных ключей. Отложенная задача.
