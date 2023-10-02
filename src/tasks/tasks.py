@@ -69,7 +69,7 @@ def send_email_request_verify(token: str, name: str, email_to: str):
         server.send_message(email)
 
 
-@celery.task
-async def deactivate_servers(db: AsyncSession):
-    servers, code, indexes = await deactivation_bab_servers(db=db)
-    return servers, code, indexes
+# @celery.task
+# async def deactivate_servers(db: AsyncSession):
+#     servers, code, indexes = await deactivation_bab_servers(db=db)
+#     return servers, code, indexes
