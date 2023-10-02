@@ -2,25 +2,25 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_async_session
-from tasks.tasks import deactivate_servers
+# from tasks.tasks import deactivate_servers
 
 
 router = APIRouter(prefix="/report")
 
 
 # TODO возможно они должны быть синхронными
-@router.get("/check-servers")
-async def check_servers(session: AsyncSession = Depends(get_async_session)):
-    # background_tasks
-    # background_tasks.add_task(deactivate_servers, session)
-
-    # это работает, но это не селери и не background_tasks
-    objs, code, indexes = await deactivate_servers(db=session)
-    return {
-        "status": 200,
-        "data": f"so good: ",
-        "details": None
-    }
+# @router.get("/check-servers")
+# async def check_servers(session: AsyncSession = Depends(get_async_session)):
+#     # background_tasks
+#     # background_tasks.add_task(deactivate_servers, session)
+#
+#     # это работает, но это не селери и не background_tasks
+#     objs, code, indexes = await deactivate_servers(db=session)
+#     return {
+#         "status": 200,
+#         "data": f"so good: ",
+#         "details": None
+#     }
 
 
 # @router.get("/dashboard")
