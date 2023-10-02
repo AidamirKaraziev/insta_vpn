@@ -16,7 +16,6 @@ from account.router import router as router_account
 from profiles.router import router as router_profile
 from tools.router import router as router_tools
 from user.router import router as router_user, get_users_router
-from tasks.router import router as router_tasks
 
 from outline_apis.router import router as router_outline
 
@@ -70,7 +69,6 @@ app.include_router(router_account)
 app.include_router(router_profile)
 app.include_router(router_outline)
 app.include_router(router_tools)
-app.include_router(router_tasks)
 
 origins = ["*"]
 

@@ -3,10 +3,7 @@ from email.message import EmailMessage
 from typing import Optional
 
 from celery import Celery
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from config import SMTP_USER, SMTP_PASSWORD, REDIS_HOST, REDIS_PORT
-from utils.utils import deactivation_bab_servers
 
 SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = 465
@@ -67,9 +64,3 @@ def send_email_request_verify(token: str, name: str, email_to: str):
     with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
         server.login(SMTP_USER, SMTP_PASSWORD)
         server.send_message(email)
-
-
-# @celery.task
-# async def deactivate_servers(db: AsyncSession):
-#     servers, code, indexes = await deactivation_bab_servers(db=db)
-#     return servers, code, indexes
