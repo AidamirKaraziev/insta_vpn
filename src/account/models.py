@@ -14,4 +14,4 @@ class Account(Base):
     id = Column(BigInteger, primary_key=True, autoincrement=False)
     name = Column(String)
     number = Column(String)
-    created_at = Column(TIMESTAMP(timezone=True), default=datetime.utcnow())
+    created_at = Column(TIMESTAMP(timezone=False), default=datetime.now())

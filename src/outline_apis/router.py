@@ -103,19 +103,32 @@ async def delete_key(
     return SingleEntityResponse(data=obj)
 
 
-@router.get(path="/test/{key_id}",
+@router.get(path="/test/my-test/",
             response_model=SingleEntityResponse,
             name='test_api',
             description='Тестирование АПИ'
             )
 async def test_api(
-        key_id: int,
         # user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
-    status = client.add_data_limit(key_id=key_id, limit_bytes=FREE_TRAFFIC)
-    # status = client.delete_data_limit(key_id=key_id)
-    return SingleEntityResponse(data=status)
+    # bad server
+    # test_client = OutlineVPN(api_url="https://2.59.183.37:38411/baaVPmyljNmp4S0sDJItaBXa",
+    #                          cert_sha256="C3460EBF84BD01A6030F31EB46B06EE6E1690781204E95D88CE9CB0731DE8198")
+    # good server
+    test_client = OutlineVPN(api_url="https://2.59.183.37:38411/bVPmyljNmp4S0sDJItaBXA",
+                             cert_sha256="C3460EBF84BD01A6030F31EB46B06EE6E1690781204E95D88CE9CB0731DE8098")
+    try:
+
+        if test_client:
+            keys = test_client.get_keys()
+            if keys:
+                print(2)
+            print(1)
+    except Exception as ex:
+        print(f"EXCEPTION: {ex}")
+    return SingleEntityResponse(data=f"It`s Okay")
+
 
 if __name__ == "__main__":
     logging.info('Running...')

@@ -1,8 +1,8 @@
-"""Inition
+"""init
 
-Revision ID: 2808e022ffe1
+Revision ID: 3f75bb0945cf
 Revises: 
-Create Date: 2023-09-23 09:52:04.194794
+Create Date: 2023-10-02 15:51:06.575074
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '2808e022ffe1'
+revision = '3f75bb0945cf'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -46,7 +46,7 @@ def upgrade() -> None:
     sa.Column('id', sa.BigInteger(), autoincrement=False, nullable=False),
     sa.Column('name', sa.String(), nullable=True),
     sa.Column('number', sa.String(), nullable=True),
-    sa.Column('created_at', sa.TIMESTAMP(timezone=True), nullable=True),
+    sa.Column('created_at', sa.TIMESTAMP(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('profile',
@@ -60,7 +60,7 @@ def upgrade() -> None:
     sa.Column('access_url', sa.String(), nullable=True),
     sa.Column('used_bytes', sa.Integer(), nullable=True),
     sa.Column('data_limit', sa.Integer(), nullable=True),
-    sa.Column('date_end', sa.TIMESTAMP(timezone=True), nullable=True),
+    sa.Column('date_end', sa.TIMESTAMP(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['account_id'], ['account.id'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['server_id'], ['server.id'], ondelete='SET NULL'),

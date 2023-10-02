@@ -156,40 +156,6 @@ def check_server(servers_address):
     return no_online
 
 
-# TODO написать функцию которая проверяет работает ли впн
-
-
-# TODO: функции передается список пиров которые перезаписываются и отправляются на фронт сообщением
-# async def replace_profile(db: AsyncSession, profiles: list):
-#     for profile in profiles:
-#         # проверить профиль
-#         profile, code, indexes = await crud_profile.get_profile_by_id(db=db, id=profile.id)
-#         await get_raise_new(code)
-#         # найти сервер
-#         server, code, indexes = await crud_server.get_server_by_id(db=session, id=profile.server_id)
-#         await get_raise_new(code)
-#         client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
-#         try:
-#             client.delete_key(key_id=profile.key_id)
-#         except Exception as ex:
-#             return f"не получилось удалить ключ потому что: {ex}"
-#         # создание нового ключа
-#         new_server, code, indexes = await crud_server.get_good_server(db=session)
-#         await get_raise_new(code)
-#         # присвоение профилю новых данных
-#         try:
-#             client = OutlineVPN(api_url=new_server.api_url, cert_sha256=new_server.cert_sha256)
-#             new_key = client.create_key()
-#         except Exception as ex:
-#             return None, outline_error(ex), None
-#         # сделать запись в базу данных
-#         update_data = ProfileUpdate(key_id=new_key.key_id, port=new_key.port, method=new_key.method,
-#                                     access_url=new_key.access_url, used_bytes=new_key.used_bytes, data_limit=0)
-#         profile, code, indexes = await crud_profile.update_profile(db=session, update_data=update_data, id=profile.id)
-#         await get_raise_new(code)
-#     pass
-
-
 async def deactivation_bab_servers(db=AsyncSession, ):
     servers, code, indexes = await crud_server.get_active_servers(db=db)
 
@@ -198,7 +164,7 @@ async def deactivation_bab_servers(db=AsyncSession, ):
         if not res:
             update_data = ServerUpdate(is_active=False)
             obj, code, indexes = await crud_server.update_server(db=db, id=server.id, update_data=update_data)
-    return servers, 0, None
+    print(f"Отложенная задача по деактивации плохих серверов выполнена")
 
 
 # TODO Функция которая удаляет все ключи у которых нет профиля. Чистка мусорных неоплаченных ключей. Отложенная задача.

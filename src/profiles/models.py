@@ -27,7 +27,7 @@ class Profile(Base):
     used_bytes = Column(Integer)
     data_limit = Column(Integer)
 
-    date_end = Column(TIMESTAMP(timezone=True), default=datetime.utcnow())
+    date_end = Column(TIMESTAMP(timezone=False), default=datetime.now())
     is_active = Column(Boolean, default=False)
 
     account = relationship(Account, backref="profiles", lazy="joined")
