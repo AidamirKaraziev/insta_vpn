@@ -16,6 +16,7 @@ from account.router import router as router_account
 from profiles.router import router as router_profile
 from tools.router import router as router_tools
 from user.router import router as router_user, get_users_router
+from tasks.router import router as router_tasks
 
 from outline_apis.router import router as router_outline
 
@@ -69,6 +70,7 @@ app.include_router(router_account)
 app.include_router(router_profile)
 app.include_router(router_outline)
 app.include_router(router_tools)
+app.include_router(router_tasks)
 
 origins = ["*"]
 
@@ -101,7 +103,6 @@ app.add_middleware(
 async def startup_event():
     redis = aioredis.from_url(f"redis://{REDIS_HOST:{REDIS_PORT}}", encoding="utf8", decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
-    # await create_initial_data()
 
 
 # @app.get("/protected-route")

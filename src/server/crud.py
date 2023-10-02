@@ -9,8 +9,7 @@ from ping3 import ping
 
 
 async def check_server_availability(address: str):
-    result = ping(address)
-    if result:
+    if ping(address):
         return True
     return False
 

@@ -178,7 +178,7 @@ async def delete_profile(
 
 
 @router.get(
-            path="/deactivate-old",
+            path="/deactivate-old/",
             response_model=SingleEntityResponse,
             name='deactivate_old_profiles',
             description='Деактивировать неоплаченные профили'
@@ -193,7 +193,7 @@ async def deactivate_old_profiles(
 
 
 @router.get(
-            path="/used-bytes",
+            path="/used-bytes/",
             response_model=OkResponse,
             name='update_used_bytes_in_profile',
             description='Обновить used_bytes во всех профилях возвращает '
@@ -208,7 +208,7 @@ async def update_used_bytes_in_profile(
 
 
 @router.get(
-            path="/get-keys-without-a-profile",
+            path="/get-keys-without-a-profile/",
             response_model=ListOfEntityResponse,
             name='get_keys_without_a_profile',
             description='Получить ключи без профиля'
@@ -224,7 +224,7 @@ async def get_keys_without_a_profile(
 
 # delete old profiles
 @router.get(
-            path="/delete-old",
+            path="/delete-old/",
             response_model=SingleEntityResponse,
             name='delete_old',
             description='Удалить устаревшие профили!'
