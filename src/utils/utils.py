@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 import subprocess
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -124,8 +124,14 @@ async def deleting_an_outdated_profile(db: AsyncSession):
     deleted_profiles = []
     for profile in profiles:
         # calculation time
-        date_end = datetime.strptime(str(profile.date_end), '%Y-%m-%d %H:%M:%S').date()
-        days = datetime.date(datetime.utcnow()) - date_end
+        if isinstance(profile.date_end, datetime):
+            days = date.today() - profile.date_end.date()
+        else:
+            date_end = datetime.strptime(str(profile.date_end), '%Y-%m-%d %H:%M:%S').date()
+            days = date.today() - date_end
+
+        # date_end = datetime.strptime(str(profile.date_end), '%Y-%m-%d %H:%M:%S').date()
+        # days = datetime.date(datetime.utcnow()) - date_end
         seconds = days.total_seconds()
 
         if seconds >= PAYMENT_WAITING_TIME:
