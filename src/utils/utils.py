@@ -33,7 +33,7 @@ async def update_used_bytes_in_profiles(db: AsyncSession, skip: int = 0):
             client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
             keys = client.get_keys()
             for key in keys:
-                profile, code, indexes = await crud_profile.get_profile_by_key_id_server_id(db=db,                                                                         server_id=int(server.id))
+                profile, code, indexes = await crud_profile.get_profile_by_key_id_server_id(db=db, server_id=int(server.id))
                 if profile is not None:
                     update_data = ProfileUpdate(used_bytes=key.used_bytes)
                     obj, code, indexes = await crud_profile.update_profile(
@@ -124,7 +124,7 @@ async def deleting_an_outdated_profile(db: AsyncSession):
     deleted_profiles = []
     for profile in profiles:
         # calculation time
-        date_end = datetime.strptime(str(profile.date_end), '%Y-%m-%d %H:%M:%S.%f%z').date()
+        date_end = datetime.strptime(str(profile.date_end), '%Y-%m-%d %H:%M:%S.%f').date()
         days = datetime.date(datetime.utcnow()) - date_end
         seconds = days.total_seconds()
 
