@@ -124,7 +124,7 @@ async def deleting_an_outdated_profile(db: AsyncSession):
     deleted_profiles = []
     for profile in profiles:
         # calculation time
-        date_end = datetime.strptime(str(profile.date_end), '%Y-%m-%d %H:%M:%S.%f').date()
+        date_end = datetime.strptime(str(profile.date_end), '%Y-%m-%d %H:%M:%S').date()
         days = datetime.date(datetime.utcnow()) - date_end
         seconds = days.total_seconds()
 
