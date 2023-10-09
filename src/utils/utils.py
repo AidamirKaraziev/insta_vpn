@@ -28,19 +28,20 @@ def outline_error(ex: Exception):
 async def update_used_bytes_in_profiles(db: AsyncSession, skip: int = 0):
     servers, code, indexes = await crud_server.get_all_servers(db=db, skip=skip, limit=LIMIT_SERVERS)
     for server in servers:
+        client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
         try:
             # проверка серверов, если не достучались до сервера -> показать его
-            client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
             keys = client.get_keys()
+
             for key in keys:
-                profile, code, indexes = await crud_profile.get_profile_by_key_id_server_id(db=db,
-                                                                                            server_id=int(server.id))
+                profile, code, indexes = await crud_profile.get_profile_by_key_id_server_id(
+                    db=db, server_id=int(server.id), key_id=int(key.key_id))
                 if profile is not None:
                     update_data = ProfileUpdate(used_bytes=key.used_bytes)
                     obj, code, indexes = await crud_profile.update_profile(
                         db=db, update_data=update_data, id=profile.id)
         except Exception as ex:
-            pass
+            print(ex)  # возможно записывать ошибки в логи
     return None, 0, None
 
 
