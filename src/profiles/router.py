@@ -109,29 +109,22 @@ async def add_profile(
     await get_raise_new(code)
 
     client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
+    # TODO: попросить азамата сделать ревью кода
     try:
         # создать пир
         new_key = client.create_key()
-        print(new_key)
+        try:
+            client.add_data_limit(key_id=new_key.key_id, limit_bytes=FREE_TRAFFIC)
+        except Exception as ex:
+            await get_raise_new(code=outline_error(ex))
     except Exception as ex:
-        print(f"Ass {ex}")
-        return None, outline_error(ex), None
-
-    try:
-        client.add_data_limit(key_id=new_key.key_id, limit_bytes=FREE_TRAFFIC)
-        print(new_key.data_limit)
-    except:
-        print("Не вышло пацаны")
+        await get_raise_new(code=outline_error(ex))
     # сделать запись в базу данных
-    print(1)
     profile = ProfileCreate(account_id=account_id, server_id=server.id, key_id=new_key.key_id, name=name,
                             port=new_key.port, method=new_key.method, access_url=new_key.access_url,
                             used_bytes=new_key.used_bytes, data_limit=FREE_TRAFFIC)
-    print(2)
     profile, code, indexes = await crud_profile.add_profile(db=session, new_data=profile)
-    print(3)
     await get_raise_new(code)
-    print(4)
     return SingleEntityResponse(data=getting_profile(obj=profile))
 
 
