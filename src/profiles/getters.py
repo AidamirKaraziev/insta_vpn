@@ -16,6 +16,7 @@ def getting_profile(obj: ProfileGet) -> Optional[ProfileGet]:
         id=obj.id,
         account_id=obj.account_id,
         server_id=obj.server_id,
+        dynamic_key=obj.dynamic_key,
         key_id=obj.key_id,
         name=obj.name,
         port=obj.port,
