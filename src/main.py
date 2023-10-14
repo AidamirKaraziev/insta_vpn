@@ -18,6 +18,7 @@ from tools.router import router as router_tools
 from user.router import router as router_user, get_users_router
 
 from outline_apis.router import router as router_outline
+from profiles.dymamic import router as dynamic_router
 
 
 current_user = fastapi_users.current_user()
@@ -61,14 +62,13 @@ app.include_router(
     tags=["auth"],
 )
 
-# app.include_router(router_role)
-# app.include_router(router_user)
 app.include_router(router_server)
 app.include_router(router_tariff)
 app.include_router(router_account)
 app.include_router(router_profile)
 app.include_router(router_outline)
 app.include_router(router_tools)
+app.include_router(dynamic_router)
 
 origins = ["*"]
 

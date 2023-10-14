@@ -1,48 +1,37 @@
+import re
+
+from fastapi import APIRouter, Depends, HTTPException, FastAPI
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from database import get_async_session
+from profiles.crud import crud_profile
 from config import OUTLINE_USERS_GATEWAY, OUTLINE_SALT, CONN_NAME
 
+router = APIRouter()
 
-# class OutlineBackend:
-#     # инициализация
-#     def __init__(self, server: str = None):
-#         self.session = requests.Session()
-#         self.server = get_server(server)
-#         self.base_url = self.server["apiUrl"]
-#
-#     # создание ключа
-#     def _post(self, path: str, data=None):
-#         url = f"{self.base_url}/{path}"
-#         response = self.session.request(
-#             "POST", url, verify=False, headers=headers, data=data
-#         )
-#         if response.status_code == 201:
-#             return response.json()
-#
-#     # изменение ключа
-#     def _put(self, path: str, data=None):
-#         url = f"{self.base_url}/{path}"
-#         json_data = json.dumps(data)
-#         response = self.session.put(url, verify=False, headers=headers, data=json_data)
-#         if response.status_code == 204:
-#             return
-#
-#     def rename_key(self, key_id: Union[str, int], key_name: str):
-#         return self._put(f"access-keys/{key_id}/name", data={"name": key_name})
-#
-#     def create_new_key(self, name: str):
-#         response = self._post("access-keys")
-#         key_id = response.get("id")
-#         self.rename_key(key_id, name)
-#         return key_id
+
+@router.get(path='/conf/%s{hex_id}' % OUTLINE_SALT,
+            name='outline_connect',
+            description='Подключение Outline '
+            )
+async def handle_payment(
+        hex_id: str,
+        session: AsyncSession = Depends(get_async_session),
+):
+    profile_id = int(hex_id, 0)
+    response, code, indexes = await crud_profile.get_config_by_id(db=session, profile_id=profile_id)
+    access_url = re.findall(r'@(.*):', response.access_url)
+    d = {
+        "server": f"{access_url[0]}",
+        "server_port": f"{response.port}",
+        "password": f"{response.password}",
+        "method": f"{response.method}"
+    }
+    print(d)
+    return d
 
 
 def gen_outline_dynamic_link(profile_id: int):
     print(hex(profile_id))
     return f"{OUTLINE_USERS_GATEWAY}/conf/{OUTLINE_SALT}{hex(profile_id)}#{CONN_NAME}"
-
-
-# def get_config_by_id(profile_id: int) -> dict:
-#     conn = DataBaseConnector()
-#     user_id = str(user_id)
-#     result = dict(conn.select(CMD, (user_id, ))[0])
-#     return result
 
