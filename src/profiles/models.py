@@ -28,6 +28,7 @@ class Profile(Base):
     access_url = Column(String)
     used_bytes = Column(Integer)
     data_limit = Column(Integer)
+    password = Column(String)
 
     date_end = Column(TIMESTAMP, default=datetime.utcnow)
     is_active = Column(Boolean, default=False)

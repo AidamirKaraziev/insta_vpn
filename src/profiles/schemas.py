@@ -53,6 +53,7 @@ class ProfileUpdate(BaseModel):
     access_url: Optional[str]
     used_bytes: Optional[int]
     data_limit: Optional[int]
+    password: Optional[str]
 
     date_end: Optional[Timestamp]
     is_active: Optional[bool]

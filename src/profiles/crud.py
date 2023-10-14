@@ -124,11 +124,11 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         objects = await super().get_multi(db_session=db, skip=0, limit=LIMIT_PROFILES)
         return objects, 0, None
 
-    async def get_config_by_id(self, *, db: AsyncSession, profile_id: int, ):
+    async def get_config_by_id(self, *, db: AsyncSession, profile_id: int):
         profile, code, indexes = await self.get_profile_by_id(db=db, id=profile_id)
         if code != 0:
             return None, code, None
-        return profile
+        return profile, 0, None
 
 
 crud_profile = CrudProfile(Profile)
