@@ -1,5 +1,6 @@
 import logging
 from typing import Union
+import re
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -126,10 +127,9 @@ async def add_profile(
         await get_raise_new(code=outline_error(ex))
     # генерация ключа
     dynamic_key = gen_outline_dynamic_link(profile_id=profile.id)
-    print(dynamic_key)
     # обновление в профиль
-    update_profile = ProfileUpdate(key_id=new_key.key_id, port=new_key.port, method=new_key.method,
-                                   access_url=new_key.access_url, used_bytes=new_key.used_bytes,
+    update_profile = ProfileUpdate(key_id=new_key.key_id, port=new_key.port, password=new_key.password,
+                                   method=new_key.method, access_url=new_key.access_url, used_bytes=new_key.used_bytes,
                                    data_limit=FREE_TRAFFIC, dynamic_key=dynamic_key)
     profile, code, indexes = await crud_profile.update_profile(db=session, id=profile.id, update_data=update_profile)
     await get_raise_new(code)
@@ -289,11 +289,24 @@ async def replacement_profile(
     return SingleEntityResponse(data=getting_profile(obj=profile))
 
 
-@router.get('/conf/%s{hex_id}' % OUTLINE_SALT)
-async def handle_payment(hex_id: str):
+@router.get(path='/conf/%s{hex_id}' % OUTLINE_SALT,
+            name='outline_connect',
+            description='Подключение Outline '
+            )
+async def handle_payment(
+        hex_id: str,
+        session: AsyncSession = Depends(get_async_session),
+):
     profile_id = int(hex_id, 0)
-    response = crud_profile.get_config_by_id(profile_id)
-    return response
-
+    response, code, indexes = await crud_profile.get_config_by_id(db=session, profile_id=profile_id)
+    access_url = re.findall(r'@(.*):', response.access_url)
+    d = {
+        "server": f"{access_url[0]}",
+        "server_port": f"{response.port}",
+        "password": f"{response.password}",
+        "method": f"{response.method}"
+    }
+    print(d)
+    return d
 if __name__ == "__main__":
     logging.info('Running...')
