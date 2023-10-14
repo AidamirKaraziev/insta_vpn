@@ -32,7 +32,9 @@ async def handle_payment(
         'Access-Control-Allow-Origin': '*'
     }
     print(d)
-    return Response(content='ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTpRM3NDeTNscWZyaks4QnIzcFY4azVq@2.59.183.37:38354/?outline=1', media_type='text/plain')
+    return Response(content='ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTpRM3NDeTNscWZyaks4QnIzcFY4azVq@2.59.183.37:38354/?outline=1',
+                    media_type='text/plain',
+                    headers=headers)
 
 
 def gen_outline_dynamic_link(profile_id: int):
