@@ -1,6 +1,7 @@
 import re
 
 from fastapi import APIRouter, Depends, HTTPException, FastAPI
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_async_session
@@ -27,8 +28,11 @@ async def handle_payment(
         "password": f"{response.password}",
         "method": f"{response.method}"
     }
+    headers = {
+        'Access-Control-Allow-Origin': '*'
+    }
     print(d)
-    return d
+    return JSONResponse(content=d, headers=headers)
 
 
 def gen_outline_dynamic_link(profile_id: int):
