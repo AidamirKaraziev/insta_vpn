@@ -8,6 +8,8 @@ class ProfileGet(BaseModel):
     account_id: int
     server_id: int
 
+    dynamic_key: str
+
     key_id: int
     name: Optional[str]
     port: Optional[int]
@@ -24,7 +26,9 @@ class ProfileCreate(BaseModel):
     account_id: int
     server_id: int
 
-    key_id: int
+    dynamic_key: Optional[str]
+
+    key_id: Optional[int]
     name: Optional[str]
     port: Optional[int]
     method: Optional[str]
@@ -39,6 +43,8 @@ class ProfileCreate(BaseModel):
 class ProfileUpdate(BaseModel):
     account_id: Optional[int]
     server_id: Optional[int]
+
+    dynamic_key: Optional[str]
 
     key_id: Optional[int]
     name: Optional[str]

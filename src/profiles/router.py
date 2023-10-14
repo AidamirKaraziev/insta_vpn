@@ -1,14 +1,16 @@
 import logging
+from typing import Union
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from config import FREE_TRAFFIC, LIMIT_PROFILES
+from config import FREE_TRAFFIC, LIMIT_PROFILES, OUTLINE_SALT
 from core.raise_template import get_raise_new
 from core.response import SingleEntityResponse, ListOfEntityResponse, OkResponse
 from database import get_async_session
 from outline.outline.outline_vpn.outline_vpn import OutlineVPN
 from profiles.crud import crud_profile
+from profiles.dymamic import gen_outline_dynamic_link
 from profiles.getters import getting_profile
 from profiles.schemas import ProfileCreate, ProfileUpdate, ProfileActivate
 from server.crud import crud_server
@@ -110,8 +112,11 @@ async def add_profile(
 
     client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
     # TODO: попросить азамата сделать ревью кода
+    # создание профиля
+    data_profile = ProfileCreate(account_id=account_id, server_id=server.id, name=name)
+    profile, code, indexes = await crud_profile.add_profile(db=session, new_data=data_profile)
+    # создание ключа
     try:
-        # создать пир
         new_key = client.create_key()
         try:
             client.add_data_limit(key_id=new_key.key_id, limit_bytes=FREE_TRAFFIC)
@@ -119,11 +124,14 @@ async def add_profile(
             await get_raise_new(code=outline_error(ex))
     except Exception as ex:
         await get_raise_new(code=outline_error(ex))
-    # сделать запись в базу данных
-    profile = ProfileCreate(account_id=account_id, server_id=server.id, key_id=new_key.key_id, name=name,
-                            port=new_key.port, method=new_key.method, access_url=new_key.access_url,
-                            used_bytes=new_key.used_bytes, data_limit=FREE_TRAFFIC)
-    profile, code, indexes = await crud_profile.add_profile(db=session, new_data=profile)
+    # генерация ключа
+    dynamic_key = gen_outline_dynamic_link(profile_id=profile.id)
+    print(dynamic_key)
+    # обновление в профиль
+    update_profile = ProfileUpdate(key_id=new_key.key_id, port=new_key.port, method=new_key.method,
+                                   access_url=new_key.access_url, used_bytes=new_key.used_bytes,
+                                   data_limit=FREE_TRAFFIC, dynamic_key=dynamic_key)
+    profile, code, indexes = await crud_profile.update_profile(db=session, id=profile.id, update_data=update_profile)
     await get_raise_new(code)
     return SingleEntityResponse(data=getting_profile(obj=profile))
 
@@ -280,6 +288,12 @@ async def replacement_profile(
     await get_raise_new(code)
     return SingleEntityResponse(data=getting_profile(obj=profile))
 
+
+@router.get('/conf/%s{hex_id}' % OUTLINE_SALT)
+async def handle_payment(hex_id: str):
+    profile_id = int(hex_id, 0)
+    response = crud_profile.get_config_by_id(profile_id)
+    return response
 
 if __name__ == "__main__":
     logging.info('Running...')

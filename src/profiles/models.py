@@ -19,6 +19,8 @@ class Profile(Base):
     account_id = Column(BigInteger, ForeignKey(Account.id, ondelete="SET NULL"))
     server_id = Column(Integer, ForeignKey(Server.id, ondelete="SET NULL"))
 
+    dynamic_key = Column(String, unique=True)
+
     key_id = Column(Integer)
     name = Column(String)
     port = Column(Integer)
