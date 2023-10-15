@@ -13,6 +13,12 @@ services:
       - redis
     restart: always
 
+  web:
+    build: nginx
+    ports:
+      - 80:80
+      - 443:443
+
   redis:
     image: redis:7
     container_name: redis_insta
