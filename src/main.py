@@ -23,11 +23,7 @@ from profiles.dymamic import router as dynamic_router
 
 current_user = fastapi_users.current_user()
 
-app = FastAPI(
-    title="Insta VPN",
-    ssl_keyfile="/certificates/apache-selfsigned.key",
-    ssl_certfile="/certificates/apache-selfsigned.crt"
-)
+app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.include_router(
