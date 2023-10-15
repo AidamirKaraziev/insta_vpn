@@ -23,7 +23,7 @@ from profiles.dymamic import router as dynamic_router
 
 current_user = fastapi_users.current_user()
 
-app = FastAPI()
+app = FastAPI(title="Insta VPN")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.include_router(
