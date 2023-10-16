@@ -1,5 +1,4 @@
 import logging
-from typing import Union
 import re
 
 from fastapi import APIRouter, Depends, HTTPException
