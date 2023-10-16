@@ -6,11 +6,8 @@ from sqlalchemy import pool
 from alembic import context
 
 from config import DB_HOST, DB_PORT, DB_USER, DB_NAME, DB_PASS
-# from old_code.role.models import metadata as metadata_role
-# from old_code.auth.models import metadata as metadata_auth
 from tariff.models import metadata as metadata_tariff
 from account.models import metadata as metadata_account
-# from payments.models import metadata as metadata_payments
 from server.models import metadata as metadata_server
 from profiles.models import metadata as metadata_profile
 from auth.models import metadata as metadata_user

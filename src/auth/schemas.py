@@ -3,8 +3,6 @@ from typing import Optional
 
 from fastapi_users import schemas
 
-# from old_code.role.schemas import RoleGet
-
 
 class UserRead(schemas.BaseUser[int]):
     id: Optional[int]
@@ -14,7 +12,6 @@ class UserRead(schemas.BaseUser[int]):
     email: Optional[str]
     phone_number: Optional[str]
     registered_at: Optional[Date]
-    # role_id: Optional[RoleGet]
     is_active: bool = True
     is_superuser: bool = False
     is_verified: bool = False
@@ -30,7 +27,6 @@ class UserCreate(schemas.BaseUserCreate):
     phone_number: str
 
     password: str
-    # role_id: int
     is_active: Optional[bool] = True
     is_superuser: Optional[bool] = False
     is_verified: Optional[bool] = False
@@ -51,7 +47,6 @@ class UserReadOld(schemas.BaseUser[int]):
     email: Optional[str]
     phone_number: Optional[str]
     registered_at: Optional[Date]
-    # role_id: Optional[int]
     is_active: bool = True
     is_superuser: bool = False
     is_verified: bool = False
