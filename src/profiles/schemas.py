@@ -5,61 +5,36 @@ from pydantic import BaseModel, Field
 
 class ProfileGet(BaseModel):
     id: int
+    name: str
     account_id: int
-    server_id: int
 
     dynamic_key: str
-
-    key_id: int
-    name: Optional[str]
-    port: Optional[int]
-    method: Optional[str]
-    access_url: Optional[str]
-    used_bytes: Optional[int]
-    data_limit: Optional[int]
+    static_key_id: Optional[int]
 
     date_end: Optional[str]
+    used_bytes: Optional[int]
     is_active: Optional[bool]
 
 
 class ProfileCreate(BaseModel):
+    name: str
     account_id: int
-    server_id: int
 
-    dynamic_key: Optional[str]
-
-    key_id: Optional[int]
-    name: Optional[str]
-    port: Optional[int]
-    method: Optional[str]
-    access_url: Optional[str]
-    used_bytes: Optional[int]
-    data_limit: Optional[int]
+    dynamic_key: str
 
     date_end: Optional[Timestamp]
     is_active: Optional[bool]
 
 
 class ProfileUpdate(BaseModel):
-    account_id: Optional[int]
-    server_id: Optional[int]
-
-    dynamic_key: Optional[str]
-
-    key_id: Optional[int]
-    name: Optional[str]
-    port: Optional[int]
-    method: Optional[str]
-    access_url: Optional[str]
-    used_bytes: Optional[int]
-    data_limit: Optional[int]
-    password: Optional[str]
+    static_key_id: Optional[int]
 
     date_end: Optional[Timestamp]
+    used_bytes: Optional[int]
     is_active: Optional[bool]
 
 
 class ProfileActivate(BaseModel):
-    data_limit: int = None
+    static_key_id: Optional[int]
     date_end: Optional[Timestamp]
     is_active: Optional[bool] = True

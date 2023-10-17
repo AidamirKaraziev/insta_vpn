@@ -11,6 +11,7 @@ from account.models import metadata as metadata_account
 from server.models import metadata as metadata_server
 from profiles.models import metadata as metadata_profile
 from auth.models import metadata as metadata_user
+from static_key.models import metadata as metadata_static_key
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -31,7 +32,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = [metadata_tariff, metadata_server, metadata_account,
+target_metadata = [metadata_tariff, metadata_server, metadata_account, metadata_static_key,
                    metadata_profile, metadata_user]
 
 # other values from the config, defined by the needs of env.py,

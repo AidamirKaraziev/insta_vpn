@@ -14,6 +14,6 @@ class Server(Base):
     cert_sha256 = Column(String)
     max_client = Column(Integer)
     fact_client = Column(Integer)
-    is_active = Column(Boolean, default=True)
     address = Column(String, unique=True)
     port = Column(String)
+    is_active = Column(Boolean, default=True)

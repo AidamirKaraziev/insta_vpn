@@ -60,7 +60,7 @@ services:
       - redis
       - celery
     ports:
-      - 8889:5555
+      - 8890:5555
     restart: always
   pgadmin:
     image: dpage/pgadmin4

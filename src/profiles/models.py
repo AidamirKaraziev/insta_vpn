@@ -1,40 +1,29 @@
 from datetime import datetime
 
-from sqlalchemy import Table, Column, Integer, String, TIMESTAMP, ForeignKey, JSON, Boolean, MetaData, DateTime, Date, \
-    UniqueConstraint, BigInteger
+from sqlalchemy import Column, String, TIMESTAMP, ForeignKey, Boolean, MetaData, BigInteger
 from sqlalchemy.orm import relationship
 
 from account.models import Account
 from database import Base
-from server.models import Server
+from static_key.models import StaticKey
 
 metadata = MetaData()
 
 
 class Profile(Base):
     __tablename__ = "profile"
-
     metadata = metadata
+
     id = Column(BigInteger, primary_key=True)
+    name = Column(String)
     account_id = Column(BigInteger, ForeignKey(Account.id, ondelete="SET NULL"))
-    server_id = Column(Integer, ForeignKey(Server.id, ondelete="SET NULL"))
 
     dynamic_key = Column(String, unique=True)
-
-    key_id = Column(Integer)
-    name = Column(String)
-    port = Column(Integer)
-    method = Column(String)
-    access_url = Column(String)
-    used_bytes = Column(Integer)
-    data_limit = Column(Integer)
-    password = Column(String)
+    static_key_id = Column(BigInteger, ForeignKey(StaticKey.id, ondelete="SET NULL"))
 
     date_end = Column(TIMESTAMP, default=datetime.utcnow)
+    used_bytes = Column(BigInteger)
     is_active = Column(Boolean, default=False)
 
     account = relationship(Account, backref="profiles", lazy="joined")
-    server = relationship(Server, backref="profiles", lazy="joined")
-    __table_args__ = (UniqueConstraint("server_id", "key_id",
-                                       name='_server_key_uc'),
-                      )
+    static_key = relationship(StaticKey, backref="profiles", lazy="joined")
