@@ -8,3 +8,4 @@ comand.txt
 dump.rdb
 задачи.txt
 /block_schemas/*
+.env-dev-v2
