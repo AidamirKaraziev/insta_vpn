@@ -132,4 +132,5 @@ def entity_error_handler(request: Request, exc: ListOfEntityError):
     )
 
 
-
+def exception_schemas(ex: Exception):
+    return {"num": 403, "message": f"{ex}"}
