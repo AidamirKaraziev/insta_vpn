@@ -19,7 +19,7 @@ class Profile(Base):
     account_id = Column(BigInteger, ForeignKey(Account.id, ondelete="SET NULL"))
 
     dynamic_key = Column(String, unique=True)
-    static_key_id = Column(BigInteger, ForeignKey(StaticKey.id, ondelete="SET NULL"))
+    static_key_id = Column(BigInteger, ForeignKey(StaticKey.id, ondelete="SET NULL"), unique=True)
 
     date_end = Column(TIMESTAMP, default=datetime.utcnow)
     used_bytes = Column(BigInteger)
