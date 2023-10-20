@@ -12,7 +12,7 @@ class StaticKey(Base):
 
     metadata = metadata
     id = Column(BigInteger, primary_key=True)
-    server_id = Column(Integer, ForeignKey(Server.id, ondelete="SET NULL"))
+    server_id = Column(Integer, ForeignKey(Server.id, ondelete="CASCADE"))
 
     key_id = Column(Integer)
     name = Column(String)
