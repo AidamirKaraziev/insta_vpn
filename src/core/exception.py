@@ -32,7 +32,3 @@ class ListOfEntityError(ValueError):
         self.errors = errors
         self.description = description
         self.http_status = http_status
-
-
-async def exception_schemas(ex: Exception):
-    return {"num": 403, "message": f"{ex}"}

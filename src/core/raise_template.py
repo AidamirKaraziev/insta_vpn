@@ -39,3 +39,7 @@ async def get_raise(num: int, message: str):
 async def get_raise_new(code):
     if code != 0:
         await get_raise(num=code["num"], message=code["message"])
+
+
+async def raise_schemas(ex: Exception):
+    return {"num": 403, "message": f"{ex}"}
