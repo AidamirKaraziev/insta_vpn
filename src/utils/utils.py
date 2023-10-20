@@ -10,6 +10,7 @@ from profiles.schemas import ProfileUpdate
 from server.crud import crud_server, check_server_availability
 from server.schemas import ServerUpdate
 
+
 """
 Какие функции в утилитах?
 1. Функция обновления байтов
@@ -19,10 +20,6 @@ from server.schemas import ServerUpdate
 5. Функция установки максимального количества клиентов на сервер
 6. Функция вывода неработающих серверов 
 """
-
-
-def outline_error(ex: Exception):
-    return {"num": 403, "message": f"{ex}"}
 
 
 async def update_used_bytes_in_profiles(db: AsyncSession, skip: int = 0):
