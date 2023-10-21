@@ -1,15 +1,14 @@
-from datetime import datetime
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from account.crud import crud_account
-from config import FREE_TRAFFIC, LIMIT_PROFILES
+from config import OUTLINE_USERS_GATEWAY, CONN_NAME, OUTLINE_SALT
 from core.base_crud import CRUDBase
-from outline.outline.outline_vpn.outline_vpn import OutlineVPN
 from profiles.models import Profile
-from profiles.schemas import ProfileCreate, ProfileUpdate, ProfileActivate
-from server.crud import crud_server
+from profiles.schemas import ProfileCreate, ProfileUpdate
+from cryptography.fernet import Fernet
+
+from static_key.crud import crud_static_key
 
 
 class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
@@ -37,57 +36,36 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         objects = await super().get_multi(db_session=db, skip=skip, limit=limit)
         return objects, 0, None
 
-    async def add_profile(self, *, db: AsyncSession, new_data: ProfileCreate):
-        obj, code, indexes = await crud_account.get_account_by_id(db=db, id=new_data.account_id)
+    async def add_profile(self, *, db: AsyncSession, account_id: int, name: str):
+        obj, code, indexes = await crud_account.get_account_by_id(db=db, id=account_id)
         if code != 0:
             return None, code, None
-        obj, code, indexes = await crud_server.get_server_by_id(db=db, id=new_data.server_id)
-        if code != 0:
-            return None, code, None
+        new_data = ProfileCreate(account_id=account_id, name=name)
         objects = await super().create(db_session=db, obj_in=new_data)
         return objects, 0, None
 
     async def update_profile(self, *, db: AsyncSession, update_data: ProfileUpdate, id: int):
-        # check id
-        query = select(self.model).where(self.model.id == id)
-        resp = await db.execute(query)
-        this_obj = resp.scalar_one_or_none()
-        if this_obj is None:
-            return None, self.not_found_id, None
-        objects = await super().update(db_session=db, obj_current=this_obj, obj_new=update_data)
-        return objects, 0, None
-
-    async def delete_profile(self, *, db: AsyncSession, id: int):
-        obj, code, indexes = await self.get_profile_by_id(db=db, id=id)
+        profile, code, indexes = await self.get_profile_by_id(db=db, id=id)
         if code != 0:
             return None, code, None
-        obj = await super().delete(db=db, id=id)
-        return obj, 0, None
+        objects = await super().update(db_session=db, obj_current=profile, obj_new=update_data)
+        return objects, 0, None
 
-    async def activate_profile(self, *, db: AsyncSession, activate_data: ProfileActivate, id: int):
+    async def activate_profile(self, *, db: AsyncSession, activate_data: ProfileUpdate, id: int):
         # check id
         profile, code, indexes = await self.get_profile_by_id(db=db, id=id)
         if code != 0:
             return None, code, None
+        dynamic_key = await self.gen_outline_dynamic_link(profile_id=id)
+        static_key, code, indexes = await crud_static_key.get_good_key(db=db)
+        if code != 0:
+            return None, code, None
+        activate_data.is_active = True
+        activate_data.dynamic_key = dynamic_key
+        activate_data.static_key_id = static_key.id
+
         objects = await super().update(db_session=db, obj_current=profile, obj_new=activate_data)
         return objects, 0, None
-
-    # перестраховка проходится по базе данных и активирует все оплаченные аккаунты
-    async def activate_paid_profiles(self, db: AsyncSession, skip: int = 0):
-        # get all profiles
-        profiles, code, indexes = await self.get_all_profiles(db=db, skip=skip, limit=LIMIT_PROFILES)
-        for profile in profiles:
-            if profile.date_end > datetime.date(datetime.now()):
-                # add data_limit
-                server, code, indexes = await crud_server.get_server_by_id(db=db, id=profile.server_id)
-                try:
-                    client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
-                    client.delete_data_limit(key_id=profile.key_id)
-                except Exception as ex:
-                    return None, self.outline_error(ex=ex), None
-                update_data = ProfileUpdate(data_limit=None, is_active=True)
-                obj, code, indexes = await self.update_profile(db=db, update_data=update_data, id=profile.id)
-        return profiles, code, indexes
 
     async def get_profile_by_key_id_server_id(self, *, db: AsyncSession, key_id: int, server_id: int):
         query = select(self.model).where(self.model.key_id == key_id, self.model.server_id == server_id)
@@ -112,23 +90,11 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
                 return f"Профиль {num}", 0, None
         return f"Профиль {num}", 0, None
 
-    async def get_profiles_by_server_id(self, *, db: AsyncSession, id: int):
-        server, code, indexes = await crud_server.get_server_by_id(db=db, id=id)
-        if code != 0:
-            return None, code, None
-        query = select(self.model).where(self.model.server_id == id)
-        response = await db.execute(query)
-        obj = response.scalars().all()
-        if response is None:
-            return None, self.not_found_by_server_id, None
-        objects = await super().get_multi(db_session=db, skip=0, limit=LIMIT_PROFILES)
-        return objects, 0, None
-
-    async def get_config_by_id(self, *, db: AsyncSession, profile_id: int):
-        profile, code, indexes = await self.get_profile_by_id(db=db, id=profile_id)
-        if code != 0:
-            return None, code, None
-        return profile, 0, None
+    async def gen_outline_dynamic_link(self, profile_id: int):
+        hex_id = str(profile_id).encode()
+        f = Fernet(OUTLINE_SALT.encode())
+        encrypted_data = f.encrypt(hex_id)
+        return f"{OUTLINE_USERS_GATEWAY}/conf/{encrypted_data.decode()}#{CONN_NAME}"
 
 
 crud_profile = CrudProfile(Profile)

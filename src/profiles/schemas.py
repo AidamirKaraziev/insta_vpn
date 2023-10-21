@@ -1,14 +1,14 @@
-from sqlite3 import Timestamp, Date
-from typing import Optional, Any
-from pydantic import BaseModel, Field
+from sqlite3 import Timestamp
+from typing import Optional
+from pydantic import BaseModel
 
 
 class ProfileGet(BaseModel):
     id: int
-    name: str
+    name: Optional[str]
     account_id: int
 
-    dynamic_key: str
+    dynamic_key: Optional[str]
     static_key_id: Optional[int]
 
     date_end: Optional[str]
@@ -20,21 +20,14 @@ class ProfileCreate(BaseModel):
     name: str
     account_id: int
 
-    dynamic_key: str
-
-    date_end: Optional[Timestamp]
-    is_active: Optional[bool]
+    dynamic_key: Optional[str]
+    is_active: Optional[bool] = False
 
 
 class ProfileUpdate(BaseModel):
+    dynamic_key: Optional[str]
     static_key_id: Optional[int]
 
     date_end: Optional[Timestamp]
     used_bytes: Optional[int]
     is_active: Optional[bool]
-
-
-class ProfileActivate(BaseModel):
-    static_key_id: Optional[int]
-    date_end: Optional[Timestamp]
-    is_active: Optional[bool] = True

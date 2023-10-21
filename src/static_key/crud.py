@@ -6,15 +6,16 @@ from core.raise_template import raise_schemas
 
 from outline.outline.outline_vpn.outline_vpn import OutlineVPN
 from server.crud import crud_server
-from static_key.models import StaticKey
 from static_key.schemas import StaticKeyUpdate, StaticKeyCreate
+from static_key.models import StaticKey
+from profiles.models import Profile
 
 
 class CrudStaticKey(CRUDBase[StaticKey, StaticKeyCreate, StaticKeyUpdate]):
     obj_name = "StaticKey"
     not_found_id = {"num": 404, "message": f"Not found {obj_name} with this id"}
-    # not_found_by_key_id_server_id = {"num": 404, "message": f"Not found a {obj_name} with this key_id and server_id"}
     not_found_by_server_id = {"num": 404, "message": f"Not found a {obj_name + 's'} with this server_id"}
+    no_keys_available = {"num": 404, "message": f"No {obj_name + 's'} available"}
 
     async def get_all_static_keys(self, *, db: AsyncSession, skip: int, limit: int):
         objects = await super().get_multi(db_session=db, skip=skip, limit=limit)
@@ -62,6 +63,16 @@ class CrudStaticKey(CRUDBase[StaticKey, StaticKeyCreate, StaticKeyUpdate]):
                 return None, code, None
         keys, code, indexes = await self.get_static_key_by_id(db=db, id=server_id)
         return keys, 0, None
+
+    async def get_good_key(self, *, db: AsyncSession):
+        res = select(self.model).select_from(self.model).outerjoin(Profile).where(
+            Profile.static_key_id == None, self.model.is_active == True).limit(1)
+        response = await db.execute(res)
+        obj = response.scalar()
+        if not obj:
+            # TODO сделать отправку письма телеграм бота или какая-то другая логика. ВАЖНО!!!
+            return None, self.no_keys_available, None
+        return obj, 0, None
 
 
 crud_static_key = CrudStaticKey(StaticKey)
