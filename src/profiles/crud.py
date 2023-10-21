@@ -92,7 +92,7 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
 
     async def gen_outline_dynamic_link(self, profile_id: int):
         hex_id = str(profile_id).encode()
-        f = Fernet(OUTLINE_SALT.encode())
+        f = Fernet(bytes(OUTLINE_SALT.encode()))
         encrypted_data = f.encrypt(hex_id)
         return f"{OUTLINE_USERS_GATEWAY}/conf/{encrypted_data.decode()}#{CONN_NAME}"
 
