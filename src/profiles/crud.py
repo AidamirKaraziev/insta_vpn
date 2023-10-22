@@ -96,5 +96,20 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         encrypted_data = f.encrypt(hex_id)
         return f"{OUTLINE_USERS_GATEWAY}/conf/{encrypted_data.decode()}#{CONN_NAME}"
 
+    async def replacement_key(self, *, db: AsyncSession, profile_id: int):
+        profile, code, indexes = await self.get_profile_by_id(db=db, id=profile_id)
+        if code != 0:
+            return None, code, None
+        static_key, code, indexes = await crud_static_key.get_replacement_key(
+            db=db, static_key_id=profile.static_key_id)
+        if code != 0:
+            return None, code, None
+        # update
+        update_data = ProfileUpdate(static_key_id=static_key.id)
+        profile, code, indexes = await self.update_profile(db=db, id=profile_id, update_data=update_data)
+        if code != 0:
+            return None, code, None
+        return profile, 0, None
+
 
 crud_profile = CrudProfile(Profile)

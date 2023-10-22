@@ -74,5 +74,19 @@ class CrudStaticKey(CRUDBase[StaticKey, StaticKeyCreate, StaticKeyUpdate]):
             return None, self.no_keys_available, None
         return obj, 0, None
 
+    async def get_replacement_key(self, *, db: AsyncSession, static_key_id: int):
+        static_key, code, indexes = await self.get_static_key_by_id(db=db, id=static_key_id)
+        if code != 0:
+            return None, code, None
+
+        res = select(self.model).select_from(self.model).outerjoin(Profile).where(
+            Profile.static_key_id == None, self.model.is_active == True,
+            self.model.server_id != static_key.server_id).limit(1)
+        response = await db.execute(res)
+        obj = response.scalar()
+        if not obj:
+            return None, self.no_keys_available, None
+        return obj, 0, None
+
 
 crud_static_key = CrudStaticKey(StaticKey)
