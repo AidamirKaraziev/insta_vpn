@@ -77,32 +77,32 @@ class CrudServer(CRUDBase[Server, ServerCreate, ServerUpdate]):
         objects = await super().update(db_session=db, obj_current=this_obj, obj_new=update_data)
         return objects, 0, None
 
-    # async def get_replacement_server(self, *, db: AsyncSession, server_id: int):
-    #     query = select(self.model).where(self.model.id != server_id, self.model.is_active != False)
-    #     response = await db.execute(query)
-    #     good_servers = response.scalars().all()
-    #     if not good_servers:
-    #         return None, self.no_good_server, None
-    #     elif good_servers is not None:
-    #         for server in good_servers:
-    #             if await check_server_availability(server.address):
-    #                 try:
-    #                     client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
-    #                     fact_client = len(client.get_keys())
-    #                     if fact_client <= server.max_client:
-    #                         return server, 0, None
-    #                 except:
-    #                     pass
-    #             else:
-    #                 pass
-    #         return None, self.no_good_server, None
-
     async def delete_server(self, *, db: AsyncSession, id: int):
         obj, code, indexes = await self.get_server_by_id(db=db, id=id)
         if code != 0:
             return None, code, None
         obj = await super().delete(db=db, id=id)
         return obj, 0, None
+
+    async def deactivate_server(self, *, db: AsyncSession, id: int):
+        server, code, indexes = await self.get_server_by_id(db=db, id=id)
+        if code != 0:
+            return None, code, None
+        update_data = ServerUpdate(is_active=False)
+        server, code, indexes = await self.update_server(db=db, id=id, update_data=update_data)
+        if code != 0:
+            return None, code, None
+        return server, 0, None
+
+    async def activate_server(self, *, db: AsyncSession, id: int):
+        server, code, indexes = await self.get_server_by_id(db=db, id=id)
+        if code != 0:
+            return None, code, None
+        update_data = ServerUpdate(is_active=True)
+        server, code, indexes = await self.update_server(db=db, id=id, update_data=update_data)
+        if code != 0:
+            return None, code, None
+        return server, 0, None
 
 
 crud_server = CrudServer(Server)

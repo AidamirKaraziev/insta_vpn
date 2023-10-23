@@ -55,11 +55,6 @@ async def get_server(
     return SingleEntityResponse(data=getting_server(obj=obj))
 
 
-# TODO deactivate server and key by server_id -> SERVER
-# TODO activate server and keys by server_id -> SERVER
-# TODO remove server and keys by server_id
-
-
 @router.post(path="/",
              response_model=SingleEntityResponse,
              name='add_server_create_keys',
@@ -96,7 +91,22 @@ async def update_server(
     return SingleEntityResponse(data=getting_server(obj=obj))
 
 
-# TODO check and refactor
+@router.delete(path="/{server_id}",
+               response_model=SingleEntityResponse,
+               name='delete_server',
+               description='Удалить сервер и все связанные с ним ключи'
+               )
+async def delete_server(
+        server_id: int,
+        user: User = Depends(current_active_superuser),
+        session: AsyncSession = Depends(get_async_session),
+):
+    obj, code, indexes = await crud_server.delete_server(db=session, id=server_id)
+    await get_raise_new(code)
+    return OkResponse()
+
+
+# TODO change to -> how mach used key
 @router.get(path="/update-fact-client/",
             response_model=SingleEntityResponse,
             name='update_fact_client',
@@ -111,17 +121,36 @@ async def update_fact_client(
     return SingleEntityResponse(data=servers)
 
 
-@router.delete(path="/{server_id}",
-               response_model=SingleEntityResponse,
-               name='delete_server',
-               description='Удалить сервер и все связанные с ним ключи'
-               )
-async def delete_server(
+@router.get(path="/deactivate/{server_id}",
+            response_model=SingleEntityResponse,
+            name='deactivate_server_and_keys',
+            description='Деактивация сервера и всех его ключей'
+            )
+async def deactivate_server_and_keys(
         server_id: int,
         user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
-    obj, code, indexes = await crud_server.delete_server(db=session, id=server_id)
+    obj, code, indexes = await crud_server.deactivate_server(db=session, id=server_id)
+    await get_raise_new(code)
+    keys, code, indexes = await crud_static_key.deactivate_keys_by_server_id(db=session, server_id=server_id)
+    await get_raise_new(code)
+    return OkResponse()
+
+
+@router.get(path="/activate/{server_id}",
+            response_model=SingleEntityResponse,
+            name='activate_server_and_keys',
+            description='Активация сервера и всех его ключей'
+            )
+async def deactivate_server_and_keys(
+        server_id: int,
+        user: User = Depends(current_active_superuser),
+        session: AsyncSession = Depends(get_async_session),
+):
+    obj, code, indexes = await crud_server.activate_server(db=session, id=server_id)
+    await get_raise_new(code)
+    keys, code, indexes = await crud_static_key.activate_keys_by_server_id(db=session, server_id=server_id)
     await get_raise_new(code)
     return OkResponse()
 

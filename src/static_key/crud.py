@@ -88,5 +88,31 @@ class CrudStaticKey(CRUDBase[StaticKey, StaticKeyCreate, StaticKeyUpdate]):
             return None, self.no_keys_available, None
         return obj, 0, None
 
+    async def deactivate_keys_by_server_id(self, db: AsyncSession, server_id: int):
+        server, code, indexes = await crud_server.get_server_by_id(db=db, id=server_id)
+        if code != 0:
+            return None, code, None
+        keys, code, indexes = await self.get_static_keys_by_server_id(db=db, server_id=server_id)
+        for key in keys:
+            update_data = StaticKeyUpdate(is_active=False)
+            await super().update(db_session=db, obj_current=key, obj_new=update_data)
+        keys, code, indexes = await self.get_static_keys_by_server_id(db=db, server_id=server_id)
+        if code != 0:
+            return None, code, None
+        return keys, 0, None
+
+    async def activate_keys_by_server_id(self, db: AsyncSession, server_id: int):
+        server, code, indexes = await crud_server.get_server_by_id(db=db, id=server_id)
+        if code != 0:
+            return None, code, None
+        keys, code, indexes = await self.get_static_keys_by_server_id(db=db, server_id=server_id)
+        for key in keys:
+            update_data = StaticKeyUpdate(is_active=True)
+            await super().update(db_session=db, obj_current=key, obj_new=update_data)
+        keys, code, indexes = await self.get_static_keys_by_server_id(db=db, server_id=server_id)
+        if code != 0:
+            return None, code, None
+        return keys, 0, None
+
 
 crud_static_key = CrudStaticKey(StaticKey)
