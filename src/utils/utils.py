@@ -170,6 +170,3 @@ async def deactivation_bab_servers(db=AsyncSession, ):
             update_data = ServerUpdate(is_active=False)
             obj, code, indexes = await crud_server.update_server(db=db, id=server.id, update_data=update_data)
     print(f"Отложенная задача по деактивации плохих серверов выполнена")
-
-
-# TODO Функция которая удаляет все ключи у которых нет профиля. Чистка мусорных неоплаченных ключей. Отложенная задача.

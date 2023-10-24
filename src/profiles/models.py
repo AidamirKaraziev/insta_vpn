@@ -2,6 +2,8 @@ from datetime import datetime
 
 from sqlalchemy import Column, String, TIMESTAMP, ForeignKey, Boolean, MetaData, BigInteger
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
 from account.models import Account
 from database import Base
@@ -14,7 +16,7 @@ class Profile(Base):
     __tablename__ = "profile"
     metadata = metadata
 
-    id = Column(BigInteger, primary_key=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String)
     account_id = Column(BigInteger, ForeignKey(Account.id, ondelete="SET NULL"))
 

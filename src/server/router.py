@@ -153,6 +153,7 @@ async def deactivate_server_and_keys(
     keys, code, indexes = await crud_static_key.activate_keys_by_server_id(db=session, server_id=server_id)
     await get_raise_new(code)
     return OkResponse()
+# TODO отложенная задача, которая отправляет уведомление если количество хороших ключей опускается до 100 шт
 
 
 if __name__ == "__main__":

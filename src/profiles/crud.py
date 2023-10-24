@@ -1,12 +1,14 @@
+from uuid import uuid4
+
+from pydantic import UUID4
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from account.crud import crud_account
-from config import OUTLINE_USERS_GATEWAY, CONN_NAME, OUTLINE_SALT
+from config import OUTLINE_USERS_GATEWAY, CONN_NAME
 from core.base_crud import CRUDBase
 from profiles.models import Profile
 from profiles.schemas import ProfileCreate, ProfileUpdate
-from cryptography.fernet import Fernet
 
 from static_key.crud import crud_static_key
 
@@ -17,8 +19,8 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
     not_found_by_key_id_server_id = {"num": 404, "message": f"Not found a {obj_name} with this key_id and server_id"}
     not_found_by_server_id = {"num": 404, "message": f"Not found a {obj_name + 's'} with this server_id"}
 
-    async def get_profile_by_id(self, *, db: AsyncSession, id: int):
-        obj = await super().get(db=db, id=id)
+    async def get_profile_by_id(self, *, db: AsyncSession, id: UUID4):
+        obj = await super().get_by_uuid(db=db, id=id)
         if obj is None:
             return None, self.not_found_id, None
         return obj, 0, None
@@ -37,21 +39,22 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         return objects, 0, None
 
     async def add_profile(self, *, db: AsyncSession, account_id: int, name: str):
+        uuid_value = uuid4()
         obj, code, indexes = await crud_account.get_account_by_id(db=db, id=account_id)
         if code != 0:
             return None, code, None
-        new_data = ProfileCreate(account_id=account_id, name=name)
+        new_data = ProfileCreate(id=uuid_value, account_id=account_id, name=name)
         objects = await super().create(db_session=db, obj_in=new_data)
         return objects, 0, None
 
-    async def update_profile(self, *, db: AsyncSession, update_data: ProfileUpdate, id: int):
+    async def update_profile(self, *, db: AsyncSession, update_data: ProfileUpdate, id: UUID4):
         profile, code, indexes = await self.get_profile_by_id(db=db, id=id)
         if code != 0:
             return None, code, None
         objects = await super().update(db_session=db, obj_current=profile, obj_new=update_data)
         return objects, 0, None
 
-    async def activate_profile(self, *, db: AsyncSession, activate_data: ProfileUpdate, id: int):
+    async def activate_profile(self, *, db: AsyncSession, activate_data: ProfileUpdate, id: UUID4):
         # check id
         profile, code, indexes = await self.get_profile_by_id(db=db, id=id)
         if code != 0:
@@ -90,13 +93,10 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
                 return f"Профиль {num}", 0, None
         return f"Профиль {num}", 0, None
 
-    async def gen_outline_dynamic_link(self, profile_id: int):
-        hex_id = str(profile_id).encode()
-        f = Fernet(bytes(OUTLINE_SALT.encode()))
-        encrypted_data = f.encrypt(hex_id)
-        return f"{OUTLINE_USERS_GATEWAY}/conf/{encrypted_data.decode()}#{CONN_NAME}"
+    async def gen_outline_dynamic_link(self, profile_id: UUID4):
+        return f"{OUTLINE_USERS_GATEWAY}/conf/{profile_id}#{CONN_NAME}"
 
-    async def replacement_key(self, *, db: AsyncSession, profile_id: int):
+    async def replacement_key(self, *, db: AsyncSession, profile_id: UUID4):
         profile, code, indexes = await self.get_profile_by_id(db=db, id=profile_id)
         if code != 0:
             return None, code, None

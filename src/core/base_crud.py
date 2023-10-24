@@ -6,7 +6,7 @@ import shutil
 import uuid
 
 from typing import Any, Generic, TypeVar, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, UUID4
 from fastapi import HTTPException, UploadFile
 from fastapi_async_sqlalchemy import db
 from fastapi.encoders import jsonable_encoder
@@ -41,6 +41,14 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
     async def get(
             self, *, id: int, db: AsyncSession | None = None
+    ) -> ModelType | None:
+        db_session = db or self.db.session
+        query = select(self.model).where(self.model.id == id)
+        response = await db_session.execute(query)
+        return response.scalar_one_or_none()
+
+    async def get_by_uuid(
+            self, *, id: UUID4, db: AsyncSession | None = None
     ) -> ModelType | None:
         db_session = db or self.db.session
         query = select(self.model).where(self.model.id == id)

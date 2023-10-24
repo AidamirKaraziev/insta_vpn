@@ -1,10 +1,10 @@
 from sqlite3 import Timestamp
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, UUID4
 
 
 class ProfileGet(BaseModel):
-    id: int
+    id: UUID4
     name: Optional[str]
     account_id: int
 
@@ -17,6 +17,7 @@ class ProfileGet(BaseModel):
 
 
 class ProfileCreate(BaseModel):
+    id: UUID4
     name: str
     account_id: int
 

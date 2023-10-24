@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import APIRouter, Depends
+from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import LIMIT_PROFILES
@@ -45,7 +46,7 @@ async def get_profiles(
             description='Вывод профиля по идентификатору'
             )
 async def get_profile(
-        profile_id: int,
+        profile_id: UUID4,
         user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
@@ -80,9 +81,6 @@ async def add_profile(
         user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
-    # проверка сколько у аккаунта пиров, дать имя пиру
-    objects, code, indexes = await crud_profile.get_profiles_by_account_id(db=session, id=account_id)
-    await get_raise_new(code)
     # получение имени для профиля
     name, code, indexes = await crud_profile.get_name_for_profile(db=session, account_id=account_id)
     await get_raise_new(code)
@@ -99,7 +97,7 @@ async def add_profile(
             )
 async def activate_profile(
         activate_data: ProfileUpdate,
-        profile_id: int,
+        profile_id: UUID4,
         user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
@@ -117,13 +115,17 @@ async def activate_profile(
             description='Заменить ключ для профиля'
             )
 async def replacement_profile(
-        profile_id: int,
+        profile_id: UUID4,
         user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     profile, code, indexes = await crud_profile.replacement_key(db=session, profile_id=profile_id)
     await get_raise_new(code)
     return SingleEntityResponse(data=getting_profile(obj=profile))
+# TODO функция деактивации профиля
+# TODO функция генерации динамического ключа для всех профилей у кого его нет. Нужно один раз для переноса пользователей
+# TODO функция подсчета оплаченных профилей по месяцам
+# TODO логика добавления бесплатного периода
 
 
 if __name__ == "__main__":
