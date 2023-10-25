@@ -44,7 +44,7 @@ async def get_static_key(
             )
 async def get_static_key(
         static_key_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_static_key.get_static_key_by_id(db=session, id=static_key_id)
@@ -81,6 +81,23 @@ async def add_static_keys(
     key, code, indexes = await crud_static_key.create_key(db=session, server_id=server_id)
     await get_raise_new(code)
     return SingleEntityResponse(data=getting_static_key(obj=key))
+
+
+@router.get(path="/free-keys-output/",
+            response_model=SingleEntityResponse,
+            name='output_how_many_free_keys',
+            description='Вывести сколько есть свободных ключей'
+            )
+async def output_how_many_free_keys(
+        user: User = Depends(current_active_superuser),
+        session: AsyncSession = Depends(get_async_session),
+):
+    quantity_free_keys, code, indexes = await crud_static_key.get_quantity_free_keys(db=session)
+    await get_raise_new(code)
+    response = f"Свободных ключей: {quantity_free_keys}"
+    return SingleEntityResponse(data=response)
+
+# TODO отложенная задача, которая отправляет уведомление если количество хороших ключей опускается до 100 шт
 
 
 if __name__ == "__main__":

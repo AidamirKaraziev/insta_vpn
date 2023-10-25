@@ -114,5 +114,12 @@ class CrudStaticKey(CRUDBase[StaticKey, StaticKeyCreate, StaticKeyUpdate]):
             return None, code, None
         return keys, 0, None
 
+    async def get_quantity_free_keys(self, *, db: AsyncSession):
+        res = select(self.model).select_from(self.model).outerjoin(Profile).where(
+            Profile.static_key_id == None, self.model.is_active == True)
+        response = await db.execute(res)
+        quantity_free_keys = len(response.all())
+        return quantity_free_keys, 0, None
+
 
 crud_static_key = CrudStaticKey(StaticKey)

@@ -10,7 +10,6 @@ from server.crud import crud_server
 from server.getters import getting_server
 from server.schemas import ServerCreate, ServerUpdate
 from static_key.crud import crud_static_key
-from utils.utils import update_fact_clients
 from auth.base_config import fastapi_users
 from auth.models import User
 
@@ -106,21 +105,6 @@ async def delete_server(
     return OkResponse()
 
 
-# TODO change to -> how mach used key
-@router.get(path="/update-fact-client/",
-            response_model=SingleEntityResponse,
-            name='update_fact_client',
-            description='Записать в БД фактическое количество клиентов'
-            )
-async def update_fact_client(
-        user: User = Depends(current_active_superuser),
-        session: AsyncSession = Depends(get_async_session),
-):
-    servers, code, indexes = await update_fact_clients(db=session)
-    await get_raise_new(code)
-    return SingleEntityResponse(data=servers)
-
-
 @router.get(path="/deactivate/{server_id}",
             response_model=SingleEntityResponse,
             name='deactivate_server_and_keys',
@@ -153,7 +137,6 @@ async def deactivate_server_and_keys(
     keys, code, indexes = await crud_static_key.activate_keys_by_server_id(db=session, server_id=server_id)
     await get_raise_new(code)
     return OkResponse()
-# TODO отложенная задача, которая отправляет уведомление если количество хороших ключей опускается до 100 шт
 
 
 if __name__ == "__main__":

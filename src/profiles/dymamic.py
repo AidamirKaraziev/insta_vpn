@@ -23,6 +23,7 @@ async def handle_payment(
 ):
     profile, code, indexes = await crud_profile.get_profile_by_id(db=session, id=profile_id)
     await get_raise_new(code)
+    # TODO сделать проверку если профиль не оплачен отправить в телеграм сообщение
     if not profile.static_key_id and profile.is_active:
         static_key, code, indexes = await crud_static_key.get_good_key(db=session)
         data = ProfileUpdate(static_key_id=static_key.id)
@@ -33,7 +34,6 @@ async def handle_payment(
         static_key, code, indexes = await crud_static_key.get_good_key(db=session)
         data = ProfileUpdate(static_key_id=static_key.id)
         profile, code, indexes = await crud_profile.update_profile(db=session, id=profile_id, update_data=data)
-
     access_url = re.findall(r'@(.*):', static_key.access_url)
     res_for_app = {
         "server": f"{access_url[0]}",
