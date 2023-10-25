@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from config import LIMIT_PROFILES
 
 from core.raise_template import get_raise_new
-from core.response import SingleEntityResponse, ListOfEntityResponse
+from core.response import SingleEntityResponse, ListOfEntityResponse, OkResponse
 from database import get_async_session
 from profiles.crud import crud_profile
 from profiles.getters import getting_profile
@@ -125,7 +125,7 @@ async def replacement_profile(
     return SingleEntityResponse(data=getting_profile(obj=profile))
 
 
-@router.get(path="/deactivate-expired/{profile_id}",
+@router.get(path="/deactivate-expired/",
             response_model=SingleEntityResponse,
             name='deactivate_expired_profile',
             description='Деактивирует активные профили, у которых истек срок действия'
@@ -137,7 +137,7 @@ async def deactivate_expired_profile(
     date_of_disconnection = datetime.now()
     deactivate_profiles = []
     profiles, code, indexes = await crud_profile.get_profiles_by_date_end(
-        db=session, date_of_disconnection=date_of_disconnection)
+        db=session, your_date=date_of_disconnection)
     for profile in profiles:
         obj, code, indexes = await crud_profile.deactivate_profile(db=session, id=profile.id)
         deactivate_profiles.append(profile)
@@ -164,7 +164,21 @@ async def counting_paid_profiles(
         response.append(d)
     return ListOfEntityResponse(data=[row for row in response])
 
-# TODO логика добавления бесплатного периода
+
+@router.delete(path="/{profile_id}",
+               response_model=SingleEntityResponse,
+               name='delete_profile',
+               description='Удалить профиль и все связанные с ним данные'
+               )
+async def delete_profile(
+        profile_id: UUID4,
+        # user: User = Depends(current_active_superuser),
+        session: AsyncSession = Depends(get_async_session),
+):
+    obj, code, indexes = await crud_profile.delete_profile(db=session, id=profile_id)
+    await get_raise_new(code)
+    return OkResponse()
+
 # TODO функция добавления подарочных дней профилю
 
 if __name__ == "__main__":
