@@ -127,7 +127,7 @@ async def deactivate_server_and_keys(
             name='activate_server_and_keys',
             description='Активация сервера и всех его ключей'
             )
-async def deactivate_server_and_keys(
+async def activate_server_and_keys(
         server_id: int,
         user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
