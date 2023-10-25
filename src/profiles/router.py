@@ -131,7 +131,7 @@ async def replacement_profile(
             description='Деактивирует активные профили, у которых истек срок действия'
             )
 async def deactivate_expired_profile(
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     date_of_disconnection = datetime.now()
@@ -145,7 +145,25 @@ async def deactivate_expired_profile(
     return ListOfEntityResponse(data=[getting_profile(profile) for profile in deactivate_profiles])
 
 
-# TODO функция подсчета оплаченных профилей по месяцам
+@router.get(path="/counting-paid-profiles/{year_value}",
+            response_model=ListOfEntityResponse,
+            name='counting_paid_profiles',
+            description='Подсчет оплаченных профилей'
+            )
+async def counting_paid_profiles(
+        year_value: int,
+        user: User = Depends(current_active_superuser),
+        session: AsyncSession = Depends(get_async_session),
+):
+    response = []
+    data, code, indexes = await crud_profile.get_active_paid_profiles_per_month_in_year(db=session, year_value=year_value)
+    for row in data:
+        month = row.month
+        active_count = row.active_count
+        d = f"Месяц: {month}, Оплаченных профилей: {active_count}"
+        response.append(d)
+    return ListOfEntityResponse(data=[row for row in response])
+
 # TODO логика добавления бесплатного периода
 # TODO функция добавления подарочных дней профилю
 

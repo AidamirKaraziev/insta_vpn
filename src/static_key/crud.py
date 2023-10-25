@@ -115,6 +115,7 @@ class CrudStaticKey(CRUDBase[StaticKey, StaticKeyCreate, StaticKeyUpdate]):
         return keys, 0, None
 
     async def get_quantity_free_keys(self, *, db: AsyncSession):
+        """Выводит количество свободных ключей"""
         res = select(self.model).select_from(self.model).outerjoin(Profile).where(
             Profile.static_key_id == None, self.model.is_active == True)
         response = await db.execute(res)

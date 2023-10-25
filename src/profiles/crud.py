@@ -2,7 +2,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from pydantic import UUID4
-from sqlalchemy import select
+from sqlalchemy import select, extract, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from account.crud import crud_account
@@ -129,6 +129,24 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         response = await db.execute(query)
         obj = response.scalars().all()
         return obj, 0, None
+
+    async def get_active_paid_profiles_per_month_in_year(self, *, db: AsyncSession, year_value: int):
+        """Получить количество активных платных профилей для каждого месяца в указанном году."""
+        query = (
+            select(
+                extract('month', self.model.date_end).label('month'),
+                func.count().label('active_count')
+            )
+            .where(
+                self.model.is_active == True,
+                extract('year', self.model.date_end) == year_value
+            )
+            .group_by(extract('month', self.model.date_end))
+            .order_by(extract('month', self.model.date_end))
+        )
+        response = await db.execute(query)
+        results = response.all()
+        return results, 0, None
 
 
 crud_profile = CrudProfile(Profile)
