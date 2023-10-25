@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from fastapi import APIRouter, Depends
 from pydantic import UUID4
@@ -122,76 +123,31 @@ async def replacement_profile(
     profile, code, indexes = await crud_profile.replacement_key(db=session, profile_id=profile_id)
     await get_raise_new(code)
     return SingleEntityResponse(data=getting_profile(obj=profile))
-# TODO функция деактивации профиля
-# TODO функция генерации динамического ключа для всех профилей у кого его нет. Нужно один раз для переноса пользователей
+
+
+@router.get(path="/deactivate-expired/{profile_id}",
+            response_model=SingleEntityResponse,
+            name='deactivate_expired_profile',
+            description='Деактивирует активные профили, у которых истек срок действия'
+            )
+async def deactivate_expired_profile(
+        # user: User = Depends(current_active_superuser),
+        session: AsyncSession = Depends(get_async_session),
+):
+    date_of_disconnection = datetime.now()
+    deactivate_profiles = []
+    profiles, code, indexes = await crud_profile.get_profiles_by_date_end(
+        db=session, date_of_disconnection=date_of_disconnection)
+    for profile in profiles:
+        obj, code, indexes = await crud_profile.deactivate_profile(db=session, id=profile.id)
+        deactivate_profiles.append(profile)
+    await get_raise_new(code)
+    return ListOfEntityResponse(data=[getting_profile(profile) for profile in deactivate_profiles])
+
+
 # TODO функция подсчета оплаченных профилей по месяцам
 # TODO логика добавления бесплатного периода
-
+# TODO функция добавления подарочных дней профилю
 
 if __name__ == "__main__":
     logging.info('Running...')
-
-
-#
-#
-#
-# @router.get(
-#             path="/deactivate-old/",
-#             response_model=SingleEntityResponse,
-#             name='deactivate_old_profiles',
-#             description='Деактивировать неоплаченные профили'
-#             )
-# async def deactivate_old_profiles(
-#         user: User = Depends(current_active_superuser),
-#         session: AsyncSession = Depends(get_async_session),
-# ):
-#     objects, code, indexes = await deactivate_profile(db=session)
-#     await get_raise_new(code)
-#     return SingleEntityResponse(data=objects)
-
-
-#
-# @router.get(
-#             path="/used-bytes/",
-#             response_model=OkResponse,
-#             name='update_used_bytes_in_profile',
-#             description='Обновить used_bytes во всех профилях возвращает '
-#             )
-# async def update_used_bytes_in_profile(
-#         user: User = Depends(current_active_superuser),
-#         session: AsyncSession = Depends(get_async_session),
-# ):
-#     objects, code, indexes = await update_used_bytes_in_profiles(db=session, skip=0)
-#     await get_raise_new(code)
-#     return OkResponse()
-
-
-#
-# @router.get(
-#             path="/get-keys-without-a-profile/",
-#             response_model=ListOfEntityResponse,
-#             name='get_keys_without_a_profile',
-#             description='Получить ключи без профиля'
-#             )
-# async def get_keys_without_a_profile(
-#         user: User = Depends(current_active_superuser),
-#         session: AsyncSession = Depends(get_async_session),
-# ):
-#     objects, code, indexes = await get_keys_without_a_profile_and_bad_server(db=session, skip=0)
-#     await get_raise_new(code)
-#     return ListOfEntityResponse(data=objects)
-
-# # delete old profiles
-# @router.get(
-#             path="/delete-old/",
-#             response_model=SingleEntityResponse,
-#             name='delete_old',
-#             description='Удалить устаревшие профили!'
-#             )
-# async def delete_old(
-#         user: User = Depends(current_active_superuser),
-#         session: AsyncSession = Depends(get_async_session),
-# ):
-#     obj, code, indexes = await deleting_an_outdated_profile(db=session)
-#     await get_raise_new(code)
-#     return SingleEntityResponse(data=obj)

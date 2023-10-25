@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import uuid4
 
 from pydantic import UUID4
@@ -11,6 +12,10 @@ from profiles.models import Profile
 from profiles.schemas import ProfileCreate, ProfileUpdate
 
 from static_key.crud import crud_static_key
+
+
+async def gen_outline_dynamic_link(profile_id: UUID4):
+    return f"{OUTLINE_USERS_GATEWAY}/conf/{profile_id}#{CONN_NAME}"
 
 
 class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
@@ -59,7 +64,7 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         profile, code, indexes = await self.get_profile_by_id(db=db, id=id)
         if code != 0:
             return None, code, None
-        dynamic_key = await self.gen_outline_dynamic_link(profile_id=id)
+        dynamic_key = await gen_outline_dynamic_link(profile_id=id)
         static_key, code, indexes = await crud_static_key.get_good_key(db=db)
         if code != 0:
             return None, code, None
@@ -68,6 +73,16 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         activate_data.static_key_id = static_key.id
 
         objects = await super().update(db_session=db, obj_current=profile, obj_new=activate_data)
+        return objects, 0, None
+
+    async def deactivate_profile(self, *, db: AsyncSession, id: UUID4):
+        """Деактивирует профиль: is_active -> False, static_key_id -> None"""
+        # check id
+        profile, code, indexes = await self.get_profile_by_id(db=db, id=id)
+        if code != 0:
+            return None, code, None
+        deactivate_data = ProfileUpdate(is_active=False, static_key_id=None)
+        objects = await super().update(db_session=db, obj_current=profile, obj_new=deactivate_data)
         return objects, 0, None
 
     async def get_profile_by_key_id_server_id(self, *, db: AsyncSession, key_id: int, server_id: int):
@@ -93,9 +108,6 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
                 return f"Профиль {num}", 0, None
         return f"Профиль {num}", 0, None
 
-    async def gen_outline_dynamic_link(self, profile_id: UUID4):
-        return f"{OUTLINE_USERS_GATEWAY}/conf/{profile_id}#{CONN_NAME}"
-
     async def replacement_key(self, *, db: AsyncSession, profile_id: UUID4):
         profile, code, indexes = await self.get_profile_by_id(db=db, id=profile_id)
         if code != 0:
@@ -110,6 +122,13 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         if code != 0:
             return None, code, None
         return profile, 0, None
+
+    async def get_profiles_by_date_end(self, *, db: AsyncSession, date_of_disconnection: datetime):
+        """Дает список активных профилей у которых истек срок действия"""
+        query = select(self.model).where(self.model.date_end < date_of_disconnection, self.model.is_active == True)
+        response = await db.execute(query)
+        obj = response.scalars().all()
+        return obj, 0, None
 
 
 crud_profile = CrudProfile(Profile)
