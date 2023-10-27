@@ -104,7 +104,7 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
     async def get_name_for_profile(self, *, db: AsyncSession, account_id: int):
         """
             Присваивает имя профиля для фронта. Номеруется от меньшего к большему.
-            Проверяет максимальное количество профилей для одного аккаунта.
+            Проверяет максимальное количество профилей для одного аккаунта
             Пример: Профиль 1.
         """
         profiles, code, indexes = await self.get_profiles_by_account_id(db=db, id=account_id)
