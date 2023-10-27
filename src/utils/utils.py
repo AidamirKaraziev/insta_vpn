@@ -22,54 +22,6 @@ from server.schemas import ServerUpdate
 """
 
 
-async def update_used_bytes_in_profiles(db: AsyncSession, skip: int = 0):
-    servers, code, indexes = await crud_server.get_all_servers(db=db, skip=skip, limit=LIMIT_SERVERS)
-    for server in servers:
-        client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
-        try:
-            # проверка серверов, если не достучались до сервера -> показать его
-            keys = client.get_keys()
-
-            for key in keys:
-                profile, code, indexes = await crud_profile.get_profile_by_key_id_server_id(
-                    db=db, server_id=int(server.id), key_id=int(key.key_id))
-                if profile is not None:
-                    update_data = ProfileUpdate(used_bytes=key.used_bytes)
-                    obj, code, indexes = await crud_profile.update_profile(
-                        db=db, update_data=update_data, id=profile.id)
-        except Exception as ex:
-            print(ex)  # возможно записывать ошибки в логи
-    return None, 0, None
-
-
-async def get_keys_without_a_profile_and_bad_server(db: AsyncSession, skip: int = 0):
-    not_in_db = []
-    unavailable_server = {}
-    bad_servers = []
-    servers, code, indexes = await crud_server.get_all_servers(db=db, skip=skip, limit=LIMIT_SERVERS)
-    for server in servers:
-        try:
-            # проверка серверов, если не достучались до сервера -> показать его
-            client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
-            keys = client.get_keys()
-            for key in keys:
-                profile, code, indexes = await crud_profile.get_profile_by_key_id_server_id(db=db,
-                                                                                            key_id=int(key.key_id),
-                                                                                            server_id=int(server.id))
-                if profile is None:
-                    not_in_db.append(indexes)
-                if profile is not None:
-                    update_data = ProfileUpdate(used_bytes=key.used_bytes)
-                    obj, code, indexes = await crud_profile.update_profile(
-                        db=db, update_data=update_data, id=profile.id)
-        except Exception as ex:
-            # добавить плохой сервер сюда
-            unavailable_server[f"{server.id}, {server.name}"] = f"{ex}"
-    bad_servers.append(unavailable_server)
-    not_in_db.append(bad_servers)
-    return not_in_db, 0, None
-
-
 async def update_fact_clients(*, db: AsyncSession):
     # get all server
     bad_servers = {}
