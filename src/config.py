@@ -32,6 +32,7 @@ LIMIT_SERVERS = 1000
 LIMIT_PROFILES = 10000
 MAX_CLIENT = 100
 PAYMENT_WAITING_TIME = 86400 * 2  # 1 day = 86400
+MAX_PROFILE_TO_ACCOUNT = 5  # Максимальное количество профилей для одного профиля
 
 OUTLINE_USERS_GATEWAY = os.environ.get("OUTLINE_USERS_GATEWAY")
 OUTLINE_SALT = os.environ.get("OUTLINE_SALT")
