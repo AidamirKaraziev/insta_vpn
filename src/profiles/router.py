@@ -1,11 +1,13 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends
 from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from config import LIMIT_PROFILES
+from account.crud import crud_account
+from account.schemas import AccountUpdate
+from config import LIMIT_PROFILES, TRIAL_DAYS
 
 from core.raise_template import get_raise_new
 from core.response import SingleEntityResponse, ListOfEntityResponse, OkResponse
@@ -88,6 +90,17 @@ async def add_profile(
     # создать профиль
     profile, code, indexes = await crud_profile.add_profile(db=session, account_id=account_id, name=name)
     await get_raise_new(code)
+    """Добавление подарочных дней, если они есть у клиента"""
+    account, code, indexes = await crud_account.get_account_by_id(db=session, id=account_id)
+    await get_raise_new(code)
+    if account.trial_is_active:
+        date_end = (datetime.now().date() + timedelta(days=TRIAL_DAYS)).strftime("%Y-%m-%dT%H:%M:%S.%f")
+        activate_data = ProfileUpdate(date_end=date_end, is_active=True)
+        profile, code, indexes = await crud_profile.activate_profile(db=session, id=profile.id,
+                                                                     activate_data=activate_data)
+        update_data = AccountUpdate(trial_is_active=False)
+        account, code, indexes = await crud_account.update_account(db=session, id=account_id, update_data=update_data)
+        await get_raise_new(code)
     return SingleEntityResponse(data=getting_profile(obj=profile))
 
 
@@ -179,7 +192,6 @@ async def delete_profile(
     await get_raise_new(code)
     return OkResponse()
 
-# TODO функция добавления подарочных дней профилю
 
 if __name__ == "__main__":
     logging.info('Running...')

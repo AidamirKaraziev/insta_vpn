@@ -47,7 +47,6 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         objects = await super().get_multi(db_session=db, skip=skip, limit=limit)
         return objects, 0, None
 
-    # TODO ограничить максимальное количество до 5
     async def add_profile(self, *, db: AsyncSession, account_id: int, name: str):
         """Создание профиля с нужными полями, который по дефолту не активен:
             id: UUID4
@@ -55,10 +54,9 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
             account_id: int
             dynamic_key: Optional[str]
             is_active: Optional[bool] = False"""
-
         uuid_value = uuid4()
-        dynamic_key = await gen_outline_dynamic_link(profile_id=uuid_value)
-        obj, code, indexes = await crud_account.get_account_by_id(db=db, id=account_id)
+        dynamic_key = await gen_outline_dynamic_link(profile_id=uuid_value)  # эта пизда выделена желтым
+        account, code, indexes = await crud_account.get_account_by_id(db=db, id=account_id)
         if code != 0:
             return None, code, None
         new_data = ProfileCreate(id=uuid_value, account_id=account_id, name=name, dynamic_key=dynamic_key)

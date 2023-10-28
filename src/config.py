@@ -33,6 +33,7 @@ LIMIT_PROFILES = 10000  # Максимальное количество проф
 MAX_CLIENT = 100  # Максимальное количество клиентов на одном сервере
 PAYMENT_WAITING_TIME = 86400 * 2  # 1 day = 86400 РУДИМЕНТ -> УДАЛИТЬ
 MAX_PROFILE_TO_ACCOUNT = 5  # Максимальное количество профилей для одного профиля
+TRIAL_DAYS = 3  # Количество пробных дней
 
 OUTLINE_USERS_GATEWAY = os.environ.get("OUTLINE_USERS_GATEWAY")
 OUTLINE_SALT = os.environ.get("OUTLINE_SALT")

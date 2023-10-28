@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Table, Column, Integer, String, TIMESTAMP, ForeignKey, JSON, Boolean, MetaData, BigInteger
+from sqlalchemy import Column, String, TIMESTAMP, ForeignKey, Boolean, MetaData, BigInteger
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from database import Base
@@ -17,7 +17,7 @@ class Account(Base):
     name = Column(String)
     number = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    trial = Column(Boolean, default=False)
+    trial_is_active = Column(Boolean, default=True)
     referral_id = Column(UUID(as_uuid=True), ForeignKey(Referral.id, ondelete="SET NULL"))
 
     referral = relationship(Referral, backref="accounts", lazy="joined")
