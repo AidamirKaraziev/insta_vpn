@@ -4,7 +4,7 @@ from sqlalchemy import Column, String, TIMESTAMP, ForeignKey, Boolean, MetaData,
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from database import Base
-from referral.models import Referral
+from referent.models import Referent
 
 metadata = MetaData()
 
@@ -18,6 +18,6 @@ class Account(Base):
     number = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     trial_is_active = Column(Boolean, default=True)
-    referral_id = Column(UUID(as_uuid=True), ForeignKey(Referral.id, ondelete="SET NULL"))
+    referent_id = Column(UUID(as_uuid=True), ForeignKey(Referent.id, ondelete="SET NULL"))
 
-    referral = relationship(Referral, backref="accounts", lazy="joined")
+    referent = relationship(Referent, backref="accounts", lazy="joined")
