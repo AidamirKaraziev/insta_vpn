@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from uuid import uuid4
 
 from pydantic import UUID4
@@ -14,8 +15,9 @@ from referent.models import Referent
 from referent.schemas import ReferentUpdate, ReferentCreate
 
 
-# async def gen_referral_link(referent_id: UUID4):
-#     return f"{OUTLINE_USERS_GATEWAY}/conf/{profile_id}#{CONN_NAME}"
+# TODO
+async def gen_referral_link(referent_id: UUID4):
+    return f"{OUTLINE_USERS_GATEWAY}/conf/{referent_id}#{CONN_NAME}"
 
 
 class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
@@ -25,12 +27,52 @@ class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
     # cannot_delete_an_active_profile = {"num": 404, "message": f"Cannot delete an active {obj_name}"}
     # too_many_profiles = {"num": 404, "message": f"Too many {obj_name}s"}
 
+    async def get_all_referents(self, *, db: AsyncSession, skip: int, limit: int):
+        """Список всех референтов, если их нет -> []"""
+        objects = await super().get_multi(db_session=db, skip=skip, limit=limit)
+        return objects, 0, None
+
     async def get_referent_by_id(self, *, db: AsyncSession, id: UUID4):
         """Получение референта по UUID4, если такого нет то вывод ошибки"""
         obj = await super().get(db=db, id=id)
         if obj is None:
             return None, self.not_found_id, None
         return obj, 0, None
+
+    async def add_referent_for_client(self, *, db: AsyncSession, telegram_id: Optional[int]):
+        """Создание референта с нужными полями, который по дефолту:
+            id: UUID4
+            telegram_id: Optional[int]
+            description: Optional[str]
+            referral_link: Optional[str]
+            password: Optional[str]"""
+        uuid_value = uuid4()
+        referral_link = await gen_referral_link(referent_id=uuid_value)  # эта пизда выделена желтыx
+        # TODO hex password
+        password = []
+        create_data = ReferentCreate(id=uuid_value, telegram_id=telegram_id,
+                                     referral_link=referral_link, password=password)
+        objects = await super().create(db_session=db, obj_in=create_data)
+        return objects, 0, None
+
+    async def add_referent_for_blogger(self, *, db: AsyncSession, description: Optional[str]):
+        """Создание референта с нужными полями, который по дефолту:
+            id: UUID4
+            telegram_id: Optional[int]
+            description: Optional[str]
+            referral_link: Optional[str]
+            password: Optional[str]"""
+        uuid_value = uuid4()
+        referral_link = await gen_referral_link(referent_id=uuid_value)  # эта пизда выделена желтыx
+        # TODO hex password
+
+        password = "hellow"
+        password.__hash__()
+        create_data = ReferentCreate(id=uuid_value, description=description,
+                                     referral_link=referral_link, password=password)
+        objects = await super().create(db_session=db, obj_in=create_data)
+        return objects, 0, None
+    # TODO update
 
 
 crud_referent = CrudReferent(Referent)
@@ -47,27 +89,7 @@ crud_referent = CrudReferent(Referent)
 #     return obj, 0, None
 #
 #
-# async def get_all_profiles(self, *, db: AsyncSession, skip: int, limit: int):
-#     """Список всех профилей, если их нет -> []"""
-#     objects = await super().get_multi(db_session=db, skip=skip, limit=limit)
-#     return objects, 0, None
-#
-#
-# async def add_profile(self, *, db: AsyncSession, account_id: int, name: str):
-#     """Создание профиля с нужными полями, который по дефолту не активен:
-#         id: UUID4
-#         name: str
-#         account_id: int
-#         dynamic_key: Optional[str]
-#         is_active: Optional[bool] = False"""
-#     uuid_value = uuid4()
-#     dynamic_key = await gen_outline_dynamic_link(profile_id=uuid_value)  # эта пизда выделена желтым
-#     account, code, indexes = await crud_account.get_account_by_id(db=db, id=account_id)
-#     if code != 0:
-#         return None, code, None
-#     new_data = ProfileCreate(id=uuid_value, account_id=account_id, name=name, dynamic_key=dynamic_key)
-#     objects = await super().create(db_session=db, obj_in=new_data)
-#     return objects, 0, None
+
 #
 #
 # async def update_profile(self, *, db: AsyncSession, update_data: ProfileUpdate, id: UUID4):
