@@ -18,3 +18,4 @@ class Referent(Base):
     description = Column(String)
     referral_link = Column(String)
     password = Column(String)
+    sbp_number = Column(String)

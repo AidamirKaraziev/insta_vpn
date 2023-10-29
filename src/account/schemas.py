@@ -10,6 +10,7 @@ class AccountGet(BaseModel):
     created_at: Optional[Timestamp]
     trial_is_active: Optional[bool]
     referral_id: Optional[UUID4]
+    can_pay_out: Optional[bool]
 
 
 class AccountCreate(BaseModel):
@@ -23,3 +24,4 @@ class AccountUpdate(BaseModel):
     name: Optional[str]
     number: Optional[str]
     trial_is_active: Optional[bool]
+    can_pay_out: Optional[bool]

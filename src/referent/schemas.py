@@ -9,6 +9,7 @@ class ReferentGet(BaseModel):
     description: Optional[str]
     referral_link: Optional[str]
     password: Optional[str]
+    sbp_number: Optional[str]
 
 
 class ReferentCreate(BaseModel):
@@ -18,6 +19,7 @@ class ReferentCreate(BaseModel):
     description: Optional[str]
     referral_link: Optional[str]
     password: Optional[str]
+    sbp_number: Optional[str]
 
 
 class ReferentUpdate(BaseModel):
@@ -26,3 +28,4 @@ class ReferentUpdate(BaseModel):
     description: Optional[str]
     referral_link: Optional[str]
     password: Optional[str]
+    sbp_number: Optional[str]

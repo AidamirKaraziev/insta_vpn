@@ -8,5 +8,6 @@ def getting_referent(obj: ReferentGet) -> Optional[ReferentGet]:
         telegram_id=obj.telegram_id,
         description=obj.description,
         referral_link=obj.referral_link,
-        password=obj.password
+        password=obj.password,
+        sbp_number=obj.sbp_number
     )
