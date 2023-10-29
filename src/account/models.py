@@ -1,8 +1,10 @@
 from datetime import datetime
 
-from sqlalchemy import Table, Column, Integer, String, TIMESTAMP, ForeignKey, JSON, Boolean, MetaData, BigInteger
+from sqlalchemy import Column, String, TIMESTAMP, ForeignKey, Boolean, MetaData, BigInteger
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 from database import Base
-
+from referent.models import Referent
 
 metadata = MetaData()
 
@@ -15,3 +17,7 @@ class Account(Base):
     name = Column(String)
     number = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    trial_is_active = Column(Boolean, default=True)
+    referent_id = Column(UUID(as_uuid=True), ForeignKey(Referent.id, ondelete="SET NULL"))
+
+    referent = relationship(Referent, backref="accounts", lazy="joined")

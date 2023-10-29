@@ -6,7 +6,7 @@ from sqlalchemy import select, extract, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from account.crud import crud_account
-from config import OUTLINE_USERS_GATEWAY, CONN_NAME
+from config import OUTLINE_USERS_GATEWAY, CONN_NAME, MAX_PROFILE_TO_ACCOUNT
 from core.base_crud import CRUDBase
 from profiles.models import Profile
 from profiles.schemas import ProfileCreate, ProfileUpdate
@@ -23,6 +23,7 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
     not_found_id = {"num": 404, "message": f"Not found {obj_name} with this id"}
     not_found_by_key_id_server_id = {"num": 404, "message": f"Not found a {obj_name} with this key_id and server_id"}
     cannot_delete_an_active_profile = {"num": 404, "message": f"Cannot delete an active {obj_name}"}
+    too_many_profiles = {"num": 404, "message": f"Too many {obj_name}s"}
 
     async def get_profile_by_id(self, *, db: AsyncSession, id: UUID4):
         """Получение профиля по UUID4, если такого нет то вывод ошибки"""
@@ -54,8 +55,8 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
             dynamic_key: Optional[str]
             is_active: Optional[bool] = False"""
         uuid_value = uuid4()
-        dynamic_key = await gen_outline_dynamic_link(profile_id=uuid_value)
-        obj, code, indexes = await crud_account.get_account_by_id(db=db, id=account_id)
+        dynamic_key = await gen_outline_dynamic_link(profile_id=uuid_value)  # эта пизда выделена желтым
+        account, code, indexes = await crud_account.get_account_by_id(db=db, id=account_id)
         if code != 0:
             return None, code, None
         new_data = ProfileCreate(id=uuid_value, account_id=account_id, name=name, dynamic_key=dynamic_key)
@@ -99,11 +100,16 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         return objects, 0, None
 
     async def get_name_for_profile(self, *, db: AsyncSession, account_id: int):
-        """Присваивает имя профиля для фронта. Номеруется от меньшего к большему
-            пример: Профиль 1."""
+        """
+            Присваивает имя профиля для фронта. Номеруется от меньшего к большему.
+            Проверяет максимальное количество профилей для одного аккаунта
+            Пример: Профиль 1.
+        """
         profiles, code, indexes = await self.get_profiles_by_account_id(db=db, id=account_id)
         if code != 0:
             return None, code, None
+        if int(len(profiles)) > int(MAX_PROFILE_TO_ACCOUNT):
+            return None, self.too_many_profiles, None
         num = 1
         name_list = []
         for profile in profiles:
