@@ -44,9 +44,20 @@ services:
     env_file:
       - .env-dev-v2
     container_name: celery_insta_v2
-    command: ["/insta_vpn/docker/celery.sh", "celery"]
+    command: [ "/insta_vpn/docker/celery.sh", "celery", "--app=celery:app" ]
     depends_on:
       - redis
+    restart: always
+
+  celery-beat:
+    build:
+      context: .
+    env_file:
+      - .env-dev-v2
+    container_name: celery_beat_insta_v2
+    command: [ "/insta_vpn/docker/celery.sh", "beat", "--app=celery:app" ]
+    depends_on:
+      - celery
     restart: always
 
   flower:
@@ -62,6 +73,7 @@ services:
     ports:
       - 8890:5555
     restart: always
+
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin_insta_v2
