@@ -81,6 +81,6 @@ def send_email_request_verify(token: str, name: str, email_to: str):
 
 
 @celery.task
-def describe_users():
+def describe_profiles():
     asyncio.run(update_fields_is_active())
 
