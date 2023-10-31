@@ -55,5 +55,72 @@ async def handle_payment(
 async def handle_payment(
         session: AsyncSession = Depends(get_async_session),
 ):
-    res = "vless://9c0b568d-446a-40c3-9514-bf6e724fec8a@176.57.212.124:443?type=tcp&security=reality&fp=firefox&pbk=n65lCyTgyOPYaRegNqxyfZfhBaGoP7JgLkXXQBnNvSw&sni=yahoo.com&flow=xtls-rprx-vision&sid=f8d8328e&spx=%2F#1-test2"
+    res = {
+  "inbounds" : [
+    {
+      "listen" : "127.0.0.1",
+      "port" : 1080,
+      "protocol" : "socks",
+      "settings" : {
+        "auth" : "noauth",
+        "udp" : true
+      },
+      "sniffing" : {
+        "destOverride" : [
+          "http",
+          "tls",
+          "quic",
+          "fakedns"
+        ],
+        "enabled" : false,
+        "routeOnly" : true
+      },
+      "tag" : "socks"
+    }
+  ],
+  "outbounds" : [
+    {
+      "protocol" : "vless",
+      "settings" : {
+        "vnext" : [
+          {
+            "address" : "176.57.212.124",
+            "port" : 443,
+            "users" : [
+              {
+                "encryption" : "none",
+                "flow" : "xtls-rprx-vision",
+                "id" : "9c0b568d-446a-40c3-9514-bf6e724fec8a"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings" : {
+        "network" : "tcp",
+        "realitySettings" : {
+          "fingerprint" : "firefox",
+          "publicKey" : "n65lCyTgyOPYaRegNqxyfZfhBaGoP7JgLkXXQBnNvSw",
+          "serverName" : "yahoo.com",
+          "shortId" : "f8d8328e",
+          "spiderX" : "\/"
+        },
+        "security" : "reality",
+        "tcpSettings" : {
+
+        }
+      },
+      "tag" : "proxy"
+    },
+    {
+      "protocol" : "freedom",
+      "tag" : "direct"
+    },
+    {
+      "protocol" : "blackhole",
+      "tag" : "block"
+    }
+  ]
+}
+
     return res
