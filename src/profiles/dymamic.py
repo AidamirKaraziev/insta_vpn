@@ -50,7 +50,7 @@ async def handle_payment(
 
 @router.get(path='/test-vless/',
             name='outline_connect',
-            description='Подключение Outline '
+            description='Подключение Outline'
             )
 async def handle_payment(
         session: AsyncSession = Depends(get_async_session),
