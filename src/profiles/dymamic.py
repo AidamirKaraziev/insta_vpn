@@ -42,3 +42,20 @@ async def handle_payment(
         "method": f"{static_key.method}"
     }
     return res_for_app
+
+
+"""TEST dynamic key VLESS"""
+
+
+@router.get(path='/test-vless/',
+            name='outline_connect',
+            description='Подключение Outline '
+            )
+async def handle_payment(
+        session: AsyncSession = Depends(get_async_session),
+):
+    res = """dmxlc3M6Ly85YzBiNTY4ZC00NDZhLTQwYzMtOTUxNC1iZjZlNzI0ZmVjOGFAMTc2LjU3LjIxMi4x
+MjQ6NDQzP3R5cGU9dGNwJnNlY3VyaXR5PXJlYWxpdHkmZnA9ZmlyZWZveCZwYms9bjY1bEN5VGd5
+T1BZYVJlZ05xeHlmWmZoQmFHb1A3SmdMa1hYUUJuTnZTdyZzbmk9eWFob28uY29tJmZsb3c9eHRs
+cy1ycHJ4LXZpc2lvbiZzaWQ9ZjhkODMyOGUmc3B4PSUyRiMxLXRlc3Qy"""
+    return res
