@@ -38,3 +38,6 @@ TRIAL_DAYS = 3  # Количество пробных дней
 OUTLINE_USERS_GATEWAY = os.environ.get("OUTLINE_USERS_GATEWAY")
 OUTLINE_SALT = os.environ.get("OUTLINE_SALT")
 CONN_NAME = os.environ.get("CONN_NAME")
+
+BASE_REFERRAL_LINK = "https://t.me/financier_tgrm_bot?start=referral-link-"
+BASE_REGISTER_REFERENT_LINK = "https://t.me/financier_tgrm_bot?start=referent-link-"

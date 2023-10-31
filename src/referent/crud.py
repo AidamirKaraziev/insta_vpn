@@ -7,7 +7,7 @@ from sqlalchemy import select, extract, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-from config import OUTLINE_USERS_GATEWAY, CONN_NAME, MAX_PROFILE_TO_ACCOUNT
+from config import OUTLINE_USERS_GATEWAY, CONN_NAME, MAX_PROFILE_TO_ACCOUNT, BASE_REFERRAL_LINK
 from core.base_crud import CRUDBase
 
 
@@ -16,8 +16,10 @@ from referent.schemas import ReferentUpdate, ReferentCreate
 
 
 # TODO
+
+
 async def gen_referral_link(referent_id: UUID4):
-    return f"{OUTLINE_USERS_GATEWAY}/conf/{referent_id}#{CONN_NAME}"
+    return f"{BASE_REFERRAL_LINK}{referent_id}"
 
 
 class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
@@ -64,10 +66,9 @@ class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
             password: Optional[str]"""
         uuid_value = uuid4()
         referral_link = await gen_referral_link(referent_id=uuid_value)  # эта пизда выделена желтыx
-        # TODO hex password
 
+        # TODO hex password
         password = "hellow"
-        password.__hash__()
         create_data = ReferentCreate(id=uuid_value, description=description,
                                      referral_link=referral_link, password=password)
         objects = await super().create(db_session=db, obj_in=create_data)
