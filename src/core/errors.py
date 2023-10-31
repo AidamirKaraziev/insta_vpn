@@ -131,5 +131,3 @@ def entity_error_handler(request: Request, exc: ListOfEntityError):
         ).dict(),
     )
 
-
-

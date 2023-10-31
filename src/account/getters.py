@@ -9,5 +9,6 @@ def getting_account(obj: AccountGet) -> Optional[AccountGet]:
         id=obj.id,
         name=obj.name,
         number=obj.number,
-        created_at=obj.created_at
+        created_at=obj.created_at,
+        can_pay_out=obj.can_pay_out
     )

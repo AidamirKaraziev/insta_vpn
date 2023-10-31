@@ -5,8 +5,8 @@ import os
 import shutil
 import uuid
 
-from typing import Any, Generic, TypeVar, Optional
-from pydantic import BaseModel
+from typing import Any, Generic, TypeVar, Optional, Union
+from pydantic import BaseModel, UUID4
 from fastapi import HTTPException, UploadFile
 from fastapi_async_sqlalchemy import db
 from fastapi.encoders import jsonable_encoder
@@ -40,7 +40,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self.db = db
 
     async def get(
-            self, *, id: int, db: AsyncSession | None = None
+            self, *, id: Union[int, UUID4], db: AsyncSession | None = None
     ) -> ModelType | None:
         db_session = db or self.db.session
         query = select(self.model).where(self.model.id == id)
@@ -119,7 +119,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         await db_session.refresh(obj_current)
         return obj_current
 
-    async def delete(self, *, id: int, db: AsyncSession | None = None):
+    async def delete(self, *, id: Union[int, UUID4], db: AsyncSession | None = None):
         db_session = db or self.db.session
         obj = await self.get(db=db_session, id=id)  # Assuming you have a `get` method to retrieve the object by id
         if obj is not None:

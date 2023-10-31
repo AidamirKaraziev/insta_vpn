@@ -2,36 +2,37 @@ version: "3.7"
 services:
   db:
     image: postgres:15
-    container_name: db_insta
+    container_name: db_insta_v2
     volumes:
-      - insta-db-data:/var/lib/postgresql/data
+      - insta-db-datav2:/var/lib/postgresql/datav2
     ports:
-      - "5432:5432"
+      - "5433:5433"
+    command: -p 5433
     env_file:
-      - .env-non-dev
+      - .env-dev-v2
     depends_on:
       - redis
     restart: always
 
   redis:
     image: redis:7
-    container_name: redis_insta
-    command: --port 5380
+    container_name: redis_insta_v2
+    command: --port 5381
     expose:
-      - 5380
+      - 5381
     env_file:
-      - .env-non-dev
+      - .env-dev-v2
     restart: always
 
   app:
     build:
       context: .
-    container_name: app_insta_vpn
+    container_name: app_insta_vpn_v2
     env_file:
-      - .env-non-dev
+      - .env-dev-v2
     command: ["/insta_vpn/docker/app.sh"]
     ports:
-      - 55713:55713
+      - 55755:55755
     depends_on:
       - db
       - redis
@@ -41,37 +42,49 @@ services:
     build:
       context: .
     env_file:
-      - .env-non-dev
-    container_name: celery_insta
-    command: ["/insta_vpn/docker/celery.sh", "celery"]
+      - .env-dev-v2
+    container_name: celery_insta_v2
+    command: [ "/insta_vpn/docker/celery.sh", "celery", "--app=celery:app" ]
     depends_on:
       - redis
+    restart: always
+
+  celery-beat:
+    build:
+      context: .
+    env_file:
+      - .env-dev-v2
+    container_name: celery_beat_insta_v2
+    command: [ "/insta_vpn/docker/celery.sh", "beat", "--app=celery:app" ]
+    depends_on:
+      - celery
     restart: always
 
   flower:
     build:
       context: .
     env_file:
-      - .env-non-dev
-    container_name: flower_insta
+      - .env-dev-v2
+    container_name: flower_insta_v2
     command: ["/insta_vpn/docker/celery.sh", "flower"]
     depends_on:
       - redis
       - celery
     ports:
-      - 8889:5555
+      - 8890:5555
     restart: always
+
   pgadmin:
     image: dpage/pgadmin4
-    container_name: pgadmin_insta
+    container_name: pgadmin_insta_v2
     depends_on:
       - db
       - redis
     ports:
-      - "5050:5050"
+      - "5051:5051"
     env_file:
-      - .env-non-dev
+      - .env-dev-v2
     restart: always
 
 volumes:
-  insta-db-data:
+  insta-db-datav2:

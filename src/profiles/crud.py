@@ -1,30 +1,39 @@
 from datetime import datetime
+from uuid import uuid4
 
-from sqlalchemy import select
+from pydantic import UUID4
+from sqlalchemy import select, extract, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from account.crud import crud_account
-from config import FREE_TRAFFIC, LIMIT_PROFILES
+from config import OUTLINE_USERS_GATEWAY, CONN_NAME, MAX_PROFILE_TO_ACCOUNT
 from core.base_crud import CRUDBase
-from outline.outline.outline_vpn.outline_vpn import OutlineVPN
 from profiles.models import Profile
-from profiles.schemas import ProfileCreate, ProfileUpdate, ProfileActivate
-from server.crud import crud_server
+from profiles.schemas import ProfileCreate, ProfileUpdate
+
+from static_key.crud import crud_static_key
+
+
+async def gen_outline_dynamic_link(profile_id: UUID4):
+    return f"{OUTLINE_USERS_GATEWAY}/conf/{profile_id}#{CONN_NAME}"
 
 
 class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
     obj_name = "Profile"
     not_found_id = {"num": 404, "message": f"Not found {obj_name} with this id"}
     not_found_by_key_id_server_id = {"num": 404, "message": f"Not found a {obj_name} with this key_id and server_id"}
-    not_found_by_server_id = {"num": 404, "message": f"Not found a {obj_name + 's'} with this server_id"}
+    cannot_delete_an_active_profile = {"num": 404, "message": f"Cannot delete an active {obj_name}"}
+    too_many_profiles = {"num": 404, "message": f"Too many {obj_name}s"}
 
-    async def get_profile_by_id(self, *, db: AsyncSession, id: int):
+    async def get_profile_by_id(self, *, db: AsyncSession, id: UUID4):
+        """Получение профиля по UUID4, если такого нет то вывод ошибки"""
         obj = await super().get(db=db, id=id)
         if obj is None:
             return None, self.not_found_id, None
         return obj, 0, None
 
     async def get_profiles_by_account_id(self, *, db: AsyncSession, id: int):
+        """Получение списка профилей по account_id, если их нет -> []"""
         account, code, indexes = await crud_account.get_account_by_id(db=db, id=id)
         if code != 0:
             return None, code, None
@@ -34,73 +43,73 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         return obj, 0, None
 
     async def get_all_profiles(self, *, db: AsyncSession, skip: int, limit: int):
+        """Список всех профилей, если их нет -> []"""
         objects = await super().get_multi(db_session=db, skip=skip, limit=limit)
         return objects, 0, None
 
-    async def add_profile(self, *, db: AsyncSession, new_data: ProfileCreate):
-        obj, code, indexes = await crud_account.get_account_by_id(db=db, id=new_data.account_id)
+    async def add_profile(self, *, db: AsyncSession, account_id: int, name: str):
+        """Создание профиля с нужными полями, который по дефолту не активен:
+            id: UUID4
+            name: str
+            account_id: int
+            dynamic_key: Optional[str]
+            is_active: Optional[bool] = False"""
+        uuid_value = uuid4()
+        dynamic_key = await gen_outline_dynamic_link(profile_id=uuid_value)  # эта пизда выделена желтым
+        account, code, indexes = await crud_account.get_account_by_id(db=db, id=account_id)
         if code != 0:
             return None, code, None
-        obj, code, indexes = await crud_server.get_server_by_id(db=db, id=new_data.server_id)
-        if code != 0:
-            return None, code, None
+        new_data = ProfileCreate(id=uuid_value, account_id=account_id, name=name, dynamic_key=dynamic_key)
         objects = await super().create(db_session=db, obj_in=new_data)
         return objects, 0, None
 
-    async def update_profile(self, *, db: AsyncSession, update_data: ProfileUpdate, id: int):
-        # check id
-        query = select(self.model).where(self.model.id == id)
-        resp = await db.execute(query)
-        this_obj = resp.scalar_one_or_none()
-        if this_obj is None:
-            return None, self.not_found_id, None
-        objects = await super().update(db_session=db, obj_current=this_obj, obj_new=update_data)
-        return objects, 0, None
-
-    async def delete_profile(self, *, db: AsyncSession, id: int):
-        obj, code, indexes = await self.get_profile_by_id(db=db, id=id)
-        if code != 0:
-            return None, code, None
-        obj = await super().delete(db=db, id=id)
-        return obj, 0, None
-
-    async def activate_profile(self, *, db: AsyncSession, activate_data: ProfileActivate, id: int):
-        # check id
+    async def update_profile(self, *, db: AsyncSession, update_data: ProfileUpdate, id: UUID4):
+        """Обновление данных в профиле:
+            dynamic_key: Optional[str]
+            static_key_id: Optional[int]
+            date_end: Optional[Timestamp]
+            used_bytes: Optional[int]
+            is_active: Optional[bool]"""
         profile, code, indexes = await self.get_profile_by_id(db=db, id=id)
         if code != 0:
             return None, code, None
+        objects = await super().update(db_session=db, obj_current=profile, obj_new=update_data)
+        return objects, 0, None
+
+    async def activate_profile(self, *, db: AsyncSession, activate_data: ProfileUpdate, id: UUID4):
+        """Активирует профиль, указывается дата окончания и is_active: True,
+         подбирается свободный static_key"""
+        profile, code, indexes = await self.get_profile_by_id(db=db, id=id)
+        if code != 0:
+            return None, code, None
+        static_key, code, indexes = await crud_static_key.get_good_key(db=db)
+        if code != 0:
+            return None, code, None
+        activate_data.is_active = True
+        activate_data.static_key_id = static_key.id
         objects = await super().update(db_session=db, obj_current=profile, obj_new=activate_data)
         return objects, 0, None
 
-    # перестраховка проходится по базе данных и активирует все оплаченные аккаунты
-    async def activate_paid_profiles(self, db: AsyncSession, skip: int = 0):
-        # get all profiles
-        profiles, code, indexes = await self.get_all_profiles(db=db, skip=skip, limit=LIMIT_PROFILES)
-        for profile in profiles:
-            if profile.date_end > datetime.date(datetime.now()):
-                # add data_limit
-                server, code, indexes = await crud_server.get_server_by_id(db=db, id=profile.server_id)
-                try:
-                    client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
-                    client.delete_data_limit(key_id=profile.key_id)
-                except Exception as ex:
-                    return None, self.outline_error(ex=ex), None
-                update_data = ProfileUpdate(data_limit=None, is_active=True)
-                obj, code, indexes = await self.update_profile(db=db, update_data=update_data, id=profile.id)
-        return profiles, code, indexes
-
-    async def get_profile_by_key_id_server_id(self, *, db: AsyncSession, key_id: int, server_id: int):
-        query = select(self.model).where(self.model.key_id == key_id, self.model.server_id == server_id)
-        response = await db.execute(query)
-        res = response.scalar_one_or_none()
-        if res is None:
-            return None, self.not_found_by_key_id_server_id, {"key_id": key_id, "server_id": server_id}
-        return res, 0, None
+    async def deactivate_profile(self, *, db: AsyncSession, id: UUID4):
+        """Деактивирует профиль: is_active -> False, static_key_id -> None"""
+        profile, code, indexes = await self.get_profile_by_id(db=db, id=id)
+        if code != 0:
+            return None, code, None
+        deactivate_data = ProfileUpdate(is_active=False, static_key_id=None)
+        objects = await super().update(db_session=db, obj_current=profile, obj_new=deactivate_data)
+        return objects, 0, None
 
     async def get_name_for_profile(self, *, db: AsyncSession, account_id: int):
+        """
+            Присваивает имя профиля для фронта. Номеруется от меньшего к большему.
+            Проверяет максимальное количество профилей для одного аккаунта
+            Пример: Профиль 1.
+        """
         profiles, code, indexes = await self.get_profiles_by_account_id(db=db, id=account_id)
         if code != 0:
             return None, code, None
+        if int(len(profiles)) > int(MAX_PROFILE_TO_ACCOUNT):
+            return None, self.too_many_profiles, None
         num = 1
         name_list = []
         for profile in profiles:
@@ -112,17 +121,56 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
                 return f"Профиль {num}", 0, None
         return f"Профиль {num}", 0, None
 
-    async def get_profiles_by_server_id(self, *, db: AsyncSession, id: int):
-        server, code, indexes = await crud_server.get_server_by_id(db=db, id=id)
+    async def replacement_key(self, *, db: AsyncSession, profile_id: UUID4):
+        """Замена static_key_id в профиле. Выбирается самый первый свободный ключ"""
+        profile, code, indexes = await self.get_profile_by_id(db=db, id=profile_id)
         if code != 0:
             return None, code, None
-        query = select(self.model).where(self.model.server_id == id)
+        static_key, code, indexes = await crud_static_key.get_replacement_key(
+            db=db, static_key_id=profile.static_key_id)
+        if code != 0:
+            return None, code, None
+        # update
+        update_data = ProfileUpdate(static_key_id=static_key.id)
+        profile, code, indexes = await self.update_profile(db=db, id=profile_id, update_data=update_data)
+        if code != 0:
+            return None, code, None
+        return profile, 0, None
+
+    async def get_profiles_by_date_end(self, *, db: AsyncSession, your_date: datetime):
+        """Дает список активных профилей, где date_end < your_date"""
+        query = select(self.model).where(self.model.date_end < your_date, self.model.is_active == True)
         response = await db.execute(query)
         obj = response.scalars().all()
-        if response is None:
-            return None, self.not_found_by_server_id, None
-        objects = await super().get_multi(db_session=db, skip=0, limit=LIMIT_PROFILES)
-        return objects, 0, None
+        return obj, 0, None
+
+    async def get_active_paid_profiles_per_month_in_year(self, *, db: AsyncSession, year_value: int):
+        """Получить количество активных платных профилей для каждого месяца в указанном году."""
+        query = (
+            select(
+                extract('month', self.model.date_end).label('month'),
+                func.count().label('active_count')
+            )
+            .where(
+                self.model.is_active == True,
+                extract('year', self.model.date_end) == year_value
+            )
+            .group_by(extract('month', self.model.date_end))
+            .order_by(extract('month', self.model.date_end))
+        )
+        response = await db.execute(query)
+        results = response.all()
+        return results, 0, None
+
+    async def delete_profile(self, *, db: AsyncSession, id: UUID4):
+        """Удаление профиля с проверкой на активность. Нельзя удалить оплаченный профиль"""
+        obj, code, indexes = await self.get_profile_by_id(db=db, id=id)
+        if code != 0:
+            return None, code, None
+        if obj.is_active:
+            return None, self.cannot_delete_an_active_profile, None
+        obj = await super().delete(db=db, id=id)
+        return obj, 0, None
 
 
 crud_profile = CrudProfile(Profile)

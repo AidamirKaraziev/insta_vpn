@@ -6,6 +6,7 @@ from account.schemas import AccountCreate, AccountUpdate
 from core.base_crud import CRUDBase
 
 
+# TODO дополнить круд в соответствии с моделью и схемой
 class CrudAccount(CRUDBase[Account, AccountCreate, AccountUpdate]):
     obj_name = "Account"
     not_found_id = {"num": 404, "message": f"Not found {obj_name} with this id"}

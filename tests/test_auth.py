@@ -8,8 +8,7 @@ def test_register():
         "is_active": True,
         "is_superuser": False,
         "is_verified": False,
-        "username": "string",
-        "role_id": 1
+        "username": "string"
     })
 
     assert response.status_code == 201

@@ -1,8 +1,14 @@
-import smtplib
+import asyncio
+from datetime import datetime
 from email.message import EmailMessage
 from typing import Optional
+import smtplib
+from sqlalchemy import update
 
 from celery import Celery
+
+from profiles.models import Profile
+from database import async_session_maker
 from config import SMTP_USER, SMTP_PASSWORD, REDIS_HOST, REDIS_PORT
 
 SMTP_HOST = "smtp.gmail.com"
@@ -50,6 +56,14 @@ def get_email_template_request_verify(name: str, email_to: Optional[str], token:
     return email
 
 
+async def update_fields_is_active():
+    today = datetime.now()
+    async with async_session_maker() as session:
+        query = update(Profile).where(Profile.date_end < today).values(is_active=False)
+        await session.execute(query)
+        await session.commit()
+
+
 @celery.task
 def send_email_report_forgot_password(token: str, name: str, email_to: str):
     email = get_email_template_forgot_password(token=token, name=name, email_to=email_to)
@@ -64,3 +78,9 @@ def send_email_request_verify(token: str, name: str, email_to: str):
     with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
         server.login(SMTP_USER, SMTP_PASSWORD)
         server.send_message(email)
+
+
+@celery.task
+def describe_profiles():
+    asyncio.run(update_fields_is_active())
+
