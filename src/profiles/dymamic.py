@@ -55,8 +55,5 @@ async def handle_payment(
 async def handle_payment(
         session: AsyncSession = Depends(get_async_session),
 ):
-    res = """dmxlc3M6Ly85YzBiNTY4ZC00NDZhLTQwYzMtOTUxNC1iZjZlNzI0ZmVjOGFAMTc2LjU3LjIxMi4x
-MjQ6NDQzP3R5cGU9dGNwJnNlY3VyaXR5PXJlYWxpdHkmZnA9ZmlyZWZveCZwYms9bjY1bEN5VGd5
-T1BZYVJlZ05xeHlmWmZoQmFHb1A3SmdMa1hYUUJuTnZTdyZzbmk9eWFob28uY29tJmZsb3c9eHRs
-cy1ycHJ4LXZpc2lvbiZzaWQ9ZjhkODMyOGUmc3B4PSUyRiMxLXRlc3Qy"""
+    res = "vless://9c0b568d-446a-40c3-9514-bf6e724fec8a@176.57.212.124:443?type=tcp&security=reality&fp=firefox&pbk=n65lCyTgyOPYaRegNqxyfZfhBaGoP7JgLkXXQBnNvSw&sni=yahoo.com&flow=xtls-rprx-vision&sid=f8d8328e&spx=%2F#1-test2"
     return res
