@@ -39,5 +39,7 @@ OUTLINE_USERS_GATEWAY = os.environ.get("OUTLINE_USERS_GATEWAY")
 OUTLINE_SALT = os.environ.get("OUTLINE_SALT")
 CONN_NAME = os.environ.get("CONN_NAME")
 
+VLESS_USERS_GATEWAY = os.environ.get("VLESS_USERS_GATEWAY")
+
 BASE_REFERRAL_LINK = "https://t.me/financier_tgrm_bot?start=referral-link-"
 BASE_REGISTER_REFERENT_LINK = "https://t.me/financier_tgrm_bot?start=referent-link-"

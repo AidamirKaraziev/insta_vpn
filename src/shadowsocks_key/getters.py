@@ -1,9 +1,9 @@
 from typing import Optional
-from static_key.schemas import StaticKeyGet
+from shadowsocks_key.schemas import ShadowsocksKeyGet
 
 
-def getting_static_key(obj: StaticKeyGet) -> Optional[StaticKeyGet]:
-    return StaticKeyGet(
+def getting_shadowsocks_key(obj: ShadowsocksKeyGet) -> Optional[ShadowsocksKeyGet]:
+    return ShadowsocksKeyGet(
         id=obj.id,
         server_id=obj.server_id,
 

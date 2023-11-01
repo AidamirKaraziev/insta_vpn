@@ -13,8 +13,10 @@ def getting_profile(obj: ProfileGet) -> Optional[ProfileGet]:
         name=obj.name,
         account_id=obj.account_id,
         dynamic_key=obj.dynamic_key,
-        static_key_id=obj.static_key_id,
+        shadowsocks_key_id=obj.shadowsocks_key_id,
+        vless_key_id=obj.vless_key_id,
         date_end=obj.date_end,
         used_bytes=obj.used_bytes,
+        vpn_type_id=obj.vpn_type_id,
         is_active=obj.is_active
     )

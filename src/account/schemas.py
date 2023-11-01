@@ -9,7 +9,7 @@ class AccountGet(BaseModel):
     number: Optional[str]
     created_at: Optional[Timestamp]
     trial_is_active: Optional[bool]
-    referral_id: Optional[UUID4]
+    referent_id: Optional[UUID4]
     can_pay_out: Optional[bool]
 
 
@@ -17,7 +17,7 @@ class AccountCreate(BaseModel):
     id: int
     name: Optional[str]
     number: Optional[str]
-    referral_id: Optional[UUID4]
+    referent_id: Optional[UUID4]
 
 
 class AccountUpdate(BaseModel):

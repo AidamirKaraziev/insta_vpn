@@ -7,8 +7,8 @@ from server.models import Server
 metadata = MetaData()
 
 
-class StaticKey(Base):
-    __tablename__ = "static_key"
+class ShadowsocksKey(Base):
+    __tablename__ = "shadowsocks_key"
 
     metadata = metadata
     id = Column(BigInteger, primary_key=True)
@@ -25,7 +25,7 @@ class StaticKey(Base):
 
     is_active = Column(Boolean, default=False)
 
-    server = relationship(Server, backref="static_keys", lazy="joined")
+    server = relationship(Server, backref="shadowsocks_keys", lazy="joined")
     __table_args__ = (
-        UniqueConstraint("server_id", "key_id", name='_key_server_uc'),
+        UniqueConstraint("server_id", "key_id", name='_key_id_server_uc'),
                       )

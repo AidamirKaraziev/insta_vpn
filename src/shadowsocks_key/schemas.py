@@ -2,7 +2,7 @@ from typing import Optional, Any
 from pydantic import BaseModel, Field
 
 
-class StaticKeyGet(BaseModel):
+class ShadowsocksKeyGet(BaseModel):
     id: int
     server_id: int
 
@@ -18,7 +18,7 @@ class StaticKeyGet(BaseModel):
     is_active: Optional[bool]
 
 
-class StaticKeyCreate(BaseModel):
+class ShadowsocksKeyCreate(BaseModel):
     server_id: int
 
     key_id: int
@@ -33,7 +33,7 @@ class StaticKeyCreate(BaseModel):
     is_active: Optional[bool]
 
 
-class StaticKeyUpdate(BaseModel):
+class ShadowsocksKeyUpdate(BaseModel):
     # server_id: Optional[int]
     #
     # key_id: Optional[int]

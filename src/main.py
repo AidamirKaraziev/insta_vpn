@@ -18,7 +18,7 @@ from user.router import router as router_user, get_users_router
 
 from outline_apis.router import router as router_outline
 from profiles.dymamic import router as dynamic_router
-from static_key.router import router as static_key_router
+from shadowsocks_key.router import router as shadowsocks_key_router
 
 
 current_user = fastapi_users.current_user()
@@ -67,7 +67,7 @@ app.include_router(router_profile)
 app.include_router(router_outline)
 app.include_router(router_tools)
 app.include_router(dynamic_router)
-app.include_router(static_key_router)
+app.include_router(shadowsocks_key_router)
 
 origins = ["*"]
 
@@ -106,5 +106,5 @@ async def startup_event():
 # def protected_route(user: User = Depends(current_user)):
 #     return f"Hello, {user.email}"
 
-# необходимо для отображения ошибок в формате exception
+"""Не удалять!!!Важно для отображения ошибок"""
 from core.errors import *

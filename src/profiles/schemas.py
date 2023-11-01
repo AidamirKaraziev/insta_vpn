@@ -9,10 +9,12 @@ class ProfileGet(BaseModel):
     account_id: int
 
     dynamic_key: Optional[str]
-    static_key_id: Optional[int]
+    shadowsocks_key_id: Optional[int]
+    vless_key_id: Optional[int]
 
     date_end: Optional[str]
     used_bytes: Optional[int]
+    vpn_type_id: Optional[int]
     is_active: Optional[bool]
 
 
@@ -22,13 +24,20 @@ class ProfileCreate(BaseModel):
     account_id: int
 
     dynamic_key: Optional[str]
-    is_active: Optional[bool] = False
+    shadowsocks_key_id: Optional[int]
+    vless_key_id: Optional[int]
+
+    date_end: Optional[str]
+    vpn_type_id: Optional[int]
+    is_active: Optional[bool]
 
 
 class ProfileUpdate(BaseModel):
     dynamic_key: Optional[str]
-    static_key_id: Optional[int]
+    shadowsocks_key_id: Optional[int]
+    vless_key_id: Optional[int]
 
-    date_end: Optional[Timestamp]
+    date_end: Optional[str]
     used_bytes: Optional[int]
+    vpn_type_id: Optional[int]
     is_active: Optional[bool]

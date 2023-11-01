@@ -9,9 +9,9 @@ from database import get_async_session
 from server.crud import crud_server
 from server.getters import getting_server
 from server.schemas import ServerCreate, ServerUpdate
-from static_key.crud import crud_static_key
 from auth.base_config import fastapi_users
 from auth.models import User
+from shadowsocks_key.crud import crud_shadowsocks_key
 
 current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
 
@@ -67,7 +67,7 @@ async def add_server_create_keys(
     try:
         server, code, indexes = await crud_server.add_server(db=session, new_data=new_data)
         await get_raise_new(code)
-        keys, code, indexes = await crud_static_key.creating_keys_for_a_server(db=session, server_id=server.id)
+        keys, code, indexes = await crud_shadowsocks_key.creating_keys_for_a_server(db=session, server_id=server.id)
         await get_raise_new(code)
         return SingleEntityResponse(data=getting_server(obj=server))
     except Exception as ex:
@@ -117,7 +117,7 @@ async def deactivate_server_and_keys(
 ):
     obj, code, indexes = await crud_server.deactivate_server(db=session, id=server_id)
     await get_raise_new(code)
-    keys, code, indexes = await crud_static_key.deactivate_keys_by_server_id(db=session, server_id=server_id)
+    keys, code, indexes = await crud_shadowsocks_key.deactivate_keys_by_server_id(db=session, server_id=server_id)
     await get_raise_new(code)
     return OkResponse()
 
@@ -134,7 +134,7 @@ async def activate_server_and_keys(
 ):
     obj, code, indexes = await crud_server.activate_server(db=session, id=server_id)
     await get_raise_new(code)
-    keys, code, indexes = await crud_static_key.activate_keys_by_server_id(db=session, server_id=server_id)
+    keys, code, indexes = await crud_shadowsocks_key.activate_keys_by_server_id(db=session, server_id=server_id)
     await get_raise_new(code)
     return OkResponse()
 

@@ -101,6 +101,7 @@ async def add_profile(
         update_data = AccountUpdate(trial_is_active=False)
         account, code, indexes = await crud_account.update_account(db=session, id=account_id, update_data=update_data)
         await get_raise_new(code)
+    print(profile)  # без этого почему-то не работает геттерс, это странно
     return SingleEntityResponse(data=getting_profile(obj=profile))
 
 

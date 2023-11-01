@@ -6,22 +6,23 @@ from core.raise_template import raise_schemas
 
 from outline.outline.outline_vpn.outline_vpn import OutlineVPN
 from server.crud import crud_server
-from static_key.schemas import StaticKeyUpdate, StaticKeyCreate
-from static_key.models import StaticKey
+
 from profiles.models import Profile
+from shadowsocks_key.models import ShadowsocksKey
+from shadowsocks_key.schemas import ShadowsocksKeyCreate, ShadowsocksKeyUpdate
 
 
-class CrudStaticKey(CRUDBase[StaticKey, StaticKeyCreate, StaticKeyUpdate]):
-    obj_name = "StaticKey"
+class CrudShadowsocksKey(CRUDBase[ShadowsocksKey, ShadowsocksKeyCreate, ShadowsocksKeyUpdate]):
+    obj_name = "ShadowsocksKey"
     not_found_id = {"num": 404, "message": f"Not found {obj_name} with this id"}
     not_found_by_server_id = {"num": 404, "message": f"Not found a {obj_name + 's'} with this server_id"}
     no_keys_available = {"num": 404, "message": f"No {obj_name + 's'} available"}
 
-    async def get_all_static_keys(self, *, db: AsyncSession, skip: int, limit: int):
+    async def get_all_shadowsocks_keys(self, *, db: AsyncSession, skip: int, limit: int):
         objects = await super().get_multi(db_session=db, skip=skip, limit=limit)
         return objects, 0, None
 
-    async def get_static_key_by_id(self, *, db: AsyncSession, id: int):
+    async def get_shadowsocks_key_by_id(self, *, db: AsyncSession, id: int):
         obj = await super().get(db=db, id=id)
         if obj is None:
             return None, self.not_found_id, None
@@ -34,7 +35,7 @@ class CrudStaticKey(CRUDBase[StaticKey, StaticKeyCreate, StaticKeyUpdate]):
         try:
             client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
             key = client.create_key()
-            new_data = StaticKeyCreate(server_id=server_id, key_id=key.key_id, name=key.name, port=key.port,
+            new_data = ShadowsocksKeyCreate(server_id=server_id, key_id=key.key_id, name=key.name, port=key.port,
                                        method=key.method, access_url=key.access_url, used_bytes=key.used_bytes,
                                        data_limit=key.data_limit, password=key.password, is_active=True)
             objects = await super().create(db_session=db, obj_in=new_data)
@@ -42,7 +43,7 @@ class CrudStaticKey(CRUDBase[StaticKey, StaticKeyCreate, StaticKeyUpdate]):
             return None, raise_schemas(ex), None
         return objects, 0, None
 
-    async def get_static_keys_by_server_id(self, *, db: AsyncSession, server_id: int):
+    async def get_shadowsocks_keys_by_server_id(self, *, db: AsyncSession, server_id: int):
         server, code, indexes = await crud_server.get_server_by_id(db=db, id=server_id)
         if code != 0:
             return None, code, None
@@ -61,12 +62,12 @@ class CrudStaticKey(CRUDBase[StaticKey, StaticKeyCreate, StaticKeyUpdate]):
             key, code, indexes = await self.create_key(db=db, server_id=server_id)
             if code != 0:
                 return None, code, None
-        keys, code, indexes = await self.get_static_key_by_id(db=db, id=server_id)
+        keys, code, indexes = await self.get_shadowsocks_key_by_id(db=db, id=server_id)
         return keys, 0, None
 
     async def get_good_key(self, *, db: AsyncSession):
         res = select(self.model).select_from(self.model).outerjoin(Profile).where(
-            Profile.static_key_id == None, self.model.is_active == True).limit(1)
+            Profile.shadowsocks_key_id == None, self.model.is_active == True).limit(1)
         response = await db.execute(res)
         obj = response.scalar()
         if not obj:
@@ -74,14 +75,14 @@ class CrudStaticKey(CRUDBase[StaticKey, StaticKeyCreate, StaticKeyUpdate]):
             return None, self.no_keys_available, None
         return obj, 0, None
 
-    async def get_replacement_key(self, *, db: AsyncSession, static_key_id: int):
-        static_key, code, indexes = await self.get_static_key_by_id(db=db, id=static_key_id)
+    async def get_replacement_key(self, *, db: AsyncSession, shadowsocks_key_id: int):
+        static_key, code, indexes = await self.get_shadowsocks_key_by_id(db=db, id=shadowsocks_key_id)
         if code != 0:
             return None, code, None
 
         res = select(self.model).select_from(self.model).outerjoin(Profile).where(
-            Profile.static_key_id == None, self.model.is_active == True,
-            self.model.server_id != static_key.server_id).limit(1)
+            Profile.shadowsocks_key_id == None, self.model.is_active == True,
+            self.model.server_id != shadowsocks_key.server_id).limit(1)
         response = await db.execute(res)
         obj = response.scalar()
         if not obj:
@@ -92,11 +93,11 @@ class CrudStaticKey(CRUDBase[StaticKey, StaticKeyCreate, StaticKeyUpdate]):
         server, code, indexes = await crud_server.get_server_by_id(db=db, id=server_id)
         if code != 0:
             return None, code, None
-        keys, code, indexes = await self.get_static_keys_by_server_id(db=db, server_id=server_id)
+        keys, code, indexes = await self.get_shadowsocks_keys_by_server_id(db=db, server_id=server_id)
         for key in keys:
-            update_data = StaticKeyUpdate(is_active=False)
+            update_data = ShadowsocksKeyUpdate(is_active=False)
             await super().update(db_session=db, obj_current=key, obj_new=update_data)
-        keys, code, indexes = await self.get_static_keys_by_server_id(db=db, server_id=server_id)
+        keys, code, indexes = await self.get_shadowsocks_keys_by_server_id(db=db, server_id=server_id)
         if code != 0:
             return None, code, None
         return keys, 0, None
@@ -105,11 +106,11 @@ class CrudStaticKey(CRUDBase[StaticKey, StaticKeyCreate, StaticKeyUpdate]):
         server, code, indexes = await crud_server.get_server_by_id(db=db, id=server_id)
         if code != 0:
             return None, code, None
-        keys, code, indexes = await self.get_static_keys_by_server_id(db=db, server_id=server_id)
+        keys, code, indexes = await self.get_shadowsocks_keys_by_server_id(db=db, server_id=server_id)
         for key in keys:
-            update_data = StaticKeyUpdate(is_active=True)
+            update_data = ShadowsocksKeyUpdate(is_active=True)
             await super().update(db_session=db, obj_current=key, obj_new=update_data)
-        keys, code, indexes = await self.get_static_keys_by_server_id(db=db, server_id=server_id)
+        keys, code, indexes = await self.get_shadowsocks_keys_by_server_id(db=db, server_id=server_id)
         if code != 0:
             return None, code, None
         return keys, 0, None
@@ -117,10 +118,10 @@ class CrudStaticKey(CRUDBase[StaticKey, StaticKeyCreate, StaticKeyUpdate]):
     async def get_quantity_free_keys(self, *, db: AsyncSession):
         """Выводит количество свободных ключей"""
         res = select(self.model).select_from(self.model).outerjoin(Profile).where(
-            Profile.static_key_id == None, self.model.is_active == True)
+            Profile.shadowsocks_key_id == None, self.model.is_active == True)
         response = await db.execute(res)
         quantity_free_keys = len(response.all())
         return quantity_free_keys, 0, None
 
 
-crud_static_key = CrudStaticKey(StaticKey)
+crud_shadowsocks_key = CrudShadowsocksKey(ShadowsocksKey)
