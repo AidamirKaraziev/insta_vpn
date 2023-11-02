@@ -10,7 +10,7 @@ from auth.base_config import fastapi_users
 from auth.models import User
 from vless_key.crud import crud_vless_key
 from vless_key.getters import getting_vless_key
-from vless_key.shcemas import VlessKeyCreate, VlessKeyLinks
+from vless_key.shcemas import VlessKeyCreate
 
 current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
 
