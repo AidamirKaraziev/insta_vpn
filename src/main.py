@@ -18,8 +18,9 @@ from user.router import router as router_user, get_users_router
 
 from outline_apis.router import router as router_outline
 from profiles.dymamic import router as dynamic_router
-from shadowsocks_key.router import router as router_shadowsocks_key
+from outline_key.router import router as router_outline_key
 from vless_key.router import router as router_vless_key
+from vpn_type.router import router as router_vpn_type
 
 
 current_user = fastapi_users.current_user()
@@ -61,6 +62,7 @@ app.include_router(
     tags=["auth"],
 )
 
+app.include_router(router_vpn_type)
 app.include_router(router_server)
 app.include_router(router_tariff)
 app.include_router(router_account)
@@ -68,7 +70,7 @@ app.include_router(router_profile)
 app.include_router(router_outline)
 app.include_router(router_tools)
 app.include_router(dynamic_router)
-app.include_router(router_shadowsocks_key)
+app.include_router(router_outline_key)
 app.include_router(router_vless_key)
 
 origins = ["*"]
