@@ -22,11 +22,23 @@ from outline_key.router import router as router_outline_key
 from vless_key.router import router as router_vless_key
 from vpn_type.router import router as router_vpn_type
 
-
 current_user = fastapi_users.current_user()
 
 app = FastAPI(title="Insta VPN")
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+"""Мои API"""
+app.include_router(router_outline_key)
+app.include_router(router_server)
+app.include_router(router_tariff)
+app.include_router(router_account)
+app.include_router(router_profile)
+app.include_router(router_outline)
+app.include_router(router_tools)
+app.include_router(dynamic_router)
+app.include_router(router_vless_key)
+app.include_router(router_vpn_type)
+
 
 app.include_router(
     fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["Bearer-auth"]
@@ -62,16 +74,6 @@ app.include_router(
     tags=["auth"],
 )
 
-app.include_router(router_vpn_type)
-app.include_router(router_server)
-app.include_router(router_tariff)
-app.include_router(router_account)
-app.include_router(router_profile)
-app.include_router(router_outline)
-app.include_router(router_tools)
-app.include_router(dynamic_router)
-app.include_router(router_outline_key)
-app.include_router(router_vless_key)
 
 origins = ["*"]
 
