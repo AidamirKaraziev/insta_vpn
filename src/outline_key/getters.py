@@ -1,9 +1,10 @@
 from typing import Optional
-from shadowsocks_key.schemas import ShadowsocksKeyGet
+
+from outline_key.schemas import OutlineKeyGet
 
 
-def getting_shadowsocks_key(obj: ShadowsocksKeyGet) -> Optional[ShadowsocksKeyGet]:
-    return ShadowsocksKeyGet(
+def getting_outline_key(obj: OutlineKeyGet) -> Optional[OutlineKeyGet]:
+    return OutlineKeyGet(
         id=obj.id,
         server_id=obj.server_id,
 

@@ -7,8 +7,8 @@ from server.models import Server
 metadata = MetaData()
 
 
-class ShadowsocksKey(Base):
-    __tablename__ = "shadowsocks_key"
+class OutlineKey(Base):
+    __tablename__ = "outline_key"
 
     metadata = metadata
     id = Column(BigInteger, primary_key=True)
@@ -23,9 +23,9 @@ class ShadowsocksKey(Base):
     data_limit = Column(Integer)
     password = Column(String)
 
-    is_active = Column(Boolean, default=False)
+    is_active = Column(Boolean)
 
-    server = relationship(Server, backref="shadowsocks_keys", lazy="joined")
+    server = relationship(Server, backref="outline_keys", lazy="joined")
     __table_args__ = (
-        UniqueConstraint("server_id", "key_id", name='_key_id_server_uc'),
+        UniqueConstraint("server_id", "key_id", name='_key_server_uc'),
                       )
