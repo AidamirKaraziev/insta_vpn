@@ -63,7 +63,7 @@ class CrudOutlineKey(CRUDBase[OutlineKey, OutlineKeyCreate, OutlineKeyUpdate]):
             return None, raise_schemas(ex), None
         return objects, 0, None
 
-    async def creating_outline_keys_for_a_server(self, *, db: AsyncSession, server_id: int):
+    async def creating_keys_for_a_server(self, *, db: AsyncSession, server_id: int):
         """
         Создает Outline ключи для сервера, по server_id.
         Проверяет есть ли такой сервер, если нет - выдает ошибку с описанием.
