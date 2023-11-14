@@ -61,7 +61,7 @@ async def encode_string(
     # ответ если профиль не активен
     elif profile.is_active is False:
         # TODO отправить смс в телегу
-        return "Не активна подписка"
+        await get_raise_new({"num": 403, "message": f"Подписка неактивна"})
     # Получаем
     outline_key, code, indexes = await crud_outline_key.get_key_by_id(db=session, id=profile.outline_key_id)
     await get_raise_new(code)
