@@ -35,7 +35,7 @@ router = APIRouter(
             description='Получение списка всех профилей'
             )
 async def get_profiles(
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_profile.get_all_profiles(db=session, skip=0, limit=LIMIT_PROFILES)
@@ -50,7 +50,7 @@ async def get_profiles(
             )
 async def get_profile(
         profile_id: UUID4,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_profile.get_profile_by_id(db=session, id=profile_id)
@@ -66,7 +66,7 @@ async def get_profile(
             )
 async def get_profiles_by_account_id(
         account_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_profile.get_profiles_by_account_id(db=session, id=account_id)
@@ -81,7 +81,7 @@ async def get_profiles_by_account_id(
              )
 async def add_profile(
         account_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     # создать профиль
@@ -109,7 +109,7 @@ async def add_profile(
 async def activate_profile(
         activate_data: ProfileUpdate,
         profile_id: UUID4,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     # найти профиль
@@ -127,7 +127,7 @@ async def activate_profile(
             )
 async def replacement_outline_key_for_profile(
         profile_id: UUID4,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     profile, code, indexes = await crud_profile.replacement_outline_key_for_profile(db=session, profile_id=profile_id)
@@ -141,7 +141,7 @@ async def replacement_outline_key_for_profile(
             description='Деактивирует активные профили, у которых истек срок действия'
             )
 async def deactivate_expired_profile(
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     date_of_disconnection = datetime.now()
@@ -162,7 +162,7 @@ async def deactivate_expired_profile(
             )
 async def counting_paid_profiles(
         year_value: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     response = []
@@ -182,7 +182,7 @@ async def counting_paid_profiles(
                )
 async def delete_profile(
         profile_id: UUID4,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_profile.delete_profile(db=session, id=profile_id)

@@ -29,7 +29,7 @@ router = APIRouter(
             )
 async def get_vless_key(
         limit: int = 1000,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_vless_key.get_all_vless_keys(db=session, skip=0, limit=limit)
@@ -44,7 +44,7 @@ async def get_vless_key(
             )
 async def get_vless_key(
         vless_key_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_vless_key.get_vless_key_by_id(db=session, id=vless_key_id)
@@ -60,7 +60,7 @@ async def get_vless_key(
             )
 async def get_vless_keys_by_server_ip(
         server_ip: str,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_vless_key.get_vless_keys_by_server_ip(db=session, server_ip=server_ip)
@@ -82,7 +82,7 @@ async def add_vless_keys(
         server_ip: str,
         file: UploadFile = File(...),
 
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     file_content = await file.read()
@@ -100,7 +100,7 @@ async def add_vless_keys(
              )
 async def add_vless_key(
         new_data: VlessKeyCreate,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     key, code, indexes = await crud_vless_key.create_key(db=session, new_data=new_data)
@@ -115,7 +115,7 @@ async def add_vless_key(
             )
 async def deactivate_vless_keys_by_server_ip(
         server_ip: str,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     keys, code, indexes = await crud_vless_key.deactivate_keys_by_server_ip(db=session, server_ip=server_ip)
@@ -130,7 +130,7 @@ async def deactivate_vless_keys_by_server_ip(
             )
 async def deactivate_vless_keys_by_server_ip(
         server_ip: str,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     keys, code, indexes = await crud_vless_key.activate_keys_by_server_ip(db=session, server_ip=server_ip)
@@ -145,7 +145,7 @@ async def deactivate_vless_keys_by_server_ip(
                )
 async def delete_keys_by_server_ip(
         server_ip: str,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     datum, code, indexes = await crud_vless_key.delete_keys_by_server_ip(db=session, server_ip=server_ip)

@@ -31,7 +31,7 @@ router = APIRouter(
 async def get_vpn_types(
         skip: int = 0,
         limit: int = 100,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_vpn_type.get_all_vpn_types(db=session, skip=skip, limit=limit)
@@ -47,7 +47,7 @@ async def get_vpn_types(
             )
 async def get_vpn_type(
         vpn_type_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_vpn_type.get_vpn_type_by_id(db=session, id=vpn_type_id)
@@ -62,7 +62,7 @@ async def get_vpn_type(
              )
 async def add_vpn_type(
         new_data: VpnTypeCreate,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_vpn_type.add_vpn_type(db=session, new_data=new_data)
@@ -78,7 +78,7 @@ async def add_vpn_type(
 async def update_vpn_type(
         update_data: VpnTypeUpdate,
         vpn_type_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_vpn_type.update_vpn_type(db=session, update_data=update_data, id=vpn_type_id)

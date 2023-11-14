@@ -49,7 +49,7 @@ router = APIRouter(
 async def get_servers(
         skip: int = 0,
         limit: int = 1000,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_server.get_all_servers(db=session, skip=skip, limit=limit)
@@ -64,7 +64,7 @@ async def get_servers(
             )
 async def get_server(
         server_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_server.get_server_by_id(db=session, id=server_id)
@@ -79,7 +79,7 @@ async def get_server(
              )
 async def add_outline_server_create_keys(
         new_data: OutlineServerCreate,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     # TODO мне не нравится, логика - переделать!
@@ -98,7 +98,7 @@ async def add_outline_server_create_keys(
 async def update_server(
         update_data: ServerUpdate,
         server_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_server.update_server(db=session, update_data=update_data, id=server_id)
@@ -113,7 +113,7 @@ async def update_server(
                )
 async def delete_server(
         server_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_server.delete_server(db=session, id=server_id)
@@ -128,7 +128,7 @@ async def delete_server(
             )
 async def deactivate_outline_server_and_keys(
         server_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_server.deactivate_server(db=session, id=server_id)
@@ -146,7 +146,7 @@ async def deactivate_outline_server_and_keys(
             )
 async def activate_outline_server_and_keys(
         server_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_server.activate_server(db=session, id=server_id)

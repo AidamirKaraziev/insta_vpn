@@ -29,7 +29,7 @@ router = APIRouter(
             )
 async def get_outline_key(
         limit: int = 1000,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 
 ):
@@ -45,7 +45,7 @@ async def get_outline_key(
             )
 async def get_outline_key(
         outline_key_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_outline_key.get_key_by_id(db=session, id=outline_key_id)
@@ -61,7 +61,7 @@ async def get_outline_key(
             )
 async def get_outline_keys_by_server_id(
         server_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_outline_key.get_keys_by_server_id(db=session, server_id=server_id)
@@ -75,7 +75,7 @@ async def get_outline_keys_by_server_id(
             description='Вывести сколько есть свободных ключей'
             )
 async def output_how_many_free_keys(
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     quantity_free_keys, code, indexes = await crud_outline_key.get_quantity_free_keys(db=session)
@@ -98,7 +98,7 @@ if __name__ == "__main__":
 #              )
 # async def create_max_outline_keys_to_server(
 #         server_id: int,
-#         # user: User = Depends(current_active_superuser),
+#         user: User = Depends(current_active_superuser),
 #         session: AsyncSession = Depends(get_async_session),
 # ):
 #     key, code, indexes = await crud_outline_key.creating_outline_keys_for_a_server(db=session, server_id=server_id)
