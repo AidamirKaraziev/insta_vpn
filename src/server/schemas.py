@@ -58,3 +58,7 @@ class ServerUpdate(BaseModel):
     name: Optional[str]
 
     fact_client: Optional[int]
+
+
+class MaxClientServerUpdate(BaseModel):
+    max_client: Optional[int]

@@ -1,6 +1,6 @@
-from sqlite3 import Timestamp
 from typing import Optional
 from pydantic import BaseModel, UUID4
+from sqlite3 import Timestamp
 
 
 class ProfileGet(BaseModel):
@@ -9,12 +9,10 @@ class ProfileGet(BaseModel):
     account_id: int
 
     dynamic_key: Optional[str]
-    shadowsocks_key_id: Optional[int]
-    vless_key_id: Optional[int]
+    outline_key_id: Optional[int]
 
-    date_end: Optional[str]
+    date_end: Optional[Timestamp]
     used_bytes: Optional[int]
-    vpn_type_id: Optional[int]
     is_active: Optional[bool]
 
 
@@ -23,21 +21,12 @@ class ProfileCreate(BaseModel):
     name: str
     account_id: int
 
-    dynamic_key: Optional[str]
-    shadowsocks_key_id: Optional[int]
-    vless_key_id: Optional[int]
-
-    date_end: Optional[str]
-    vpn_type_id: Optional[int]
-    is_active: Optional[bool]
+    is_active: Optional[bool] = False
 
 
 class ProfileUpdate(BaseModel):
-    dynamic_key: Optional[str]
-    shadowsocks_key_id: Optional[int]
-    vless_key_id: Optional[int]
+    outline_key_id: Optional[int]
 
-    date_end: Optional[str]
+    date_end: Optional[Timestamp]
     used_bytes: Optional[int]
-    vpn_type_id: Optional[int]
     is_active: Optional[bool]
