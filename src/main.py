@@ -18,7 +18,6 @@ from outline_key.router import router as router_outline_key
 from user.router import router as router_user, get_users_router
 
 from tools.router import router as router_tools
-from outline_apis.router import router as router_outline
 from vless_key.router import router as router_vless_key
 from vpn_type.router import router as router_vpn_type
 
