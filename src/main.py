@@ -34,12 +34,12 @@ app.include_router(router_outline_key)
 app.include_router(router_server)
 app.include_router(router_tariff)
 app.include_router(router_account)
+app.include_router(router_vpn_type)
 
 # пригодится в будущем
 # app.include_router(router_outline)
 # app.include_router(router_tools)
 # app.include_router(router_vless_key)
-# app.include_router(router_vpn_type)
 
 
 app.include_router(
