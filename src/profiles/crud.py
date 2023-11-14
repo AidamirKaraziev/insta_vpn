@@ -121,21 +121,20 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         objects = await super().update(db_session=db, obj_current=profile, obj_new=deactivate_data)
         return objects, 0, None
 
-    # async def replacement_key(self, *, db: AsyncSession, profile_id: UUID4):
-    #     """Замена outline_key_id в профиле. Выбирается самый первый свободный ключ"""
-    #     profile, code, indexes = await self.get_profile_by_id(db=db, id=profile_id)
-    #     if code != 0:
-    #         return None, code, None
-    #     shadowsocks_key, code, indexes = await crud_shadowsocks_key.get_replacement_key(
-    #         db=db, shadowsocks_key_id=profile.shadowsocks_key_id)
-    #     if code != 0:
-    #         return None, code, None
-    #     # update
-    #     update_data = ProfileUpdate(shadowsocks_key_id=shadowsocks_key.id)
-    #     profile, code, indexes = await self.update_profile(db=db, id=profile_id, update_data=update_data)
-    #     if code != 0:
-    #         return None, code, None
-    #     return profile, 0, None
+    async def replacement_outline_key_for_profile(self, *, db: AsyncSession, profile_id: UUID4):
+        """Замена outline_key_id в профиле. Выбирается самый первый свободный ключ"""
+        profile, code, indexes = await self.get_profile_by_id(db=db, id=profile_id)
+        if code != 0:
+            return None, code, None
+        outline_key, code, indexes = await crud_outline_key.get_replacement_key(
+            db=db, outline_key_id=profile.outline_key_id)
+        if code != 0:
+            return None, code, None
+        update_data = ProfileUpdate(outline_key_id=outline_key.id)
+        profile, code, indexes = await self.update_profile(db=db, id=profile_id, update_data=update_data)
+        if code != 0:
+            return None, code, None
+        return profile, 0, None
 
     async def get_profiles_by_date_end(self, *, db: AsyncSession, your_date: datetime):
         """Дает список активных профилей, где date_end < your_date"""

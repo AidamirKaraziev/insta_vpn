@@ -119,20 +119,20 @@ async def activate_profile(
     await get_raise_new(code)
     return SingleEntityResponse(data=getting_profile(obj=obj))
 
-# TODO test
-# @router.put(path="/replacement/{profile_id}",
-#             response_model=SingleEntityResponse,
-#             name='replacement_key_for_profile',
-#             description='Заменить ключ для профиля'
-#             )
-# async def replacement_profile(
-#         profile_id: UUID4,
-#         # user: User = Depends(current_active_superuser),
-#         session: AsyncSession = Depends(get_async_session),
-# ):
-#     profile, code, indexes = await crud_profile.replacement_key(db=session, profile_id=profile_id)
-#     await get_raise_new(code)
-#     return SingleEntityResponse(data=getting_profile(obj=profile))
+
+@router.put(path="/replacement-outline-key/{profile_id}",
+            response_model=SingleEntityResponse,
+            name='replacement_outline_key_for_profile',
+            description='Заменить Outline ключ для профиля'
+            )
+async def replacement_outline_key_for_profile(
+        profile_id: UUID4,
+        # user: User = Depends(current_active_superuser),
+        session: AsyncSession = Depends(get_async_session),
+):
+    profile, code, indexes = await crud_profile.replacement_outline_key_for_profile(db=session, profile_id=profile_id)
+    await get_raise_new(code)
+    return SingleEntityResponse(data=getting_profile(obj=profile))
 
 
 @router.get(path="/deactivate-expired/",
