@@ -12,7 +12,7 @@ class OutlineKey(Base):
 
     metadata = metadata
     id = Column(BigInteger, primary_key=True)
-    server_id = Column(Integer, ForeignKey(Server.id, ondelete="CASCADE"))
+    server_id = Column(Integer, ForeignKey(Server.id, ondelete="CASCADE", onupdate="CASCADE"))
 
     key_id = Column(Integer)
     name = Column(String)
