@@ -1,8 +1,8 @@
-"""init
+"""Init
 
-Revision ID: 62f9c3db5f57
+Revision ID: c7b2b85dcafc
 Revises: 
-Create Date: 2023-11-01 20:15:07.244710
+Create Date: 2023-11-14 16:09:41.977888
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = "62f9c3db5f57"
+revision = "c7b2b85dcafc"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -37,38 +37,25 @@ def upgrade() -> None:
         sa.UniqueConstraint("name"),
     )
     op.create_table(
-        "vless_key",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("link", sa.String(), nullable=True),
-        sa.Column("server_ip", sa.String(), nullable=True),
-        sa.Column("is_active", sa.Boolean(), nullable=True),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("link"),
-    )
-    op.create_table(
         "server",
         sa.Column("id", sa.Integer(), autoincrement=False, nullable=False),
+        sa.Column("vpn_type_id", sa.Integer(), nullable=True),
         sa.Column("name", sa.String(), nullable=True),
-        sa.Column("api_url", sa.String(), nullable=False),
+        sa.Column("api_url", sa.String(), nullable=True),
         sa.Column("cert_sha256", sa.String(), nullable=True),
-        sa.Column("max_client", sa.Integer(), nullable=True),
-        sa.Column("fact_client", sa.Integer(), nullable=True),
+        sa.Column("marzban_login", sa.String(), nullable=True),
+        sa.Column("marzban_pass", sa.String(), nullable=True),
         sa.Column("address", sa.String(), nullable=True),
         sa.Column("port", sa.String(), nullable=True),
+        sa.Column("max_client", sa.Integer(), nullable=True),
+        sa.Column("fact_client", sa.Integer(), nullable=True),
         sa.Column("is_active", sa.Boolean(), nullable=True),
+        sa.ForeignKeyConstraint(
+            ["vpn_type_id"], ["vpn_type.id"], ondelete="SET NULL"
+        ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("address"),
         sa.UniqueConstraint("api_url"),
-    )
-    op.create_table(
-        "referent",
-        sa.Column("id", sa.UUID(), nullable=False),
-        sa.Column("telegram_id", sa.BigInteger(), nullable=True),
-        sa.Column("description", sa.String(), nullable=True),
-        sa.Column("referral_link", sa.String(), nullable=True),
-        sa.Column("password", sa.String(), nullable=True),
-        sa.Column("sbp_number", sa.String(), nullable=True),
-        sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
         "account",
@@ -77,15 +64,11 @@ def upgrade() -> None:
         sa.Column("number", sa.String(), nullable=True),
         sa.Column("created_at", sa.TIMESTAMP(), nullable=True),
         sa.Column("trial_is_active", sa.Boolean(), nullable=True),
-        sa.Column("referent_id", sa.UUID(), nullable=True),
         sa.Column("can_pay_out", sa.Boolean(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["referent_id"], ["referent.id"], ondelete="SET NULL"
-        ),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
-        "shadowsocks_key",
+        "outline_key",
         sa.Column("id", sa.BigInteger(), nullable=False),
         sa.Column("server_id", sa.Integer(), nullable=True),
         sa.Column("key_id", sa.Integer(), nullable=True),
@@ -101,36 +84,25 @@ def upgrade() -> None:
             ["server_id"], ["server.id"], ondelete="CASCADE"
         ),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("server_id", "key_id", name="_key_id_server_uc"),
+        sa.UniqueConstraint("server_id", "key_id", name="_key_server_uc"),
     )
     op.create_table(
         "profile",
         sa.Column("id", sa.UUID(), nullable=False),
         sa.Column("name", sa.String(), nullable=True),
         sa.Column("account_id", sa.BigInteger(), nullable=True),
-        sa.Column("dynamic_key", sa.String(), nullable=True),
-        sa.Column("shadowsocks_key_id", sa.BigInteger(), nullable=True),
-        sa.Column("vless_key_id", sa.Integer(), nullable=True),
+        sa.Column("outline_key_id", sa.BigInteger(), nullable=True),
         sa.Column("date_end", sa.TIMESTAMP(), nullable=True),
         sa.Column("used_bytes", sa.BigInteger(), nullable=True),
-        sa.Column("vpn_type_id", sa.Integer(), nullable=True),
         sa.Column("is_active", sa.Boolean(), nullable=True),
         sa.ForeignKeyConstraint(
             ["account_id"], ["account.id"], ondelete="SET NULL"
         ),
         sa.ForeignKeyConstraint(
-            ["shadowsocks_key_id"], ["shadowsocks_key.id"], ondelete="SET NULL"
-        ),
-        sa.ForeignKeyConstraint(
-            ["vless_key_id"], ["vless_key.id"], ondelete="SET NULL"
-        ),
-        sa.ForeignKeyConstraint(
-            ["vpn_type_id"], ["vpn_type.id"], ondelete="SET NULL"
+            ["outline_key_id"], ["outline_key.id"], ondelete="SET NULL"
         ),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("dynamic_key"),
-        sa.UniqueConstraint("shadowsocks_key_id"),
-        sa.UniqueConstraint("vless_key_id"),
+        sa.UniqueConstraint("outline_key_id"),
     )
     op.create_table(
         "user",
@@ -153,11 +125,9 @@ def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table("user")
     op.drop_table("profile")
-    op.drop_table("shadowsocks_key")
+    op.drop_table("outline_key")
     op.drop_table("account")
-    op.drop_table("referent")
     op.drop_table("server")
-    op.drop_table("vless_key")
     op.drop_table("vpn_type")
     op.drop_table("tariff")
     # ### end Alembic commands ###
