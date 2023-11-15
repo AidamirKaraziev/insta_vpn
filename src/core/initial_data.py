@@ -7,9 +7,7 @@ from vpn_type.models import VpnType
 
 
 async def check_vpn_type(session: AsyncSession = Depends(get_async_session)):
-    outline_vpn_type = VpnType(id=1, name='Outline')
-    vless_vpn_type = VpnType(id=2, name='VLESS')
-    vpn_type_check_list = [outline_vpn_type, vless_vpn_type]
+    vpn_type_check_list = [VpnType(id=1, name='Outline'), VpnType(id=2, name='VLESS')]
 
     creation_list = []
     for obj in vpn_type_check_list:
