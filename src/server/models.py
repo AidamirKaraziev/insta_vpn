@@ -12,7 +12,7 @@ class Server(Base):
 
     metadata = metadata
     id = Column(Integer, primary_key=True, autoincrement=False)
-    vpn_type_id = Column(Integer, ForeignKey(VpnType.id, ondelete="SET NULL"))
+    vpn_type_id = Column(Integer, ForeignKey(VpnType.id, ondelete="SET NULL", onupdate="CASCADE"))
     name = Column(String)
     api_url = Column(String, unique=True)
     cert_sha256 = Column(String)
