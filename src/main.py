@@ -9,6 +9,7 @@ from auth.base_config import fastapi_users, auth_backend
 from auth.manager import get_user_manager
 from auth.schemas import UserReadOld, UserCreate, UserRead, UserUpdate
 from config import REDIS_HOST, REDIS_PORT
+from core.initial_data import create_initial_data
 from server.router import router as router_server
 from tariff.router import router as router_tariff
 from account.router import router as router_account
@@ -107,6 +108,7 @@ app.add_middleware(
 async def startup_event():
     redis = aioredis.from_url(f"redis://{REDIS_HOST:{REDIS_PORT}}", encoding="utf8", decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
+    await create_initial_data()
 
 
 # @app.get("/protected-route")
