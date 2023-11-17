@@ -1,4 +1,5 @@
 from datetime import datetime
+from sqlite3 import Timestamp
 from uuid import uuid4
 
 from pydantic import UUID4
@@ -170,6 +171,14 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
             return None, self.cannot_delete_an_active_profile, None
         obj = await super().delete(db=db, id=id)
         return obj, 0, None
+
+    async def get_profiles_by_filter(self, *, db: AsyncSession, date_end_min: Timestamp, date_end_max: Timestamp,
+                                     is_active: bool):
+        query = select(self.model).where(self.model.date_end >= date_end_min, self.model.date_end <= date_end_max,
+                                         self.model.is_active == is_active)
+        resp = await db.execute(query)
+        objects = resp.scalars().all()
+        return objects, 0, None
 
 
 crud_profile = CrudProfile(Profile)

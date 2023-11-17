@@ -17,10 +17,11 @@ from profiles.router import router as router_profile
 from profiles.dymamic import router as dynamic_router
 from outline_key.router import router as router_outline_key
 from user.router import router as router_user, get_users_router
+from admin.router import router as admin_router
 
-from tools.router import router as router_tools
-from vless_key.router import router as router_vless_key
 from vpn_type.router import router as router_vpn_type
+# from tools.router import router as router_tools
+# from vless_key.router import router as router_vless_key
 
 current_user = fastapi_users.current_user()
 
@@ -28,6 +29,7 @@ app = FastAPI(title="Insta VPN")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 """Мои API"""
+app.include_router(admin_router)
 app.include_router(dynamic_router)
 app.include_router(router_profile)
 app.include_router(router_outline_key)

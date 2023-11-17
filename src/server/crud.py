@@ -116,7 +116,6 @@ class CrudServer(CRUDBase[Server, ServerCreate, ServerUpdate]):
             cert_sha256: str
             max_client: int
             is_active: Optional[bool] = True"""
-        """"""
         # check vpn type
         if new_data.vpn_type_id != 1:
             return None, self.vpn_type_id_incorrectly_selected, None
@@ -140,7 +139,6 @@ class CrudServer(CRUDBase[Server, ServerCreate, ServerUpdate]):
 
         objects = await super().create(db_session=db, obj_in=new_data)
         return objects, 0, None
-
 
     """КОД ДЯЛ VLESS"""
     async def add_vless_server(self, *, db: AsyncSession, new_data: VlessServerCreate):
