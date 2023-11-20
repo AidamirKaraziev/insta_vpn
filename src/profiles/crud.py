@@ -1,5 +1,6 @@
 from datetime import datetime
 from sqlite3 import Timestamp
+from typing import Optional
 from uuid import uuid4
 
 from pydantic import UUID4
@@ -173,12 +174,19 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         return obj, 0, None
 
     async def get_profiles_by_filter(self, *, db: AsyncSession, date_end_min: Timestamp, date_end_max: Timestamp,
-                                     is_active: bool):
-        query = select(self.model).where(self.model.date_end >= date_end_min, self.model.date_end <= date_end_max,
-                                         self.model.is_active == is_active)
-        resp = await db.execute(query)
-        objects = resp.scalars().all()
-        return objects, 0, None
+                                     is_active: Optional[bool]):
+        """Получение списка всех профилей за определенный промежуток времени, с фильтром по активности профиля"""
+        if is_active is not None:
+            query = select(self.model).where(self.model.date_end >= date_end_min, self.model.date_end <= date_end_max,
+                                             self.model.is_active == is_active)
+            resp = await db.execute(query)
+            objects = resp.scalars().all()
+            return objects, 0, None
+        elif is_active is None:
+            query = select(self.model).where(self.model.date_end >= date_end_min, self.model.date_end <= date_end_max)
+            resp = await db.execute(query)
+            objects = resp.scalars().all()
+            return objects, 0, None
 
 
 crud_profile = CrudProfile(Profile)

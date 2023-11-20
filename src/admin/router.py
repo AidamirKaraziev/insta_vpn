@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,18 +26,38 @@ router = APIRouter(
             path='/get-profiles-by-filter/ ',
             response_model=ListOfEntityResponse,
             name='get_profiles_by_filter',
-            description='Получение списка аккаунтов отфильтрованных по дате окончания и активности'
+            description='Получение списка профилей отфильтрованных по дате окончания и активности:"2023-11-20T19:28:13"'
             )
 async def get_profiles_by_filter(
         date_end_min: Timestamp,
         date_end_max: Timestamp,
-        is_active: bool,
+        is_active: Optional[bool] = None,
         user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_profile.get_profiles_by_filter(
         db=session, date_end_min=date_end_min, date_end_max=date_end_max, is_active=is_active)
     return ListOfEntityResponse(data=[getting_profile(obj) for obj in objects])
+
+
+# TODO API get accounts where not profile
+# @router.get(
+#             path='/get-accounts-where-not-profile/ ',
+#             response_model=ListOfEntityResponse,
+#             name='get_accounts_where_not_profile',
+#             description='Получение списка аккаунтов у которых нет профиля'
+#             )
+# async def get_accounts_where_not_profile(
+#         date_end_min: Timestamp,
+#         date_end_max: Timestamp,
+#         is_active: bool,
+#         user: User = Depends(current_active_superuser),
+#         session: AsyncSession = Depends(get_async_session),
+# ):
+#     objects, code, indexes = await crud_profile.get_profiles_by_filter(
+#         db=session, date_end_min=date_end_min, date_end_max=date_end_max, is_active=is_active)
+#     return ListOfEntityResponse(data=[getting_profile(obj) for obj in objects])
+
 
 if __name__ == "__main__":
     logging.info('Running...')
