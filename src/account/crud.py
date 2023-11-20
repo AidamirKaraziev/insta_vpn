@@ -1,9 +1,10 @@
-from sqlalchemy import select
+from sqlalchemy import select, exists
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from account.models import Account
 from account.schemas import AccountCreate, AccountUpdate
 from core.base_crud import CRUDBase
+from profiles.models import Profile
 
 
 class CrudAccount(CRUDBase[Account, AccountCreate, AccountUpdate]):
@@ -39,6 +40,14 @@ class CrudAccount(CRUDBase[Account, AccountCreate, AccountUpdate]):
 
         objects = await super().update(db_session=db, obj_current=this_obj, obj_new=update_data)
         return objects, 0, None
+
+    async def get_accounts_without_profile(self, db: AsyncSession):
+        """Возвращает список аккаунтов, у которых нет профиля"""
+        res = select(self.model).select_from(self.model).where(
+            ~exists().where(self.model.id == Profile.account_id))
+        response = await db.execute(res)
+        objs = response.scalars().all()
+        return objs, 0, None
 
 
 crud_account = CrudAccount(Account)
