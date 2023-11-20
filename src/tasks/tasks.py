@@ -56,6 +56,7 @@ def get_email_template_request_verify(name: str, email_to: Optional[str], token:
     return email
 
 
+# TODO добавить отправку уведомления в телеграмм
 async def update_fields_is_active():
     today = datetime.now()
     async with async_session_maker() as session:
