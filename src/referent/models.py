@@ -1,9 +1,11 @@
 import uuid
 
-from sqlalchemy import Column, String, MetaData, BigInteger
-from database import Base
+from sqlalchemy import Column, String, MetaData, BigInteger, Integer, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 
+from database import Base
+from partner.models import Partner
 
 metadata = MetaData()
 
@@ -16,6 +18,8 @@ class Referent(Base):
     telegram_id = Column(BigInteger)
 
     description = Column(String)
-    referral_link = Column(String)
     password = Column(String)
-    sbp_number = Column(String)
+    balance = Column(Integer)
+    partner_id = Column(Integer, ForeignKey(Partner.id, ondelete="SET NULL"))
+
+    partner = relationship(Partner, backref="referents", lazy="joined")
