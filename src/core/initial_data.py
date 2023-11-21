@@ -3,9 +3,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 from database import get_async_session
 from partner.models import Partner
+from status.models import Status
 from tariff.models import Tariff
 from vpn_type.models import VpnType
 
+
+# TODO внедрить проверку на исключения через try: except:
 
 async def check_vpn_type(session: AsyncSession = Depends(get_async_session)):
     vpn_type_check_list = [VpnType(id=1, name='Outline'),
@@ -81,7 +84,31 @@ async def create_partner():
         await db.close()
 
 
+async def check_status(session: AsyncSession = Depends(get_async_session)):
+    check_list = [Status(id=1, name='Создан'),
+                  Status(id=2, name='Выполняется'),
+                  Status(id=3, name='Готово')
+                  ]
+
+    creation_list = []
+    for obj in check_list:
+        query = select(Status).where(Status.name == obj.name, Status.id == obj.id)
+        obj_type = await session.execute(query)
+        if obj_type.scalar_one_or_none() is None:
+            creation_list.append(obj)
+    return creation_list
+
+
+async def create_status():
+    async for db in get_async_session():
+        creation_list = await check_status(db)
+        [db.add(obj) for obj in creation_list]
+        await db.commit()
+        await db.close()
+
+
 async def create_initial_data():
     await create_vpn_type()
     await create_tariff()
     await create_partner()
+    await create_status()
