@@ -67,6 +67,7 @@ class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
         uuid_value = uuid4()
         referral_link = await gen_referral_link(referent_id=uuid_value)  # эта пизда выделена желтыx
 
+
         # TODO hex password
         password = "hellow"
         create_data = ReferentCreate(id=uuid_value, description=description,
