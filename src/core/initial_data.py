@@ -2,12 +2,14 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 from database import get_async_session
+from partner.models import Partner
 from tariff.models import Tariff
 from vpn_type.models import VpnType
 
 
 async def check_vpn_type(session: AsyncSession = Depends(get_async_session)):
-    vpn_type_check_list = [VpnType(id=1, name='Outline'), VpnType(id=2, name='VLESS')]
+    vpn_type_check_list = [VpnType(id=1, name='Outline'),
+                           VpnType(id=2, name='VLESS')]
 
     creation_list = []
     for obj in vpn_type_check_list:
@@ -54,6 +56,32 @@ async def create_tariff():
         await db.close()
 
 
+async def check_partner(session: AsyncSession = Depends(get_async_session)):
+    check_list = [Partner(id=1, name='Общие'),
+                  Partner(id=2, name='Айдамир'),
+                  Partner(id=3, name='Азамат'),
+                  Partner(id=4, name='Настя'),
+                  Partner(id=5, name='Кара')
+                  ]
+
+    creation_list = []
+    for obj in check_list:
+        query = select(Partner).where(Partner.name == obj.name, Partner.id == obj.id)
+        obj_type = await session.execute(query)
+        if obj_type.scalar_one_or_none() is None:
+            creation_list.append(obj)
+    return creation_list
+
+
+async def create_partner():
+    async for db in get_async_session():
+        creation_list = await check_partner(db)
+        [db.add(obj) for obj in creation_list]
+        await db.commit()
+        await db.close()
+
+
 async def create_initial_data():
     await create_vpn_type()
     await create_tariff()
+    await create_partner()
