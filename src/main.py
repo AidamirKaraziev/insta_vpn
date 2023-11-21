@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi.middleware.cors import CORSMiddleware
@@ -28,7 +27,6 @@ from user.router import router as router_user, get_users_router
 current_user = fastapi_users.current_user()
 
 app = FastAPI(title="Insta VPN")
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 """Мои API"""
 app.include_router(status_router)
