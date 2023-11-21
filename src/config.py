@@ -27,13 +27,16 @@ SUPERUSER_PASSWORD = os.environ.get("SUPERUSER_PASSWORD")
 SMTP_USER = os.environ.get("SMTP_USER")
 SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
 
-FREE_TRAFFIC = 1  # Максимальное количество байт для статического ключа
+"""Еще нужны"""
 LIMIT_SERVERS = 1000  # Максимальное количество серверов
 LIMIT_PROFILES = 10000  # Максимальное количество профилей
 MAX_CLIENT = 100  # Максимальное количество клиентов на одном сервере
-PAYMENT_WAITING_TIME = 86400 * 2  # 1 day = 86400 РУДИМЕНТ -> УДАЛИТЬ
 MAX_PROFILE_TO_ACCOUNT = 5  # Максимальное количество профилей для одного профиля
 TRIAL_DAYS = 3  # Количество пробных дней
+
+"""REFERENT"""
+BASE_REFERENT_GIFT_DAYS = 3  # базовое количество подарочных дней
+BASE_PARTNER = 1  # базовый партнер - лицо привело референта 1="Общие", нужно для KPI
 
 OUTLINE_USERS_GATEWAY = os.environ.get("OUTLINE_USERS_GATEWAY")
 OUTLINE_SALT = os.environ.get("OUTLINE_SALT")
@@ -43,3 +46,7 @@ VLESS_USERS_GATEWAY = os.environ.get("VLESS_USERS_GATEWAY")
 
 BASE_REFERRAL_LINK = "https://t.me/financier_tgrm_bot?start=referral-link-"
 BASE_REGISTER_REFERENT_LINK = "https://t.me/financier_tgrm_bot?start=referent-link-"
+
+"""Уже не нужны"""
+FREE_TRAFFIC = 1  # Максимальное количество байт для статического ключа
+PAYMENT_WAITING_TIME = 86400 * 2  # 1 day = 86400 РУДИМЕНТ -> УДАЛИТЬ
