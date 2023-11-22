@@ -16,10 +16,12 @@ class Referent(Base):
     metadata = metadata
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     telegram_id = Column(BigInteger)
+    partner_id = Column(Integer, ForeignKey(Partner.id, ondelete="SET NULL"))
+
+    gift_days = Column(Integer)
+    balance = Column(Integer)
 
     description = Column(String)
     password = Column(String)
-    balance = Column(Integer)
-    partner_id = Column(Integer, ForeignKey(Partner.id, ondelete="SET NULL"))
 
     partner = relationship(Partner, backref="referents", lazy="joined")
