@@ -16,6 +16,7 @@ from vpn_type.models import metadata as metadata_vpn_type
 from partner.models import metadata as metadata_partner
 from referent.models import metadata as metadata_referent
 from status.models import metadata as metadata_status
+from payment.models import metadata as payment_metadata
 
 
 # this is the Alembic Config object, which provides
@@ -38,7 +39,8 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = [metadata_tariff, metadata_vpn_type, metadata_partner, metadata_status, metadata_server,
-                   metadata_account, metadata_referent, metadata_outline_key, metadata_profile, metadata_user]
+                   metadata_account, metadata_referent, metadata_outline_key, metadata_profile, metadata_user,
+                   payment_metadata]
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
