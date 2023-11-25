@@ -44,8 +44,10 @@ CONN_NAME = os.environ.get("CONN_NAME")
 
 VLESS_USERS_GATEWAY = os.environ.get("VLESS_USERS_GATEWAY")
 
-BASE_REFERRAL_LINK = "https://t.me/financier_tgrm_bot?start=referral-link-"
-BASE_REGISTER_REFERENT_LINK = "https://t.me/financier_tgrm_bot?start=referent-link-"
+BASE_REFERRAL_LINK = "https://t.me/financier_tgrm_bot?start="  # bot/referral/uuid
+
+# TODO заменить на бота для референтов
+BASE_REGISTER_REFERENT_LINK = "https://t.me/financier_tgrm_bot?start="  # bot/referral/uuid
 
 """Уже не нужны"""
 FREE_TRAFFIC = 1  # Максимальное количество байт для статического ключа

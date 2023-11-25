@@ -23,6 +23,7 @@ class CrudAccount(CRUDBase[Account, AccountCreate, AccountUpdate]):
         return objects, 0, None
 
     async def add_account(self, *, db: AsyncSession, new_data: AccountCreate):
+        # TODO add check referent_id
         query = select(self.model).where(self.model.id == new_data.id)
         response = await db.execute(query)
         if response.scalar_one_or_none() is not None:

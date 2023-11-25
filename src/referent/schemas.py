@@ -1,31 +1,43 @@
 from typing import Optional
 from pydantic import BaseModel, UUID4
 
+from config import BASE_REFERENT_GIFT_DAYS, BASE_PARTNER
+
 
 class ReferentGet(BaseModel):
     id: UUID4
     telegram_id: Optional[int]
 
+    gift_days: Optional[int]
+    balance: Optional[int]
+    partner_id: Optional[int]
+
     description: Optional[str]
-    referral_link: Optional[str]
     password: Optional[str]
-    sbp_number: Optional[str]
 
 
 class ReferentCreate(BaseModel):
-    id: UUID4
     telegram_id: Optional[int]
 
+    gift_days: Optional[int] = BASE_REFERENT_GIFT_DAYS
+    balance: Optional[int]
+    partner_id: Optional[int] = BASE_PARTNER
+
     description: Optional[str]
-    referral_link: Optional[str]
     password: Optional[str]
-    sbp_number: Optional[str]
 
 
 class ReferentUpdate(BaseModel):
-    telegram_id: Optional[int]
+    partner_id: Optional[int]
+
+    gift_days: Optional[int]
+    balance: Optional[int]
 
     description: Optional[str]
-    referral_link: Optional[str]
-    password: Optional[str]
-    sbp_number: Optional[str]
+
+
+class ReferentLink(BaseModel):
+    referent_link: str
+# class ReferentRegister(BaseModel):
+#     telegram_id: Optional[int]
+
