@@ -15,12 +15,13 @@ class ReferentGet(BaseModel):
     description: Optional[str]
     password: Optional[str]
 
+    referral_link: Optional[str]
+
 
 class ReferentCreate(BaseModel):
     telegram_id: Optional[int]
 
     gift_days: Optional[int] = BASE_REFERENT_GIFT_DAYS
-    balance: Optional[int]
     partner_id: Optional[int] = BASE_PARTNER
 
     description: Optional[str]
@@ -38,6 +39,18 @@ class ReferentUpdate(BaseModel):
 
 class ReferentLink(BaseModel):
     referent_link: str
-# class ReferentRegister(BaseModel):
-#     telegram_id: Optional[int]
 
+#
+# class ReferentCreateNative(BaseModel):
+#     telegram_id: Optional[int]
+#
+#     gift_days: Optional[int] = BASE_REFERENT_GIFT_DAYS
+#     partner_id: Optional[int] = BASE_PARTNER
+#
+#
+# class ReferentCreateBlogger(BaseModel):
+#     gift_days: Optional[int] = BASE_REFERENT_GIFT_DAYS
+#     partner_id: Optional[int] = BASE_PARTNER
+#
+#     description: Optional[str]
+#     password: Optional[str]

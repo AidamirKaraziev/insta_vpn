@@ -6,20 +6,12 @@ from pydantic import UUID4
 from sqlalchemy import select, extract, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
-from config import OUTLINE_USERS_GATEWAY, CONN_NAME, MAX_PROFILE_TO_ACCOUNT, BASE_REFERRAL_LINK
+from account.crud import crud_account
 from core.base_crud import CRUDBase
 
 
 from referent.models import Referent
 from referent.schemas import ReferentUpdate, ReferentCreate
-
-
-# TODO
-
-
-# async def gen_referral_link(referent_id: UUID4):
-#     return f"{BASE_REFERRAL_LINK}{referent_id}"
 
 
 class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
@@ -31,21 +23,37 @@ class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
         objects = await super().get_multi(db_session=db, skip=skip, limit=limit)
         return objects, 0, None
 
-    # async def get_account_by_id(self, *, db: AsyncSession, id: int):
-    #     obj = await super().get(db=db, id=id)
-    #     if obj is None:
-    #         return None, self.not_found_id, None
-    #     return obj, 0, None
+    async def get_referent_by_id(self, *, db: AsyncSession, id: int):
+        """
+            Проверяем id, если такого нет - возвращает ошибку.
+            Возвращаем по id.
+        """
+        obj = await super().get(db=db, id=id)
+        if obj is None:
+            return None, self.not_found_id, None
+        return obj, 0, None
 
     #
-    # async def add_account(self, *, db: AsyncSession, new_data: AccountCreate):
-    #     # TODO add check referent_id
-    #     query = select(self.model).where(self.model.id == new_data.id)
-    #     response = await db.execute(query)
-    #     if response.scalar_one_or_none() is not None:
-    #         return None, self.telegram_id_is_exist, None
-    #     objects = await super().create(db_session=db, obj_in=new_data)
-    #     return objects, 0, None
+    async def add_native_referent(self, *, db: AsyncSession, new_data: ReferentCreate):
+        """
+            Проверка на account_id
+            telegram_id: Optional[int]
+
+            gift_days: Optional[int] = BASE_REFERENT_GIFT_DAYS
+            partner_id: Optional[int] = BASE_PARTNER
+
+            description: Optional[str]
+            password: Optional[str]
+        """
+        # проверка телеграмм id
+        obj, code, indexes = await crud_account.get_account_by_id(db=db, id=new_data.telegram_id)
+        if code != 0:
+            return None, code, None
+        new_data.description = None
+        new_data.password = None
+
+        objects = await super().create(db_session=db, obj_in=new_data)
+        return objects, 0, None
     #
     # async def update_account(self, *, db: AsyncSession, update_data: AccountUpdate, id: int):
     #     # check id
