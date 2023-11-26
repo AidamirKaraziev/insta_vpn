@@ -6,6 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from database import Base
 from partner.models import Partner
+from referent_type.models import ReferentType
 
 metadata = MetaData()
 
@@ -17,6 +18,7 @@ class Referent(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     telegram_id = Column(BigInteger)
     partner_id = Column(Integer, ForeignKey(Partner.id, ondelete="SET NULL"))
+    referent_type_id = Column(Integer, ForeignKey(ReferentType.id, ondelete="SET NULL"))
 
     gift_days = Column(Integer)
     balance = Column(Integer)
@@ -25,3 +27,4 @@ class Referent(Base):
     password = Column(String)
 
     partner = relationship(Partner, backref="referents", lazy="joined")
+    referent_type = relationship(ReferentType, backref="referents", lazy="joined")
