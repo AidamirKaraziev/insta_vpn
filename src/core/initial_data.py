@@ -130,8 +130,23 @@ async def create_referent_type():
 
 
 async def create_initial_data():
-    await create_vpn_type()
-    await create_tariff()
-    await create_partner()
-    await create_status()
-    await create_referent_type()
+    try:
+        await create_vpn_type()
+    except Exception as ex:
+        print(ex)
+    try:
+        await create_tariff()
+    except Exception as ex:
+        print(ex)
+    try:
+        await create_partner()
+    except Exception as ex:
+        print(ex)
+    try:
+        await create_status()
+    except Exception as ex:
+        print(ex)
+    try:
+        await create_referent_type()
+    except Exception as ex:
+        print(ex)
