@@ -13,6 +13,10 @@ class CrudAccount(CRUDBase[Account, AccountCreate, AccountUpdate]):
     telegram_id_is_exist = {"num": 403, "message": f"А {obj_name} with that telegram id already exists"}
 
     async def get_account_by_id(self, *, db: AsyncSession, id: int):
+        """
+            Проверяем id, если такого нет - возвращает ошибку.
+            Возвращаем по id.
+        """
         obj = await super().get(db=db, id=id)
         if obj is None:
             return None, self.not_found_id, None
