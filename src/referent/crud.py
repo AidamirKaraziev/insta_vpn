@@ -13,7 +13,6 @@ from referent.models import Referent
 from referent.schemas import ReferentUpdate, ReferentCreate
 
 
-# TODO add referent_type
 class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
     obj_name = "Референт"
     not_found_id = {"num": 404, "message": f"Не нашли {obj_name}а с таким id"}
@@ -42,8 +41,7 @@ class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
 
     async def create_native_referent(self, *, db: AsyncSession, new_data: ReferentCreate):
         """
-            Проверка на account_id
-            telegram_id: Optional[int]
+            telegram_id: int
 
             gift_days: Optional[int] = BASE_REFERENT_GIFT_DAYS
             partner_id: Optional[int] = BASE_PARTNER
@@ -52,12 +50,20 @@ class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
             description: Optional[str]
             password: Optional[str]
         """
-        new_data.referent_type_id = 1
-        new_data.description = None
-        new_data.password = None
+        # TODO Возможно вынести в отдельную функцию
+        res = select(self.model).where(self.model.telegram_id == new_data.telegram_id, self.model.referent_type_id == 1)
+        response = await db.execute(res)
+        referent = response.scalar_one_or_none()
+        if referent is not None:
+            return referent, 0, None
+        else:
+            new_data.referent_type_id = 1
+            new_data.partner_id = 1
+            new_data.description = None
+            new_data.password = None
 
-        objects = await super().create(db_session=db, obj_in=new_data)
-        return objects, 0, None
+            objects = await super().create(db_session=db, obj_in=new_data)
+            return objects, 0, None
 
 
 crud_referent = CrudReferent(Referent)
