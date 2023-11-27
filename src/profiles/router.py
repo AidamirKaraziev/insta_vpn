@@ -18,6 +18,8 @@ from profiles.schemas import ProfileUpdate
 
 from auth.base_config import fastapi_users
 from auth.models import User
+from referent.crud import crud_referent
+from referent.schemas import ReferentCreate
 
 current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
 
@@ -116,6 +118,9 @@ async def activate_profile(
     profile, code, indexes = await crud_profile.get_profile_by_id(db=session, id=profile_id)
     await get_raise_new(code)
     obj, code, indexes = await crud_profile.activate_profile(db=session, activate_data=activate_data, id=profile_id)
+    await get_raise_new(code)
+    referent_data = ReferentCreate(telegram_id=profile.account_id)
+    referent, code, indexes = await crud_referent.create_native_referent(db=session, new_data=referent_data)
     await get_raise_new(code)
     return SingleEntityResponse(data=getting_profile(obj=obj))
 
