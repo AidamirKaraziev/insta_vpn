@@ -1,9 +1,10 @@
 from typing import Optional
-from static_key.schemas import StaticKeyGet
+
+from outline_key.schemas import OutlineKeyGet
 
 
-def getting_static_key(obj: StaticKeyGet) -> Optional[StaticKeyGet]:
-    return StaticKeyGet(
+def getting_outline_key(obj: OutlineKeyGet) -> Optional[OutlineKeyGet]:
+    return OutlineKeyGet(
         id=obj.id,
         server_id=obj.server_id,
 

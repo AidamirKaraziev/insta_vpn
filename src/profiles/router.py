@@ -84,11 +84,8 @@ async def add_profile(
         user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
-    # получение имени для профиля
-    name, code, indexes = await crud_profile.get_name_for_profile(db=session, account_id=account_id)
-    await get_raise_new(code)
     # создать профиль
-    profile, code, indexes = await crud_profile.add_profile(db=session, account_id=account_id, name=name)
+    profile, code, indexes = await crud_profile.add_profile(db=session, account_id=account_id)
     await get_raise_new(code)
     """Добавление подарочных дней, если они есть у клиента"""
     account, code, indexes = await crud_account.get_account_by_id(db=session, id=account_id)
@@ -123,17 +120,17 @@ async def activate_profile(
     return SingleEntityResponse(data=getting_profile(obj=obj))
 
 
-@router.put(path="/replacement/{profile_id}",
+@router.put(path="/replacement-outline-key/{profile_id}",
             response_model=SingleEntityResponse,
-            name='replacement_key_for_profile',
-            description='Заменить ключ для профиля'
+            name='replacement_outline_key_for_profile',
+            description='Заменить Outline ключ для профиля'
             )
-async def replacement_profile(
+async def replacement_outline_key_for_profile(
         profile_id: UUID4,
         user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
-    profile, code, indexes = await crud_profile.replacement_key(db=session, profile_id=profile_id)
+    profile, code, indexes = await crud_profile.replacement_outline_key_for_profile(db=session, profile_id=profile_id)
     await get_raise_new(code)
     return SingleEntityResponse(data=getting_profile(obj=profile))
 
@@ -185,7 +182,7 @@ async def counting_paid_profiles(
                )
 async def delete_profile(
         profile_id: UUID4,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_profile.delete_profile(db=session, id=profile_id)

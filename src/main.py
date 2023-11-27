@@ -9,22 +9,40 @@ from auth.base_config import fastapi_users, auth_backend
 from auth.manager import get_user_manager
 from auth.schemas import UserReadOld, UserCreate, UserRead, UserUpdate
 from config import REDIS_HOST, REDIS_PORT
+from core.initial_data import create_initial_data
 from server.router import router as router_server
 from tariff.router import router as router_tariff
 from account.router import router as router_account
 from profiles.router import router as router_profile
-from tools.router import router as router_tools
-from user.router import router as router_user, get_users_router
-
-from outline_apis.router import router as router_outline
 from profiles.dymamic import router as dynamic_router
-from static_key.router import router as static_key_router
+from outline_key.router import router as router_outline_key
+from user.router import router as router_user, get_users_router
+from admin.router import router as admin_router
 
+from vpn_type.router import router as router_vpn_type
+# from tools.router import router as router_tools
+# from vless_key.router import router as router_vless_key
 
 current_user = fastapi_users.current_user()
 
 app = FastAPI(title="Insta VPN")
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+"""Мои API"""
+app.include_router(admin_router)
+app.include_router(dynamic_router)
+app.include_router(router_profile)
+app.include_router(router_outline_key)
+app.include_router(router_server)
+app.include_router(router_tariff)
+app.include_router(router_account)
+app.include_router(router_vpn_type)
+
+# пригодится в будущем
+# app.include_router(router_outline)
+# app.include_router(router_tools)
+# app.include_router(router_vless_key)
+
 
 app.include_router(
     fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["Bearer-auth"]
@@ -60,14 +78,6 @@ app.include_router(
     tags=["auth"],
 )
 
-app.include_router(router_server)
-app.include_router(router_tariff)
-app.include_router(router_account)
-app.include_router(router_profile)
-app.include_router(router_outline)
-app.include_router(router_tools)
-app.include_router(dynamic_router)
-app.include_router(static_key_router)
 
 origins = ["*"]
 
@@ -100,11 +110,13 @@ app.add_middleware(
 async def startup_event():
     redis = aioredis.from_url(f"redis://{REDIS_HOST:{REDIS_PORT}}", encoding="utf8", decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
+    await create_initial_data()
 
 
 # @app.get("/protected-route")
 # def protected_route(user: User = Depends(current_user)):
 #     return f"Hello, {user.email}"
 
-# необходимо для отображения ошибок в формате exception
+"""Не удалять!!!Важно для отображения ошибок"""
 from core.errors import *
+"""Внесу некие данные для проверки потом удали ,Айдамир заебал"""

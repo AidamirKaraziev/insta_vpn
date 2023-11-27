@@ -1,4 +1,6 @@
 from datetime import datetime
+from sqlite3 import Timestamp
+from typing import Optional
 from uuid import uuid4
 
 from pydantic import UUID4
@@ -6,16 +8,11 @@ from sqlalchemy import select, extract, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from account.crud import crud_account
-from config import OUTLINE_USERS_GATEWAY, CONN_NAME, MAX_PROFILE_TO_ACCOUNT
+from config import MAX_PROFILE_TO_ACCOUNT
 from core.base_crud import CRUDBase
+from outline_key.crud import crud_outline_key
 from profiles.models import Profile
 from profiles.schemas import ProfileCreate, ProfileUpdate
-
-from static_key.crud import crud_static_key
-
-
-async def gen_outline_dynamic_link(profile_id: UUID4):
-    return f"{OUTLINE_USERS_GATEWAY}/conf/{profile_id}#{CONN_NAME}"
 
 
 class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
@@ -47,58 +44,6 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         objects = await super().get_multi(db_session=db, skip=skip, limit=limit)
         return objects, 0, None
 
-    async def add_profile(self, *, db: AsyncSession, account_id: int, name: str):
-        """Создание профиля с нужными полями, который по дефолту не активен:
-            id: UUID4
-            name: str
-            account_id: int
-            dynamic_key: Optional[str]
-            is_active: Optional[bool] = False"""
-        uuid_value = uuid4()
-        dynamic_key = await gen_outline_dynamic_link(profile_id=uuid_value)  # эта пизда выделена желтым
-        account, code, indexes = await crud_account.get_account_by_id(db=db, id=account_id)
-        if code != 0:
-            return None, code, None
-        new_data = ProfileCreate(id=uuid_value, account_id=account_id, name=name, dynamic_key=dynamic_key)
-        objects = await super().create(db_session=db, obj_in=new_data)
-        return objects, 0, None
-
-    async def update_profile(self, *, db: AsyncSession, update_data: ProfileUpdate, id: UUID4):
-        """Обновление данных в профиле:
-            dynamic_key: Optional[str]
-            static_key_id: Optional[int]
-            date_end: Optional[Timestamp]
-            used_bytes: Optional[int]
-            is_active: Optional[bool]"""
-        profile, code, indexes = await self.get_profile_by_id(db=db, id=id)
-        if code != 0:
-            return None, code, None
-        objects = await super().update(db_session=db, obj_current=profile, obj_new=update_data)
-        return objects, 0, None
-
-    async def activate_profile(self, *, db: AsyncSession, activate_data: ProfileUpdate, id: UUID4):
-        """Активирует профиль, указывается дата окончания и is_active: True,
-         подбирается свободный static_key"""
-        profile, code, indexes = await self.get_profile_by_id(db=db, id=id)
-        if code != 0:
-            return None, code, None
-        static_key, code, indexes = await crud_static_key.get_good_key(db=db)
-        if code != 0:
-            return None, code, None
-        activate_data.is_active = True
-        activate_data.static_key_id = static_key.id
-        objects = await super().update(db_session=db, obj_current=profile, obj_new=activate_data)
-        return objects, 0, None
-
-    async def deactivate_profile(self, *, db: AsyncSession, id: UUID4):
-        """Деактивирует профиль: is_active -> False, static_key_id -> None"""
-        profile, code, indexes = await self.get_profile_by_id(db=db, id=id)
-        if code != 0:
-            return None, code, None
-        deactivate_data = ProfileUpdate(is_active=False, static_key_id=None)
-        objects = await super().update(db_session=db, obj_current=profile, obj_new=deactivate_data)
-        return objects, 0, None
-
     async def get_name_for_profile(self, *, db: AsyncSession, account_id: int):
         """
             Присваивает имя профиля для фронта. Номеруется от меньшего к большему.
@@ -121,17 +66,73 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
                 return f"Профиль {num}", 0, None
         return f"Профиль {num}", 0, None
 
-    async def replacement_key(self, *, db: AsyncSession, profile_id: UUID4):
-        """Замена static_key_id в профиле. Выбирается самый первый свободный ключ"""
+    # TODO check
+    async def add_profile(self, *, db: AsyncSession, account_id: int):
+        """Создание профиля с нужными полями, который по дефолту не активен:
+            id: UUID4
+            name: str
+            account_id: int
+            is_active: Optional[bool] = False"""
+        uuid_value = uuid4()
+        account, code, indexes = await crud_account.get_account_by_id(db=db, id=account_id)
+        if code != 0:
+            return None, code, None
+        # получение имени для профиля
+        name, code, indexes = await self.get_name_for_profile(db=db, account_id=account_id)
+        if code != 0:
+            return None, code, None
+        new_data = ProfileCreate(id=uuid_value, account_id=account_id, name=name)
+        objects = await super().create(db_session=db, obj_in=new_data)
+        return objects, 0, None
+
+    async def update_profile(self, *, db: AsyncSession, update_data: ProfileUpdate, id: UUID4):
+        """Обновление данных в профиле:
+            dynamic_key: Optional[str]
+            shadowsocks_key_id: Optional[int]
+            date_end: Optional[Timestamp]
+            used_bytes: Optional[int]
+            is_active: Optional[bool]"""
+        profile, code, indexes = await self.get_profile_by_id(db=db, id=id)
+        if code != 0:
+            return None, code, None
+        objects = await super().update(db_session=db, obj_current=profile, obj_new=update_data)
+        return objects, 0, None
+
+    # TODO test
+    async def activate_profile(self, *, db: AsyncSession, activate_data: ProfileUpdate, id: UUID4):
+        """Активирует профиль, указывается дата окончания и is_active: True,
+         подбирается свободный outline_key"""
+        profile, code, indexes = await self.get_profile_by_id(db=db, id=id)
+        if code != 0:
+            return None, code, None
+        outline_key, code, indexes = await crud_outline_key.get_good_key(db=db)
+        if code != 0:
+            return None, code, None
+        activate_data.is_active = True
+        activate_data.outline_key_id = outline_key.id
+        objects = await super().update(db_session=db, obj_current=profile, obj_new=activate_data)
+        return objects, 0, None
+
+    # TODO test
+    async def deactivate_profile(self, *, db: AsyncSession, id: UUID4):
+        """Деактивирует профиль: is_active -> False, outline_key_id -> None"""
+        profile, code, indexes = await self.get_profile_by_id(db=db, id=id)
+        if code != 0:
+            return None, code, None
+        deactivate_data = ProfileUpdate(is_active=False, outline_key_id=None)
+        objects = await super().update(db_session=db, obj_current=profile, obj_new=deactivate_data)
+        return objects, 0, None
+
+    async def replacement_outline_key_for_profile(self, *, db: AsyncSession, profile_id: UUID4):
+        """Замена outline_key_id в профиле. Выбирается самый первый свободный ключ"""
         profile, code, indexes = await self.get_profile_by_id(db=db, id=profile_id)
         if code != 0:
             return None, code, None
-        static_key, code, indexes = await crud_static_key.get_replacement_key(
-            db=db, static_key_id=profile.static_key_id)
+        outline_key, code, indexes = await crud_outline_key.get_replacement_key(
+            db=db, outline_key_id=profile.outline_key_id)
         if code != 0:
             return None, code, None
-        # update
-        update_data = ProfileUpdate(static_key_id=static_key.id)
+        update_data = ProfileUpdate(outline_key_id=outline_key.id)
         profile, code, indexes = await self.update_profile(db=db, id=profile_id, update_data=update_data)
         if code != 0:
             return None, code, None
@@ -171,6 +172,21 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
             return None, self.cannot_delete_an_active_profile, None
         obj = await super().delete(db=db, id=id)
         return obj, 0, None
+
+    async def get_profiles_by_filter(self, *, db: AsyncSession, date_end_min: Timestamp, date_end_max: Timestamp,
+                                     is_active: Optional[bool]):
+        """Получение списка всех профилей за определенный промежуток времени, с фильтром по активности профиля"""
+        if is_active is not None:
+            query = select(self.model).where(self.model.date_end >= date_end_min, self.model.date_end <= date_end_max,
+                                             self.model.is_active == is_active)
+            resp = await db.execute(query)
+            objects = resp.scalars().all()
+            return objects, 0, None
+        elif is_active is None:
+            query = select(self.model).where(self.model.date_end >= date_end_min, self.model.date_end <= date_end_max)
+            resp = await db.execute(query)
+            objects = resp.scalars().all()
+            return objects, 0, None
 
 
 crud_profile = CrudProfile(Profile)

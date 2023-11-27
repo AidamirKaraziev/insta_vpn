@@ -7,12 +7,12 @@ from server.models import Server
 metadata = MetaData()
 
 
-class StaticKey(Base):
-    __tablename__ = "static_key"
+class OutlineKey(Base):
+    __tablename__ = "outline_key"
 
     metadata = metadata
     id = Column(BigInteger, primary_key=True)
-    server_id = Column(Integer, ForeignKey(Server.id, ondelete="CASCADE"))
+    server_id = Column(Integer, ForeignKey(Server.id, ondelete="CASCADE", onupdate="CASCADE"))
 
     key_id = Column(Integer)
     name = Column(String)
@@ -23,9 +23,9 @@ class StaticKey(Base):
     data_limit = Column(Integer)
     password = Column(String)
 
-    is_active = Column(Boolean, default=False)
+    is_active = Column(Boolean)
 
-    server = relationship(Server, backref="static_keys", lazy="joined")
+    server = relationship(Server, backref="outline_keys", lazy="joined")
     __table_args__ = (
         UniqueConstraint("server_id", "key_id", name='_key_server_uc'),
                       )
