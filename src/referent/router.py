@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import APIRouter, Depends
+from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.raise_template import get_raise_new
@@ -44,7 +45,7 @@ async def get_referents(
             description='Вывод референта по идентификатору'
             )
 async def get_referent(
-        referent_id: int,
+        referent_id: UUID4,
         # user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
