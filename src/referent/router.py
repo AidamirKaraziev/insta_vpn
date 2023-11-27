@@ -84,6 +84,24 @@ async def get_referents_by_telegram_id(
     return ListOfEntityResponse(data=[getting_referent(obj) for obj in objects])
 
 
+# TODO возможно потом удалить это апи потому что все будет происходить внутри кода
+@router.get(
+            path="/change-balance/{referent_id}",
+            response_model=SingleEntityResponse,
+            name='change_balance',
+            description='Изменить баланс для референта'
+            )
+async def change_balance(
+        referent_id: UUID4,
+        amount: int,
+        # user: User = Depends(current_active_superuser),
+        session: AsyncSession = Depends(get_async_session),
+):
+    obj, code, indexes = await crud_referent.change_balance(db=session, id=referent_id, amount=amount)
+    await get_raise_new(code=code)
+    return SingleEntityResponse(data=getting_referent(obj=obj))
+
+
 if __name__ == "__main__":
     logging.info('Running...')
 

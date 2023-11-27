@@ -10,13 +10,14 @@ from core.base_crud import CRUDBase
 
 
 from referent.models import Referent
-from referent.schemas import ReferentUpdate, ReferentCreate
+from referent.schemas import ReferentUpdate, ReferentCreate, ReferentBalanceUpdate
 
 
 class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
     obj_name = "Референт"
     not_found_id = {"num": 404, "message": f"Не нашли {obj_name}а с таким id"}
     telegram_id_is_exist = {"num": 403, "message": f"{obj_name} с таким telegram_id уже есть"}
+    balance_less_than_zero = {"num": 403, "message": f"{obj_name}: баланс не может быть меньше нуля."}
 
     async def get_all_referents(self, *, db: AsyncSession, skip: int, limit: int):
         objects = await super().get_multi(db_session=db, skip=skip, limit=limit)
@@ -65,19 +66,26 @@ class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
             objects = await super().create(db_session=db, obj_in=new_data)
             return objects, 0, None
 
+    async def change_balance(self, *, db: AsyncSession, id: UUID4, amount: int):
+        """
+            amount - это сумма на которую изменится баланс.
+            Проверяем есть ли такой референт по referent_id, если нет - выводим ошибку с описанием.
+            balance: Optional[int]
+        """
+        this_obj, code, indexes = await self.get_referent_by_id(db=db, id=id)
+        if code != 0:
+            return None, code, None
+        # расчет нового баланса
+        balance = int(this_obj.balance) + amount
+        if balance < 0:
+            return None, self.balance_less_than_zero, None
+        update_data = ReferentBalanceUpdate(balance=balance)
+        objects = await super().update(db_session=db, obj_current=this_obj, obj_new=update_data)
+        return objects, 0, None
+
 
 crud_referent = CrudReferent(Referent)
-#
-# async def update_account(self, *, db: AsyncSession, update_data: AccountUpdate, id: int):
-#     # check id
-#     query = select(self.model).where(self.model.id == id)
-#     resp = await db.execute(query)
-#     this_obj = resp.scalar_one_or_none()
-#     if this_obj is None:
-#         return None, self.not_found_id, None
-#
-#     objects = await super().update(db_session=db, obj_current=this_obj, obj_new=update_data)
-#     return objects, 0, None
+
 #
 # async def get_accounts_without_profile(self, db: AsyncSession):
 #     """Возвращает список аккаунтов, у которых нет профиля"""

@@ -6,7 +6,6 @@ from partner.schemas import PartnerGet
 from referent_type.schemas import ReferentTypeGet
 
 
-# TODO add referent_type
 class ReferentGet(BaseModel):
     id: UUID4
     telegram_id: Optional[int]
@@ -34,15 +33,11 @@ class ReferentCreate(BaseModel):
 
 class ReferentUpdate(BaseModel):
     # partner_id: Optional[int]
-    #
+
     gift_days: Optional[int]
     balance: Optional[int]
 
     # description: Optional[str]
-
-
-class ReferentLink(BaseModel):
-    referent_link: str
 
 
 """Мои размышления касательно двух типов рефералов"""
