@@ -63,7 +63,7 @@ async def add_referent(
         # user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
-    obj, code, indexes = await crud_referent.add_native_referent(db=session, new_data=new_data)
+    obj, code, indexes = await crud_referent.create_native_referent(db=session, new_data=new_data)
     await get_raise_new(code)
     return SingleEntityResponse(data=getting_referent(obj=obj))
 

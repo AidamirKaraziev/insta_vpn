@@ -22,7 +22,7 @@ class ReferentGet(BaseModel):
 
 
 class ReferentCreate(BaseModel):
-    telegram_id: Optional[int]
+    telegram_id: int
     referent_type_id: Optional[int]
 
     gift_days: Optional[int] = BASE_REFERENT_GIFT_DAYS

@@ -5,6 +5,7 @@ from account.models import Account
 from account.schemas import AccountCreate, AccountUpdate
 from core.base_crud import CRUDBase
 from profiles.models import Profile
+from referent.crud import crud_referent
 
 
 class CrudAccount(CRUDBase[Account, AccountCreate, AccountUpdate]):
@@ -27,7 +28,16 @@ class CrudAccount(CRUDBase[Account, AccountCreate, AccountUpdate]):
         return objects, 0, None
 
     async def add_account(self, *, db: AsyncSession, new_data: AccountCreate):
-        # TODO add check referent_id
+        """
+            id: int
+            name: Optional[str]
+            number: Optional[str]
+            referent_id: Optional[UUID4] - проверяем есть ли такой референт.
+        """
+        if new_data.referent_id is not None:
+            referent, code, indexes = await crud_referent.get_referent_by_id(db=db, id=new_data.referent_id)
+            if code != 0:
+                return None, code, None
         query = select(self.model).where(self.model.id == new_data.id)
         response = await db.execute(query)
         if response.scalar_one_or_none() is not None:

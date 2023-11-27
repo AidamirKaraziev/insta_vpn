@@ -1,12 +1,12 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from account.crud import crud_account
 from account.getters import getting_account
 from account.schemas import AccountCreate, AccountUpdate
-from core.raise_template import get_raise
+from core.raise_template import get_raise_new
 from core.response import SingleEntityResponse, ListOfEntityResponse
 from database import get_async_session
 from auth.base_config import fastapi_users
@@ -29,8 +29,8 @@ router = APIRouter(
             )
 async def get_accounts(
         skip: int = 0,
-        limit: int = 100,
-        user: User = Depends(current_active_superuser),
+        limit: int = 1000,
+        # user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_account.get_all_accounts(db=session, skip=skip, limit=limit)
@@ -45,16 +45,14 @@ async def get_accounts(
             )
 async def get_account(
         account_id: int,
-        user: User = Depends(current_active_superuser),
+        # user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_account.get_account_by_id(db=session, id=account_id)
-    if code != 0:
-        await get_raise(num=code["num"], message=code["message"])
+    await get_raise_new(code)
     return SingleEntityResponse(data=getting_account(obj=obj))
 
 
-# TODO update router
 @router.post(path="/",
              response_model=SingleEntityResponse,
              name='add_account',
@@ -62,12 +60,11 @@ async def get_account(
              )
 async def add_account(
         new_data: AccountCreate,
-        user: User = Depends(current_active_superuser),
+        # user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_account.add_account(db=session, new_data=new_data)
-    if code != 0:
-        await get_raise(num=code["num"], message=code["message"])
+    await get_raise_new(code)
     return SingleEntityResponse(data=getting_account(obj=obj))
 
 
@@ -79,13 +76,14 @@ async def add_account(
 async def update_account(
         update_data: AccountUpdate,
         account_id: int,
-        user: User = Depends(current_active_superuser),
+        # user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_account.update_account(db=session, update_data=update_data, id=account_id)
-    if code != 0:
-        await get_raise(num=code["num"], message=code["message"])
+    await get_raise_new(code)
     return SingleEntityResponse(data=getting_account(obj=obj))
+
+# TODO get_accounts_by_referent_id
 
 
 if __name__ == "__main__":
