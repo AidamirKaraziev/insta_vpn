@@ -66,7 +66,6 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
                 return f"Профиль {num}", 0, None
         return f"Профиль {num}", 0, None
 
-    # TODO check
     async def add_profile(self, *, db: AsyncSession, account_id: int):
         """Создание профиля с нужными полями, который по дефолту не активен:
             id: UUID4
@@ -98,10 +97,11 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         objects = await super().update(db_session=db, obj_current=profile, obj_new=update_data)
         return objects, 0, None
 
-    # TODO test
     async def activate_profile(self, *, db: AsyncSession, activate_data: ProfileUpdate, id: UUID4):
-        """Активирует профиль, указывается дата окончания и is_active: True,
-         подбирается свободный outline_key"""
+        """
+            Активирует профиль, указывается дата окончания и is_active: True.
+            Подбирается свободный outline_key.
+         """
         profile, code, indexes = await self.get_profile_by_id(db=db, id=id)
         if code != 0:
             return None, code, None
@@ -113,7 +113,6 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         objects = await super().update(db_session=db, obj_current=profile, obj_new=activate_data)
         return objects, 0, None
 
-    # TODO test
     async def deactivate_profile(self, *, db: AsyncSession, id: UUID4):
         """Деактивирует профиль: is_active -> False, outline_key_id -> None"""
         profile, code, indexes = await self.get_profile_by_id(db=db, id=id)
