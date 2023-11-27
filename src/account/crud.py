@@ -1,3 +1,4 @@
+from pydantic import UUID4
 from sqlalchemy import select, exists
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -60,6 +61,19 @@ class CrudAccount(CRUDBase[Account, AccountCreate, AccountUpdate]):
         """Возвращает список аккаунтов, у которых нет профиля"""
         res = select(self.model).select_from(self.model).where(
             ~exists().where(self.model.id == Profile.account_id))
+        response = await db.execute(res)
+        objs = response.scalars().all()
+        return objs, 0, None
+
+    async def get_accounts_by_referent_id(self, *, db: AsyncSession, referent_id: UUID4):
+        """
+            Вывод списка аккаунтов по референт_id.
+            Проверка есть ли такой референт, если нет - вывод ошибки с описанием.
+        """
+        referent, code, indexes = await crud_referent.get_referent_by_id(db=db, id=referent_id)
+        if code != 0:
+            return None, code, None
+        res = select(self.model).where(self.model.referent_id == referent_id)
         response = await db.execute(res)
         objs = response.scalars().all()
         return objs, 0, None
