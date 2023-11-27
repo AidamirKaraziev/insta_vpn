@@ -31,17 +31,17 @@ current_user = fastapi_users.current_user()
 app = FastAPI(title="Insta VPN")
 
 """Мои API"""
-app.include_router(referent_type_router)
+app.include_router(router_account)
 app.include_router(referent_router)
-app.include_router(status_router)
-app.include_router(partner_router)
 app.include_router(admin_router)
 app.include_router(dynamic_router)
 app.include_router(router_profile)
 app.include_router(router_outline_key)
 app.include_router(router_server)
+app.include_router(partner_router)
+app.include_router(status_router)
 app.include_router(router_tariff)
-app.include_router(router_account)
+app.include_router(referent_type_router)
 app.include_router(router_vpn_type)
 
 # пригодится в будущем
