@@ -9,11 +9,10 @@ from tariff.models import Tariff
 from vpn_type.models import VpnType
 
 
-# TODO внедрить проверку на исключения через try: except:
-
 async def check_vpn_type(session: AsyncSession = Depends(get_async_session)):
-    check_list = [VpnType(id=1, name='Outline'),
-                           VpnType(id=2, name='VLESS')]
+    check_list = [
+        VpnType(id=1, name='Outline'),
+        VpnType(id=2, name='VLESS')]
 
     creation_list = []
     for obj in check_list:
