@@ -14,6 +14,7 @@ from referent.models import Referent
 from referent.schemas import ReferentUpdate, ReferentCreate
 
 
+# TODO add referent_type
 class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
     obj_name = "Референт"
     not_found_id = {"num": 404, "message": f"Не нашли {obj_name}а с таким id"}
@@ -22,7 +23,6 @@ class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
     async def get_all_referents(self, *, db: AsyncSession, skip: int, limit: int):
         objects = await super().get_multi(db_session=db, skip=skip, limit=limit)
         return objects, 0, None
-
     async def get_referent_by_id(self, *, db: AsyncSession, id: int):
         """
             Проверяем id, если такого нет - возвращает ошибку.
@@ -33,7 +33,13 @@ class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
             return None, self.not_found_id, None
         return obj, 0, None
 
-    #
+    async def get_by_telegram_id(self, *, db: AsyncSession, telegram_id: int):
+        """Возвращает список референтов, по телеграм id"""
+        res = select(self.model).where(self.model.telegram_id == telegram_id)
+        response = await db.execute(res)
+        objs = response.scalars().all()
+        return objs, 0, None
+
     async def add_native_referent(self, *, db: AsyncSession, new_data: ReferentCreate):
         """
             Проверка на account_id
@@ -41,6 +47,7 @@ class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
 
             gift_days: Optional[int] = BASE_REFERENT_GIFT_DAYS
             partner_id: Optional[int] = BASE_PARTNER
+            referent_type_id: Optional[int]
 
             description: Optional[str]
             password: Optional[str]
@@ -49,6 +56,7 @@ class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
         obj, code, indexes = await crud_account.get_account_by_id(db=db, id=new_data.telegram_id)
         if code != 0:
             return None, code, None
+        new_data.referent_type_id = 1
         new_data.description = None
         new_data.password = None
 

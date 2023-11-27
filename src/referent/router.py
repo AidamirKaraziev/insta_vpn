@@ -25,7 +25,7 @@ router = APIRouter(
             path='/all',
             response_model=ListOfEntityResponse,
             name='get_referents',
-            description='Получение списка всех аккаунтов'
+            description='Получение списка всех референтов'
             )
 async def get_referents(
         skip: int = 0,
@@ -67,7 +67,20 @@ async def add_referent(
     await get_raise_new(code)
     return SingleEntityResponse(data=getting_referent(obj=obj))
 
-# TODO get_referent_by_telegram_id
+
+@router.get(
+            path='/get-by/{telegram_id}',
+            response_model=ListOfEntityResponse,
+            name='get_referents_by_telegram_id',
+            description='Получение списка референтов по телеграмм id '
+            )
+async def get_referents_by_telegram_id(
+        telegram_id: int,
+        # user: User = Depends(current_active_superuser),
+        session: AsyncSession = Depends(get_async_session),
+):
+    objects, code, indexes = await crud_referent.get_by_telegram_id(db=session, telegram_id=telegram_id)
+    return ListOfEntityResponse(data=[getting_referent(obj) for obj in objects])
 
 
 if __name__ == "__main__":

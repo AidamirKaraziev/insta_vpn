@@ -2,16 +2,19 @@ from typing import Optional
 from pydantic import BaseModel, UUID4
 
 from config import BASE_REFERENT_GIFT_DAYS, BASE_PARTNER
+from partner.schemas import PartnerGet
+from referent_type.schemas import ReferentTypeGet
 
 
+# TODO add referent_type
 class ReferentGet(BaseModel):
     id: UUID4
     telegram_id: Optional[int]
 
     gift_days: Optional[int]
     balance: Optional[int]
-    partner_id: Optional[int]
-
+    partner: Optional[PartnerGet]
+    referent_type: Optional[ReferentTypeGet]
     description: Optional[str]
     password: Optional[str]
 
@@ -20,6 +23,7 @@ class ReferentGet(BaseModel):
 
 class ReferentCreate(BaseModel):
     telegram_id: Optional[int]
+    referent_type_id: Optional[int]
 
     gift_days: Optional[int] = BASE_REFERENT_GIFT_DAYS
     partner_id: Optional[int] = BASE_PARTNER
@@ -29,18 +33,19 @@ class ReferentCreate(BaseModel):
 
 
 class ReferentUpdate(BaseModel):
-    partner_id: Optional[int]
-
+    # partner_id: Optional[int]
+    #
     gift_days: Optional[int]
     balance: Optional[int]
 
-    description: Optional[str]
+    # description: Optional[str]
 
 
 class ReferentLink(BaseModel):
     referent_link: str
 
-#
+
+"""Мои размышления касательно двух типов рефералов"""
 # class ReferentCreateNative(BaseModel):
 #     telegram_id: Optional[int]
 #
