@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import APIRouter, Depends
+from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from account.crud import crud_account
@@ -83,7 +84,21 @@ async def update_account(
     await get_raise_new(code)
     return SingleEntityResponse(data=getting_account(obj=obj))
 
-# TODO get_accounts_by_referent_id
+
+@router.get(
+            path="/by-referent/{referent_id}",
+            response_model=ListOfEntityResponse,
+            name='get_accounts_by_referent_id',
+            description='Вывод аккаунтов по referent_id'
+            )
+async def get_accounts_by_referent_id(
+        referent_id: UUID4,
+        # user: User = Depends(current_active_superuser),
+        session: AsyncSession = Depends(get_async_session),
+):
+    objects, code, indexes = await crud_account.get_accounts_by_referent_id(db=session, referent_id=referent_id)
+    await get_raise_new(code)
+    return ListOfEntityResponse(data=[getting_account(obj) for obj in objects])
 
 
 if __name__ == "__main__":
