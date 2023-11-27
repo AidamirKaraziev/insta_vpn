@@ -21,7 +21,7 @@ class Referent(Base):
     referent_type_id = Column(Integer, ForeignKey(ReferentType.id, ondelete="SET NULL"))
 
     gift_days = Column(Integer)
-    balance = Column(Integer)
+    balance = Column(Integer, default=0)
 
     description = Column(String)
     password = Column(String)
