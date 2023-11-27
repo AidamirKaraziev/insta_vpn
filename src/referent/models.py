@@ -28,7 +28,6 @@ class Referent(Base):
 
     partner = relationship(Partner, backref="referents", lazy="joined")
     referent_type = relationship(ReferentType, backref="referents", lazy="joined")
-    # TODO add unique constraint
     __table_args__ = (
             UniqueConstraint("telegram_id", "referent_type_id", name='_telegram_referent_type_uc'),
                           )
