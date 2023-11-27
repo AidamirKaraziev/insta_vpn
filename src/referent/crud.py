@@ -10,7 +10,7 @@ from core.base_crud import CRUDBase
 
 
 from referent.models import Referent
-from referent.schemas import ReferentUpdate, ReferentCreate, ReferentBalanceUpdate
+from referent.schemas import ReferentUpdate, ReferentCreate
 
 
 class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
@@ -79,7 +79,7 @@ class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
         balance = int(this_obj.balance) + amount
         if balance < 0:
             return None, self.balance_less_than_zero, None
-        update_data = ReferentBalanceUpdate(balance=balance)
+        update_data = ReferentUpdate(balance=balance)
         objects = await super().update(db_session=db, obj_current=this_obj, obj_new=update_data)
         return objects, 0, None
 
