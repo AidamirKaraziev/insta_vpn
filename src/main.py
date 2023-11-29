@@ -21,6 +21,7 @@ from status.router import router as status_router
 from vpn_type.router import router as router_vpn_type
 from referent.router import router as referent_router
 from referent_type.router import router as referent_type_router
+from payment.router import router as payment_router
 
 from user.router import router as router_user, get_users_router
 # from tools.router import router as router_tools
@@ -31,6 +32,7 @@ current_user = fastapi_users.current_user()
 app = FastAPI(title="Insta VPN")
 
 """Мои API"""
+app.include_router(payment_router)
 app.include_router(router_account)
 app.include_router(referent_router)
 app.include_router(admin_router)

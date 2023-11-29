@@ -1,91 +1,91 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
+from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.raise_template import get_raise, get_raise_new
+from core.raise_template import get_raise_new
 from core.response import SingleEntityResponse, ListOfEntityResponse
 from database import get_async_session
 
 from auth.base_config import fastapi_users
 from auth.models import User
-from vpn_type.crud import crud_vpn_type
-from vpn_type.getters import getting_vpn_type
-from vpn_type.schemas import VpnTypeCreate, VpnTypeUpdate
+from payment.crud import crud_payment
+from payment.getters import getting_payment
+from payment.schemas import PaymentCreate
 
 current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
 
 
 router = APIRouter(
-    prefix="/vpn_type",
-    tags=["VpnType"]
+    prefix="/payment",
+    tags=["Payment"]
 )
 
 
 @router.get(
             path='/all',
             response_model=ListOfEntityResponse,
-            name='get_vpn_types',
-            description='Получение списка всех VPN типов '
+            name='get_payments',
+            description='Получение списка всех выплат'
             )
-async def get_vpn_types(
+async def get_payments(
         skip: int = 0,
-        limit: int = 100,
-        user: User = Depends(current_active_superuser),
+        limit: int = 1000,
+        # user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
-    objects, code, indexes = await crud_vpn_type.get_all_vpn_types(db=session, skip=skip, limit=limit)
-    print(objects)
-    return ListOfEntityResponse(data=[getting_vpn_type(obj) for obj in objects])
+    objects, code, indexes = await crud_payment.get_all(db=session, skip=skip, limit=limit)
+    return ListOfEntityResponse(data=[getting_payment(obj) for obj in objects])
 
 
 @router.get(
-            path="/{vpn_type_id}",
+            path="/{payment_id}",
             response_model=SingleEntityResponse,
-            name='get_vpn_type',
-            description='Вывод VPN типа по идентификатору'
+            name='get_payment',
+            description='Вывод выплаты по id'
             )
-async def get_vpn_type(
-        vpn_type_id: int,
-        user: User = Depends(current_active_superuser),
+async def get_payment(
+        payment_id: UUID4,
+        # user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
-    obj, code, indexes = await crud_vpn_type.get_vpn_type_by_id(db=session, id=vpn_type_id)
+    obj, code, indexes = await crud_payment.get_payment_by_id(db=session, id=payment_id)
     await get_raise_new(code)
-    return SingleEntityResponse(data=getting_vpn_type(obj=obj))
+    return SingleEntityResponse(data=getting_payment(obj=obj))
 
 
 @router.post(path="/",
              response_model=SingleEntityResponse,
-             name='add_vpn_type',
-             description='Добавить новый VPN тип'
+             name='create_payment',
+             description='Создать новую оплату'
              )
-async def add_vpn_type(
-        new_data: VpnTypeCreate,
-        user: User = Depends(current_active_superuser),
+async def create_payment(
+        new_data: PaymentCreate,
+        # user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
-    obj, code, indexes = await crud_vpn_type.add_vpn_type(db=session, new_data=new_data)
+    obj, code, indexes = await crud_payment.create_payment(db=session, new_data=new_data)
     await get_raise_new(code)
-    return SingleEntityResponse(data=getting_vpn_type(obj=obj))
+    return SingleEntityResponse(data=getting_payment(obj=obj))
 
-
-@router.put(path="/{vpn_type_id}",
-            response_model=SingleEntityResponse,
-            name='update_vpn_type',
-            description='Изменить VPN тип'
-            )
-async def update_vpn_type(
-        update_data: VpnTypeUpdate,
-        vpn_type_id: int,
-        user: User = Depends(current_active_superuser),
-        session: AsyncSession = Depends(get_async_session),
-):
-    obj, code, indexes = await crud_vpn_type.update_vpn_type(db=session, update_data=update_data, id=vpn_type_id)
-    await get_raise_new(code)
-    return SingleEntityResponse(data=getting_vpn_type(obj=obj))
-
-# TODO delete vpn type by id
 
 if __name__ == "__main__":
     logging.info('Running...')
+
+#
+# @router.put(path="/{vpn_type_id}",
+#             response_model=SingleEntityResponse,
+#             name='update_vpn_type',
+#             description='Изменить VPN тип'
+#             )
+# async def update_vpn_type(
+#         update_data: VpnTypeUpdate,
+#         vpn_type_id: int,
+#         user: User = Depends(current_active_superuser),
+#         session: AsyncSession = Depends(get_async_session),
+# ):
+#     obj, code, indexes = await crud_vpn_type.update_vpn_type(db=session, update_data=update_data, id=vpn_type_id)
+#     await get_raise_new(code)
+#     return SingleEntityResponse(data=getting_vpn_type(obj=obj))
+#
