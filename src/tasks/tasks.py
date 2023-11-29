@@ -90,25 +90,27 @@ def describe_profiles():
     asyncio.run(update_fields_is_active())
 
 
-"""НЕ смог внедрить celery - надо дописать"""
+# TODO написать задачу которая проходится по всем payment
+"""
+Задача которая проходится по всем payment, где status_id == 1(Создан)
+после выполнения:
+obj, code, indexes = await crud_referent.change_balance(db=session, id=referent_id, amount=amount)
+менять Payment.status_id = 3(Готово)
+Если ошибка поменять Payment.status_id = 4(Отказано) - еще не внедрил
+"""
 
 
-# TODO дописать
-async def async_change_balance(referent_id: UUID4, amount: int):
+@celery.task
+async def change_balance_for_referent(referent_id: UUID4, amount: int):
+    """
+        referent_id: UUID4
+        amount: int ; 50(пополнение), -50(списание).
+        Отложенный перезапуск в случае неудачи, через count_down. -> запись в лог.
+    """
     async with async_session_maker() as session:
         obj, code, indexes = await crud_referent.change_balance(db=session, id=referent_id, amount=amount)
         print(amount)
         if code != 0:
             logging.info('Running...')
             # вот тут надо отложенный перезапуск
-
-
-@celery.task
-def change_balance_for_referent(referent_id: UUID4, amount: int):
-    """
-        referent_id: UUID4
-        amount: int ; 50(пополнение), -50(списание).
-        Отложенный перезапуск в случае неудачи, через count_down. -> запись в лог.
-    """
-    asyncio.run(async_change_balance(referent_id=referent_id, amount=amount))
 
