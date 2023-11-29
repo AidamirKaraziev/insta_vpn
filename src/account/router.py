@@ -12,6 +12,10 @@ from core.response import SingleEntityResponse, ListOfEntityResponse
 from database import get_async_session
 from auth.base_config import fastapi_users
 from auth.models import User
+from referent.crud import crud_referent
+from config import THE_AMOUNT_OF_PAYMENT_FOR_A_REFERRAL
+
+# from tasks.tasks import change_balance_for_referent
 
 current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
 
@@ -66,6 +70,13 @@ async def add_account(
 ):
     obj, code, indexes = await crud_account.add_account(db=session, new_data=new_data)
     await get_raise_new(code)
+    # TODO делать через payments
+    if new_data.referent_id is not None:
+        # TODO внедрить celery,предварительно дописав функцию
+        # change_balance_for_referent.delay(referent_id=new_data.referent_id, amount=PAYMENT_FOR_A_REFERRAL)
+        referent, code, indexes = await crud_referent.change_balance(db=session, id=new_data.referent_id,
+                                                                     amount=THE_AMOUNT_OF_PAYMENT_FOR_A_REFERRAL)
+        await get_raise_new(code)
     return SingleEntityResponse(data=getting_account(obj=obj))
 
 
