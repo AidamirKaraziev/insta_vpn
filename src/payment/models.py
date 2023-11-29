@@ -18,7 +18,7 @@ class Payment(Base):
     metadata = metadata
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     referent_id = Column(UUID(as_uuid=True), ForeignKey(Referent.id, ondelete="SET NULL"))
-    sum = Column(Integer)
+    amount = Column(Integer)
     spb_number = Column(String)
     card_number = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
