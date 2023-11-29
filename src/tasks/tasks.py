@@ -1,8 +1,11 @@
 import asyncio
+import logging
 from datetime import datetime
 from email.message import EmailMessage
 from typing import Optional
 import smtplib
+
+from pydantic import UUID4
 from sqlalchemy import update
 
 from celery import Celery
@@ -10,6 +13,7 @@ from celery import Celery
 from profiles.models import Profile
 from database import async_session_maker
 from config import SMTP_USER, SMTP_PASSWORD, REDIS_HOST, REDIS_PORT
+from referent.crud import crud_referent
 
 SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = 465
@@ -84,4 +88,27 @@ def send_email_request_verify(token: str, name: str, email_to: str):
 @celery.task
 def describe_profiles():
     asyncio.run(update_fields_is_active())
+
+
+"""НЕ смог внедрить celery - надо дописать"""
+
+
+# TODO дописать
+async def async_change_balance(referent_id: UUID4, amount: int):
+    async with async_session_maker() as session:
+        obj, code, indexes = await crud_referent.change_balance(db=session, id=referent_id, amount=amount)
+        print(amount)
+        if code != 0:
+            logging.info('Running...')
+            # вот тут надо отложенный перезапуск
+
+
+@celery.task
+def change_balance_for_referent(referent_id: UUID4, amount: int):
+    """
+        referent_id: UUID4
+        amount: int ; 50(пополнение), -50(списание).
+        Отложенный перезапуск в случае неудачи, через count_down. -> запись в лог.
+    """
+    asyncio.run(async_change_balance(referent_id=referent_id, amount=amount))
 
