@@ -6,21 +6,32 @@ from tariff.schemas import TariffUpdate, TariffCreate
 
 
 class CrudTariff(CRUDBase[Tariff, TariffCreate, TariffUpdate]):
-    obj_name = "tariff"
-    not_found_id = {"num": 404, "message": f"Not found {obj_name} with this id"}
+    obj_name = "Tariff"
+    not_found_id = {"num": 404, "message": f"{obj_name}: не нашли а с таким id"}
     name_is_exist = {"num": 403, "message": f"А {obj_name} with that name already exists"}
 
+    async def get_all_tariffs(self, *, db: AsyncSession, skip: int, limit: int):
+        """
+            Выводим список всех тарифов.
+        """
+        objects = await super().get_multi(db_session=db, skip=skip, limit=limit)
+        return objects, 0, None
+
     async def get_tariff_by_id(self, *, db: AsyncSession, id: int):
+        """
+            Проверяем id, если такого нет - возвращает ошибку.
+            Возвращаем по id.
+        """
         obj = await super().get(db=db, id=id)
         if obj is None:
             return None, self.not_found_id, None
         return obj, 0, None
 
-    async def get_all_tariffs(self, *, db: AsyncSession, skip: int, limit: int):
-        objects = await super().get_multi(db_session=db, skip=skip, limit=limit)
-        return objects, 0, None
-
     async def add_tariff(self, *, db: AsyncSession, new_data: TariffCreate):
+        """
+            Проверяем id, если такой есть - возвращает ошибку.
+            Проверяем name, если такой есть - возвращает ошибку.
+        """
         # check name
         query = select(self.model).where(self.model.name == new_data.name)
         response = await db.execute(query)
@@ -30,7 +41,6 @@ class CrudTariff(CRUDBase[Tariff, TariffCreate, TariffUpdate]):
         return objects, 0, None
 
     async def update_tariff(self, *, db: AsyncSession, update_data: TariffUpdate, id: int):
-        # check id
         query = select(self.model).where(self.model.id == id)
         resp = await db.execute(query)
         this_obj = resp.scalar_one_or_none()
