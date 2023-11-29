@@ -20,6 +20,9 @@ class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
     balance_less_than_zero = {"num": 403, "message": f"{obj_name}: баланс не может быть меньше нуля."}
 
     async def get_all_referents(self, *, db: AsyncSession, skip: int, limit: int):
+        """
+            Выводим список всех референтов.
+        """
         objects = await super().get_multi(db_session=db, skip=skip, limit=limit)
         return objects, 0, None
 
