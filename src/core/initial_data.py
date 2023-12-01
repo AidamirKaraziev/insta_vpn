@@ -7,6 +7,8 @@ from referent_type.models import ReferentType
 from status.models import Status
 from tariff.models import Tariff
 from vpn_type.models import VpnType
+from config import STATUS_CREATE, STATUS_DONE, STATUS_ERROR, GENERAL_PARTNER, AIDAMIR_PARTNER, AZAMAT_PARTNER,\
+    NASTYA_PARTNER, KARA_PARTNER
 
 
 async def check_vpn_type(session: AsyncSession = Depends(get_async_session)):
@@ -60,11 +62,12 @@ async def create_tariff():
 
 
 async def check_partner(session: AsyncSession = Depends(get_async_session)):
-    check_list = [Partner(id=1, name='Общие'),
-                  Partner(id=2, name='Айдамир'),
-                  Partner(id=3, name='Азамат'),
-                  Partner(id=4, name='Настя'),
-                  Partner(id=5, name='Кара')
+    check_list = [
+        Partner(id=GENERAL_PARTNER.id, name=GENERAL_PARTNER.name),
+        Partner(id=AIDAMIR_PARTNER.id, name=AIDAMIR_PARTNER.name),
+        Partner(id=AZAMAT_PARTNER.id, name=AZAMAT_PARTNER.name),
+        Partner(id=NASTYA_PARTNER.id, name=NASTYA_PARTNER.name),
+        Partner(id=KARA_PARTNER.id, name=KARA_PARTNER.name)
                   ]
 
     creation_list = []
@@ -85,11 +88,12 @@ async def create_partner():
 
 
 async def check_status(session: AsyncSession = Depends(get_async_session)):
-    check_list = [Status(id=1, name='Создан'),
-                  Status(id=2, name='Выполняется'),
-                  Status(id=3, name='Готово')
-                  ]
 
+    check_list = [
+        Status(id=STATUS_CREATE.id, name=STATUS_CREATE.name),
+        Status(id=STATUS_DONE.id, name=STATUS_DONE.name),
+        Status(id=STATUS_ERROR.id, name=STATUS_ERROR.name)
+                  ]
     creation_list = []
     for obj in check_list:
         query = select(Status).where(Status.name == obj.name, Status.id == obj.id)
@@ -110,6 +114,10 @@ async def create_status():
 async def check_referent_type(session: AsyncSession = Depends(get_async_session)):
     check_list = [ReferentType(id=1, name='Native'),
                   ReferentType(id=2, name='Blogger')]
+    # check_list = [
+    #     ReferentType(id=NATIVE_REFERENT_TYPE.id, name=NATIVE_REFERENT_TYPE.name),
+    #     ReferentType(id=BLOGGER_REFERENT_TYPE.id, name=BLOGGER_REFERENT_TYPE.name)
+    # ]
 
     creation_list = []
     for obj in check_list:
@@ -149,3 +157,4 @@ async def create_initial_data():
         await create_referent_type()
     except Exception as ex:
         print(ex)
+
