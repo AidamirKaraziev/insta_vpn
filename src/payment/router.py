@@ -70,22 +70,20 @@ async def create_payment(
     return SingleEntityResponse(data=getting_payment(obj=obj))
 
 
+@router.put(path="/execution/{payment_id}",
+            response_model=SingleEntityResponse,
+            name='execution_payment',
+            description='Исполнить оплату'
+            )
+async def execution_payment(
+        payment_id: UUID4,
+        # user: User = Depends(current_active_superuser),
+        session: AsyncSession = Depends(get_async_session),
+):
+    obj, code, indexes = await crud_payment.execution_of_payment(db=session, id=payment_id)
+    await get_raise_new(code)
+    return SingleEntityResponse(data=getting_payment(obj=obj))
+
+
 if __name__ == "__main__":
     logging.info('Running...')
-
-#
-# @router.put(path="/{vpn_type_id}",
-#             response_model=SingleEntityResponse,
-#             name='update_vpn_type',
-#             description='Изменить VPN тип'
-#             )
-# async def update_vpn_type(
-#         update_data: VpnTypeUpdate,
-#         vpn_type_id: int,
-#         user: User = Depends(current_active_superuser),
-#         session: AsyncSession = Depends(get_async_session),
-# ):
-#     obj, code, indexes = await crud_vpn_type.update_vpn_type(db=session, update_data=update_data, id=vpn_type_id)
-#     await get_raise_new(code)
-#     return SingleEntityResponse(data=getting_vpn_type(obj=obj))
-#
