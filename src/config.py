@@ -6,6 +6,7 @@ from partner.schemas import PartnerCreate
 from referent_type.schemas import ReferentTypeCreate
 from status.schemas import StatusCreate
 from tariff.schemas import TariffCreate
+from vpn_type.schemas import VpnTypeCreate
 
 load_dotenv()
 
@@ -73,13 +74,17 @@ NASTYA_PARTNER = PartnerCreate(id=4, name='Настя')
 KARA_PARTNER = PartnerCreate(id=5, name='Кара')
 
 """ReferentType"""
-NATIVE_REFERENT_TYPE = ReferentTypeCreate(id=1, name='Native'),
+NATIVE_REFERENT_TYPE = ReferentTypeCreate(id=1, name='Native')
 BLOGGER_REFERENT_TYPE = ReferentTypeCreate(id=2, name='Blogger')
 
 """Tariff"""
 ONE_MONTH_TARIFF = TariffCreate(id=1, name='30 дней (100₽)', price=100, period_days=30,
-                                photo_url='https://i.imgur.com/e4pGpmu.jpg', is_active=True),
+                                photo_url='https://i.imgur.com/e4pGpmu.jpg', is_active=True)
 TWO_MONTH_TARIFF = TariffCreate(id=2, name='60 дней (200₽)', price=200, period_days=60,
-                                photo_url='https://i.imgur.com/nld6nHb.jpg', is_active=True),
+                                photo_url='https://i.imgur.com/nld6nHb.jpg', is_active=True)
 THREE_MONTH_TARIFF = TariffCreate(id=3, name='90 дней (300₽)', price=300, period_days=90,
                                   photo_url='https://i.imgur.com/jEcEWNj.jpg', is_active=True)
+
+"""VpnType"""
+OUTLINE_VPN_TYPE = VpnTypeCreate(id=1, name='Outline')
+VLESS_VPN_TYPE = VpnTypeCreate(id=2, name='VLESS')
