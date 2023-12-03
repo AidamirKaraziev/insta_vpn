@@ -56,11 +56,6 @@ BASE_REFERRAL_LINK = "https://t.me/financier_tgrm_bot?start="  # bot/referral/uu
 # TODO заменить на бота для референтов
 BASE_REGISTER_REFERENT_LINK = "https://t.me/financier_tgrm_bot?start="  # bot/referral/uuid
 
-"""Уже не нужны"""
-FREE_TRAFFIC = 1  # Максимальное количество байт для статического ключа
-PAYMENT_WAITING_TIME = 86400 * 2  # 1 day = 86400 РУДИМЕНТ -> УДАЛИТЬ
-
-
 """Payment"""
 STATUS_CREATE = StatusCreate(id=1, name='Создан')
 STATUS_ERROR = StatusCreate(id=2, name='Ошибка')
@@ -78,13 +73,18 @@ NATIVE_REFERENT_TYPE = ReferentTypeCreate(id=1, name='Native')
 BLOGGER_REFERENT_TYPE = ReferentTypeCreate(id=2, name='Blogger')
 
 """Tariff"""
-ONE_MONTH_TARIFF = TariffCreate(id=1, name='30 дней (100₽)', price=100, period_days=30,
-                                photo_url='https://i.imgur.com/e4pGpmu.jpg', is_active=True)
-TWO_MONTH_TARIFF = TariffCreate(id=2, name='60 дней (200₽)', price=200, period_days=60,
-                                photo_url='https://i.imgur.com/nld6nHb.jpg', is_active=True)
-THREE_MONTH_TARIFF = TariffCreate(id=3, name='90 дней (300₽)', price=300, period_days=90,
-                                  photo_url='https://i.imgur.com/jEcEWNj.jpg', is_active=True)
+ONE_MONTH_TARIFF = TariffCreate(
+    id=1, name='30 дней (100₽)', price=100, period_days=30, photo_url='https://i.imgur.com/e4pGpmu.jpg', is_active=True)
+TWO_MONTH_TARIFF = TariffCreate(
+    id=2, name='60 дней (200₽)', price=200, period_days=60, photo_url='https://i.imgur.com/nld6nHb.jpg', is_active=True)
+THREE_MONTH_TARIFF = TariffCreate(
+    id=3, name='90 дней (300₽)', price=300, period_days=90, photo_url='https://i.imgur.com/jEcEWNj.jpg', is_active=True)
 
 """VpnType"""
 OUTLINE_VPN_TYPE = VpnTypeCreate(id=1, name='Outline')
 VLESS_VPN_TYPE = VpnTypeCreate(id=2, name='VLESS')
+
+
+"""Уже не нужны"""
+FREE_TRAFFIC = 1  # Максимальное количество байт для статического ключа
+PAYMENT_WAITING_TIME = 86400 * 2  # 1 day = 86400 РУДИМЕНТ -> УДАЛИТЬ
