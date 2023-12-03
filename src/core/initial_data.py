@@ -7,8 +7,9 @@ from referent_type.models import ReferentType
 from status.models import Status
 from tariff.models import Tariff
 from vpn_type.models import VpnType
-from config import STATUS_CREATE, STATUS_DONE, STATUS_ERROR, GENERAL_PARTNER, AIDAMIR_PARTNER, AZAMAT_PARTNER,\
-    NASTYA_PARTNER, KARA_PARTNER
+from config import STATUS_CREATE, STATUS_DONE, STATUS_ERROR, GENERAL_PARTNER, AIDAMIR_PARTNER, AZAMAT_PARTNER, \
+    NASTYA_PARTNER, KARA_PARTNER, BLOGGER_REFERENT_TYPE, NATIVE_REFERENT_TYPE, ONE_MONTH_TARIFF, TWO_MONTH_TARIFF, \
+    THREE_MONTH_TARIFF
 
 
 async def check_vpn_type(session: AsyncSession = Depends(get_async_session)):
@@ -35,13 +36,16 @@ async def create_vpn_type():
 
 async def check_tariff(session: AsyncSession = Depends(get_async_session)):
     check_list = [
-        Tariff(id=1, name='30 дней (100₽)', price=100, period_days=30, photo_url='https://i.imgur.com/e4pGpmu.jpg',
-               is_active=True),
-        Tariff(id=2, name='60 дней (200₽)', price=200, period_days=60, photo_url='https://i.imgur.com/nld6nHb.jpg',
-               is_active=True),
-        Tariff(id=3, name='90 дней (300₽)', price=300, period_days=90, photo_url='https://i.imgur.com/jEcEWNj.jpg',
-               is_active=True)]
-
+        Tariff(id=ONE_MONTH_TARIFF.id, name=ONE_MONTH_TARIFF.name,
+               price=ONE_MONTH_TARIFF.price, period_days=ONE_MONTH_TARIFF.period_days,
+               photo_url=ONE_MONTH_TARIFF.photo_url, is_active=ONE_MONTH_TARIFF.is_active),
+        Tariff(id=TWO_MONTH_TARIFF.id, name=TWO_MONTH_TARIFF.name,
+               price=TWO_MONTH_TARIFF.price, period_days=TWO_MONTH_TARIFF.period_days,
+               photo_url=TWO_MONTH_TARIFF.photo_url, is_active=TWO_MONTH_TARIFF.is_active),
+        Tariff(id=THREE_MONTH_TARIFF.id, name=THREE_MONTH_TARIFF.name,
+               price=THREE_MONTH_TARIFF.price, period_days=THREE_MONTH_TARIFF.period_days,
+               photo_url=THREE_MONTH_TARIFF.photo_url, is_active=THREE_MONTH_TARIFF.is_active)
+    ]
     creation_list = []
     for obj in check_list:
         query = select(Tariff).where(
@@ -112,12 +116,10 @@ async def create_status():
 
 
 async def check_referent_type(session: AsyncSession = Depends(get_async_session)):
-    check_list = [ReferentType(id=1, name='Native'),
-                  ReferentType(id=2, name='Blogger')]
-    # check_list = [
-    #     ReferentType(id=NATIVE_REFERENT_TYPE.id, name=NATIVE_REFERENT_TYPE.name),
-    #     ReferentType(id=BLOGGER_REFERENT_TYPE.id, name=BLOGGER_REFERENT_TYPE.name)
-    # ]
+    check_list = [
+        ReferentType(id=NATIVE_REFERENT_TYPE.id, name=NATIVE_REFERENT_TYPE.name),
+        ReferentType(id=BLOGGER_REFERENT_TYPE.id, name=BLOGGER_REFERENT_TYPE.name)
+    ]
 
     creation_list = []
     for obj in check_list:
