@@ -9,6 +9,7 @@ class CrudTariff(CRUDBase[Tariff, TariffCreate, TariffUpdate]):
     obj_name = "Tariff"
     not_found_id = {"num": 404, "message": f"{obj_name}: не нашли а с таким id"}
     name_is_exist = {"num": 403, "message": f"А {obj_name} with that name already exists"}
+    id_is_exist = {"num": 403, "message": f"{obj_name}: с таким id уже есть в БД!"}
 
     async def get_all_tariffs(self, *, db: AsyncSession, skip: int, limit: int):
         """
@@ -32,6 +33,10 @@ class CrudTariff(CRUDBase[Tariff, TariffCreate, TariffUpdate]):
             Проверяем id, если такой есть - возвращает ошибку.
             Проверяем name, если такой есть - возвращает ошибку.
         """
+        if new_data.id is not None:
+            obj, code, indexes = await self.get_tariff_by_id(db=db, id=new_data.id)
+            if obj:
+                return None, self.id_is_exist, None
         # check name
         query = select(self.model).where(self.model.name == new_data.name)
         response = await db.execute(query)
