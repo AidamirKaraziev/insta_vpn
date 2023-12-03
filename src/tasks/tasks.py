@@ -64,7 +64,8 @@ def get_email_template_request_verify(name: str, email_to: Optional[str], token:
 async def update_fields_is_active():
     today = datetime.now()
     async with async_session_maker() as session:
-        query = update(Profile).where(Profile.date_end < today).values(is_active=False)
+        query = update(Profile).where(
+            Profile.date_end < today, Profile.is_active == True).values(is_active=False, outline_key_id=None)
         await session.execute(query)
         await session.commit()
 
