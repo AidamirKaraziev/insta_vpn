@@ -41,7 +41,7 @@ MAX_PROFILE_TO_ACCOUNT = 5  # Максимальное количество пр
 TRIAL_DAYS = 3  # Количество пробных дней
 
 """REFERENT"""
-BASE_REFERENT_GIFT_DAYS = 3  # базовое количество подарочных дней
+BASE_REFERENT_GIFT_DAYS = 4  # базовое количество подарочных дней
 BASE_PARTNER = 1  # базовый партнер - лицо привело референта 1="Общие", нужно для KPI
 THE_AMOUNT_OF_PAYMENT_FOR_A_REFERRAL = 50  # Реферальная выплата за нового клиента
 
