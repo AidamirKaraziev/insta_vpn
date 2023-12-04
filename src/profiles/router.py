@@ -93,7 +93,11 @@ async def add_profile(
     account, code, indexes = await crud_account.get_account_by_id(db=session, id=account_id)
     await get_raise_new(code)
     if account.trial_is_active:
-        date_end = (datetime.now().date() + timedelta(days=TRIAL_DAYS)).strftime("%Y-%m-%dT%H:%M:%S.%f")
+        if account.referent_id is not None:
+            referent, code, indexes = await crud_referent.get_referent_by_id(db=session, id=account.referent_id)
+            date_end = (datetime.now().date() + timedelta(days=referent.gift_days)).strftime("%Y-%m-%dT%H:%M:%S.%f")
+        else:
+            date_end = (datetime.now().date() + timedelta(days=TRIAL_DAYS)).strftime("%Y-%m-%dT%H:%M:%S.%f")
         activate_data = ProfileUpdate(date_end=date_end, is_active=True)
         profile, code, indexes = await crud_profile.activate_profile(db=session, id=profile.id,
                                                                      activate_data=activate_data)
