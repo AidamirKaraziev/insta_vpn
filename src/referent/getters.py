@@ -9,7 +9,7 @@ from referent_type.getters import getting_referent_type
 
 
 def gen_referral_link(referent_id: UUID4):
-    return f"{BASE_REFERRAL_LINK}/referral/{referent_id}"
+    return f"{BASE_REFERRAL_LINK}referral-{referent_id}"
 
 
 # def gen_referent_link(referent_id: UUID4):
