@@ -9,6 +9,7 @@ from core.base_crud import CRUDBase
 from payment.models import Payment
 from payment.schemas import PaymentUpdate, PaymentCreate
 from referent.crud import crud_referent
+from status.crud import crud_status
 
 
 class CrudPayment(CRUDBase[Payment, PaymentCreate, PaymentUpdate]):
@@ -35,6 +36,19 @@ class CrudPayment(CRUDBase[Payment, PaymentCreate, PaymentUpdate]):
         if obj is None:
             return None, self.not_found_id, None
         return obj, 0, None
+
+    async def get_payments_by_status_id(self, *, db: AsyncSession, status_id: int):
+        """
+            Получение списка платежей отфильтрованных по status_id.
+            Если нет такого status_id, выводит ошибку с описанием.
+        """
+        status, code, indexes = await crud_status.get_status_by_id(db=db, id=status_id)
+        if code != 0:
+            return None, code, None
+        query = select(self.model).where(self.model.status_id == status_id)
+        resp = await db.execute(query)
+        objects = resp.scalars().all()
+        return objects, 0, None
 
     async def create_payment(self, *, db: AsyncSession, new_data: PaymentCreate):
         """
@@ -88,6 +102,25 @@ class CrudPayment(CRUDBase[Payment, PaymentCreate, PaymentUpdate]):
         update_data = PaymentUpdate(status_id=STATUS_DONE.id)
         objects = await super().update(db_session=db, obj_current=this_obj, obj_new=update_data)
         return objects, 0, None
+
+    async def make_all_new_payments(self, *, db: AsyncSession):
+        """
+            Получение списка платежей отфильтрованных по status_id = STATUS_CREATE.id.
+            Если нет такого status_id, выводит ошибку с описанием.
+        """
+        done_list = []
+        error_list = []
+        created_payments, code, indexes = await self.get_payments_by_status_id(db=db, status_id=STATUS_CREATE.id)
+        if code != 0:
+            return None, code, None
+        for payment in created_payments:
+            res, code, indexes = await self.execution_of_payment(db=db, id=payment.id)
+            if code == 0:
+                done_list.append(res)
+            else:
+                error_list.append(res)
+        return {"Готово": done_list,
+                "Ошибка": error_list}, 0, None
 
 
 crud_payment = CrudPayment(Payment)
