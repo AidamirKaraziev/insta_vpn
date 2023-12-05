@@ -6,13 +6,16 @@ from typing import Optional
 import smtplib
 
 from pydantic import UUID4
-from sqlalchemy import update
+from sqlalchemy import update, select
 
 from celery import Celery
 
+from payment.crud import crud_payment
+from payment.models import Payment
+from payment.schemas import PaymentUpdate
 from profiles.models import Profile
 from database import async_session_maker
-from config import SMTP_USER, SMTP_PASSWORD, REDIS_HOST, REDIS_PORT
+from config import SMTP_USER, SMTP_PASSWORD, REDIS_HOST, REDIS_PORT, STATUS_CREATE, STATUS_ERROR
 from referent.crud import crud_referent
 
 SMTP_HOST = "smtp.gmail.com"
@@ -68,6 +71,20 @@ async def update_fields_is_active():
             Profile.date_end < today, Profile.is_active == True).values(is_active=False, outline_key_id=None)
         await session.execute(query)
         await session.commit()
+
+
+# TODO execution payments
+async def execution_payments():
+    """
+        Получаем список payment where status_id == STATUS_CREATE.id
+        В идеале использовать crud_payment.execution_of_payment - тогда вообще ничего писать не надо
+    """
+    async with async_session_maker() as session:
+        query = select(Payment).where(
+            Payment.status_id == STATUS_CREATE.id)
+        payments = await session.execute(query)
+        for payment in payments:
+            await crud_payment.execution_of_payment(db=session, id=payment.id)
 
 
 @celery.task
