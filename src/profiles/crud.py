@@ -127,6 +127,9 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         profile, code, indexes = await self.get_profile_by_id(db=db, id=profile_id)
         if code != 0:
             return None, code, None
+        # если нечего заменять, просто вернет профиль при подключении ключ сам назначится
+        if profile.outline_key_id is None:
+            return profile, 0, None
         outline_key, code, indexes = await crud_outline_key.get_replacement_key(
             db=db, outline_key_id=profile.outline_key_id)
         if code != 0:
