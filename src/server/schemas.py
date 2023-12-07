@@ -1,6 +1,8 @@
 from typing import Optional
 from pydantic import BaseModel, Field
 
+from config import OUTLINE_VPN_TYPE
+
 
 class ServerGet(BaseModel):
     id: int
@@ -27,7 +29,7 @@ class ServerCreate(BaseModel):
 
 class OutlineServerCreate(ServerCreate):
     id: int
-    vpn_type_id: int
+    vpn_type_id: int = OUTLINE_VPN_TYPE.id
     name: str
     address: str
     port: str

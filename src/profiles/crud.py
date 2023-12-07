@@ -66,7 +66,6 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
                 return f"Профиль {num}", 0, None
         return f"Профиль {num}", 0, None
 
-    # TODO check
     async def add_profile(self, *, db: AsyncSession, account_id: int):
         """Создание профиля с нужными полями, который по дефолту не активен:
             id: UUID4
@@ -98,24 +97,27 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         objects = await super().update(db_session=db, obj_current=profile, obj_new=update_data)
         return objects, 0, None
 
-    # TODO test
     async def activate_profile(self, *, db: AsyncSession, activate_data: ProfileUpdate, id: UUID4):
-        """Активирует профиль, указывается дата окончания и is_active: True,
-         подбирается свободный outline_key"""
+        """
+            Активирует профиль, указывается дата окончания и is_active: True.
+            Не подбираем свободный outline_key, он подберется по факту в момент подключения к VPN.
+         """
         profile, code, indexes = await self.get_profile_by_id(db=db, id=id)
         if code != 0:
             return None, code, None
-        outline_key, code, indexes = await crud_outline_key.get_good_key(db=db)
-        if code != 0:
-            return None, code, None
+        # получит outline_key в момент подключения
+        # outline_key, code, indexes = await crud_outline_key.get_good_key(db=db)
+        # if code != 0:
+        #     return None, code, None
+        # activate_data.outline_key_id = outline_key.id
         activate_data.is_active = True
-        activate_data.outline_key_id = outline_key.id
         objects = await super().update(db_session=db, obj_current=profile, obj_new=activate_data)
         return objects, 0, None
 
-    # TODO test
     async def deactivate_profile(self, *, db: AsyncSession, id: UUID4):
-        """Деактивирует профиль: is_active -> False, outline_key_id -> None"""
+        """
+            Деактивирует профиль: is_active -> False, outline_key_id -> None
+        """
         profile, code, indexes = await self.get_profile_by_id(db=db, id=id)
         if code != 0:
             return None, code, None
@@ -124,10 +126,15 @@ class CrudProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
         return objects, 0, None
 
     async def replacement_outline_key_for_profile(self, *, db: AsyncSession, profile_id: UUID4):
-        """Замена outline_key_id в профиле. Выбирается самый первый свободный ключ"""
+        """
+            Замена outline_key_id в профиле. Выбирается самый первый свободный ключ
+        """
         profile, code, indexes = await self.get_profile_by_id(db=db, id=profile_id)
         if code != 0:
             return None, code, None
+        # если нечего заменять, просто вернет профиль при подключении ключ сам назначится
+        if profile.outline_key_id is None:
+            return profile, 0, None
         outline_key, code, indexes = await crud_outline_key.get_replacement_key(
             db=db, outline_key_id=profile.outline_key_id)
         if code != 0:

@@ -1,9 +1,9 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.raise_template import get_raise, get_raise_new
+from core.raise_template import get_raise_new
 from core.response import SingleEntityResponse, ListOfEntityResponse
 from database import get_async_session
 
@@ -35,7 +35,6 @@ async def get_vpn_types(
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_vpn_type.get_all_vpn_types(db=session, skip=skip, limit=limit)
-    print(objects)
     return ListOfEntityResponse(data=[getting_vpn_type(obj) for obj in objects])
 
 

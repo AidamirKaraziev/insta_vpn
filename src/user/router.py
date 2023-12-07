@@ -6,7 +6,6 @@ from typing import Optional, Type
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status,  UploadFile, File
 from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi_users import exceptions, models
 from fastapi_users.manager import BaseUserManager, UserManagerDependency
 from fastapi_users.router.common import ErrorCode, ErrorModel
@@ -40,7 +39,6 @@ router = APIRouter(
     prefix="/users",
     tags=["users"]
 )
-router.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @router.get(

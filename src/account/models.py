@@ -18,7 +18,6 @@ class Account(Base):
     number = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     trial_is_active = Column(Boolean, default=True)
-    # referent_id = Column(UUID(as_uuid=True), ForeignKey(Referent.id, ondelete="SET NULL"))
-    can_pay_out = Column(Boolean, default=True)
+    referent_id = Column(UUID(as_uuid=True), ForeignKey(Referent.id, ondelete="SET NULL"))
 
-    # referent = relationship(Referent, backref="accounts", lazy="joined")
+    referent = relationship(Referent, backref="accounts", lazy="joined")

@@ -1,15 +1,22 @@
 import asyncio
+import logging
 from datetime import datetime
 from email.message import EmailMessage
 from typing import Optional
 import smtplib
-from sqlalchemy import update
+
+from pydantic import UUID4
+from sqlalchemy import update, select
 
 from celery import Celery
 
+from payment.crud import crud_payment
+from payment.models import Payment
+from payment.schemas import PaymentUpdate
 from profiles.models import Profile
 from database import async_session_maker
-from config import SMTP_USER, SMTP_PASSWORD, REDIS_HOST, REDIS_PORT
+from config import SMTP_USER, SMTP_PASSWORD, REDIS_HOST, REDIS_PORT, STATUS_CREATE, STATUS_ERROR
+from referent.crud import crud_referent
 
 SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = 465
@@ -60,9 +67,24 @@ def get_email_template_request_verify(name: str, email_to: Optional[str], token:
 async def update_fields_is_active():
     today = datetime.now()
     async with async_session_maker() as session:
-        query = update(Profile).where(Profile.date_end < today).values(is_active=False)
+        query = update(Profile).where(
+            Profile.date_end < today, Profile.is_active == True).values(is_active=False, outline_key_id=None)
         await session.execute(query)
         await session.commit()
+
+
+# TODO execution payments
+async def execution_payments():
+    """
+        Получаем список payment where status_id == STATUS_CREATE.id
+        В идеале использовать crud_payment.execution_of_payment - тогда вообще ничего писать не надо
+    """
+    async with async_session_maker() as session:
+        query = select(Payment).where(
+            Payment.status_id == STATUS_CREATE.id)
+        payments = await session.execute(query)
+        for payment in payments:
+            await crud_payment.execution_of_payment(db=session, id=payment.id)
 
 
 @celery.task
@@ -84,4 +106,29 @@ def send_email_request_verify(token: str, name: str, email_to: str):
 @celery.task
 def describe_profiles():
     asyncio.run(update_fields_is_active())
+
+
+# TODO написать задачу которая проходится по всем payment
+"""
+Задача которая проходится по всем payment, где status_id == 1(Создан)
+после выполнения:
+obj, code, indexes = await crud_referent.change_balance(db=session, id=referent_id, amount=amount)
+менять Payment.status_id = 3(Готово)
+Если ошибка поменять Payment.status_id = 4(Отказано) - еще не внедрил
+"""
+
+
+@celery.task
+async def change_balance_for_referent(referent_id: UUID4, amount: int):
+    """
+        referent_id: UUID4
+        amount: int ; 50(пополнение), -50(списание).
+        Отложенный перезапуск в случае неудачи, через count_down. -> запись в лог.
+    """
+    async with async_session_maker() as session:
+        obj, code, indexes = await crud_referent.change_balance(db=session, id=referent_id, amount=amount)
+        print(amount)
+        if code != 0:
+            logging.info('Running...')
+            # вот тут надо отложенный перезапуск
 
