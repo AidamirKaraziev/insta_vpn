@@ -20,9 +20,12 @@ router = APIRouter(
 )
 
 
-@router.get(path="/outline/{profile_id}",
-            )
-async def encode_string(
+@router.get(
+    path="/outline/{profile_id}",
+    name='dynamic_connection_to_online_servers',
+    description='Динамическое подключение к online серверам'
+)
+async def dynamic_connection_to_online_servers(
         profile_id: UUID4,
         session: AsyncSession = Depends(get_async_session),
 ):
