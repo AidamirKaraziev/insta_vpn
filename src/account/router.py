@@ -35,7 +35,7 @@ router = APIRouter(
 async def get_accounts(
         skip: int = 0,
         limit: int = 1000,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_account.get_all_accounts(db=session, skip=skip, limit=limit)
@@ -50,7 +50,7 @@ async def get_accounts(
             )
 async def get_account(
         account_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_account.get_account_by_id(db=session, id=account_id)
@@ -65,7 +65,7 @@ async def get_account(
              )
 async def add_account(
         new_data: AccountCreate,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_account.add_account(db=session, new_data=new_data)
@@ -86,7 +86,7 @@ async def add_account(
 async def update_account(
         update_data: AccountUpdate,
         account_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_account.update_account(db=session, update_data=update_data, id=account_id)
@@ -102,7 +102,7 @@ async def update_account(
             )
 async def get_accounts_by_referent_id(
         referent_id: UUID4,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_account.get_accounts_by_referent_id(db=session, referent_id=referent_id)

@@ -31,7 +31,7 @@ router = APIRouter(
 async def get_referents(
         skip: int = 0,
         limit: int = 1000,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_referent.get_all_referents(db=session, skip=skip, limit=limit)
@@ -46,7 +46,7 @@ async def get_referents(
             )
 async def get_referent(
         referent_id: UUID4,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_referent.get_referent_by_id(db=session, id=referent_id)
@@ -61,7 +61,7 @@ async def get_referent(
              )
 async def add_referent(
         new_data: ReferentCreate,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_referent.create_native_referent(db=session, new_data=new_data)
@@ -77,7 +77,7 @@ async def add_referent(
             )
 async def get_referents_by_telegram_id(
         telegram_id: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_referent.get_by_telegram_id(db=session, telegram_id=telegram_id)
@@ -94,7 +94,7 @@ async def get_referents_by_telegram_id(
 async def change_balance(
         referent_id: UUID4,
         amount: int,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_referent.change_balance(db=session, id=referent_id, amount=amount)

@@ -34,7 +34,7 @@ router = APIRouter(
 async def get_payments(
         skip: int = 0,
         limit: int = 1000,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_payment.get_all(db=session, skip=skip, limit=limit)
@@ -49,7 +49,7 @@ async def get_payments(
             )
 async def get_payments_by_status_id(
         status_id: Optional[int] = STATUS_CREATE.id,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     objects, code, indexes = await crud_payment.get_payments_by_status_id(
@@ -66,7 +66,7 @@ async def get_payments_by_status_id(
             )
 async def get_payment(
         payment_id: UUID4,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_payment.get_payment_by_id(db=session, id=payment_id)
@@ -81,7 +81,7 @@ async def get_payment(
              )
 async def create_payment(
         new_data: PaymentCreate,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_payment.create_payment(db=session, new_data=new_data)
@@ -96,7 +96,7 @@ async def create_payment(
             )
 async def execution_payment(
         payment_id: UUID4,
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_payment.execution_of_payment(db=session, id=payment_id)
@@ -110,7 +110,7 @@ async def execution_payment(
             description='Выполнить все новые платежи'
             )
 async def make_all_new_payments(
-        # user: User = Depends(current_active_superuser),
+        user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_payment.make_all_new_payments(db=session)
