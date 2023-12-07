@@ -12,6 +12,7 @@ class TariffGet(BaseModel):
 
 
 class TariffCreate(BaseModel):
+    id: Optional[int]
     name: str = Field(..., title="tariff")
     price: int
     period_days: int

@@ -1,3 +1,4 @@
+from pydantic import UUID4
 from sqlalchemy import select, exists
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -5,6 +6,7 @@ from account.models import Account
 from account.schemas import AccountCreate, AccountUpdate
 from core.base_crud import CRUDBase
 from profiles.models import Profile
+from referent.crud import crud_referent
 
 
 class CrudAccount(CRUDBase[Account, AccountCreate, AccountUpdate]):
@@ -13,6 +15,10 @@ class CrudAccount(CRUDBase[Account, AccountCreate, AccountUpdate]):
     telegram_id_is_exist = {"num": 403, "message": f"А {obj_name} with that telegram id already exists"}
 
     async def get_account_by_id(self, *, db: AsyncSession, id: int):
+        """
+            Проверяем id, если такого нет - возвращает ошибку.
+            Возвращаем по id.
+        """
         obj = await super().get(db=db, id=id)
         if obj is None:
             return None, self.not_found_id, None
@@ -23,6 +29,16 @@ class CrudAccount(CRUDBase[Account, AccountCreate, AccountUpdate]):
         return objects, 0, None
 
     async def add_account(self, *, db: AsyncSession, new_data: AccountCreate):
+        """
+            id: int
+            name: Optional[str]
+            number: Optional[str]
+            referent_id: Optional[UUID4] - проверяем есть ли такой референт.
+        """
+        if new_data.referent_id is not None:
+            referent, code, indexes = await crud_referent.get_referent_by_id(db=db, id=new_data.referent_id)
+            if code != 0:
+                return None, code, None
         query = select(self.model).where(self.model.id == new_data.id)
         response = await db.execute(query)
         if response.scalar_one_or_none() is not None:
@@ -45,6 +61,19 @@ class CrudAccount(CRUDBase[Account, AccountCreate, AccountUpdate]):
         """Возвращает список аккаунтов, у которых нет профиля"""
         res = select(self.model).select_from(self.model).where(
             ~exists().where(self.model.id == Profile.account_id))
+        response = await db.execute(res)
+        objs = response.scalars().all()
+        return objs, 0, None
+
+    async def get_accounts_by_referent_id(self, *, db: AsyncSession, referent_id: UUID4):
+        """
+            Вывод списка аккаунтов по референт_id.
+            Проверка есть ли такой референт, если нет - вывод ошибки с описанием.
+        """
+        referent, code, indexes = await crud_referent.get_referent_by_id(db=db, id=referent_id)
+        if code != 0:
+            return None, code, None
+        res = select(self.model).where(self.model.referent_id == referent_id)
         response = await db.execute(res)
         objs = response.scalars().all()
         return objs, 0, None

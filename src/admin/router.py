@@ -88,3 +88,4 @@ if __name__ == "__main__":
 # TODO добавить в referent поля balance, spb_number
 # TODO добавить в account поле can_pay_out: True написать логику выплаты пользователям и проставления can_pay_out: False
 # TODO сделать вывод баланса
+# TODO удалить директорию static

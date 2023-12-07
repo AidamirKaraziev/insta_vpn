@@ -9,19 +9,17 @@ class AccountGet(BaseModel):
     number: Optional[str]
     created_at: Optional[Timestamp]
     trial_is_active: Optional[bool]
-    # referent_id: Optional[UUID4]
-    can_pay_out: Optional[bool]
+    referent_id: Optional[UUID4]
 
 
 class AccountCreate(BaseModel):
     id: int
     name: Optional[str]
     number: Optional[str]
-    # referent_id: Optional[UUID4]
+    referent_id: Optional[UUID4]
 
 
 class AccountUpdate(BaseModel):
     name: Optional[str]
     number: Optional[str]
     trial_is_active: Optional[bool]
-    can_pay_out: Optional[bool]

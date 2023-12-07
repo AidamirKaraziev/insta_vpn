@@ -11,5 +11,5 @@ def getting_account(obj: AccountGet) -> Optional[AccountGet]:
         number=obj.number,
         created_at=obj.created_at,
         trial_is_active=obj.trial_is_active,
-        can_pay_out=obj.can_pay_out
+        referent_id=obj.referent_id
     )
