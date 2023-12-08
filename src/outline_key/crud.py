@@ -174,9 +174,9 @@ class CrudOutlineKey(CRUDBase[OutlineKey, OutlineKeyCreate, OutlineKeyUpdate]):
                 the_best_percentage_of_free_keys = percent_active
                 good_key = objs[0]
                 print("good_key:", good_key.id)
-            elif good_key is None:
-                # TODO отправить смс в телегу, сообщить что ключи закончились
-                return None, self.no_keys_available, None
+        if good_key is None:
+            # TODO отправить смс в телегу, сообщить что ключи закончились
+            return None, self.no_keys_available, None
         return good_key, 0, None
 
 
