@@ -164,16 +164,10 @@ class CrudOutlineKey(CRUDBase[OutlineKey, OutlineKeyCreate, OutlineKeyUpdate]):
             active_keys = len(objs)  # свободные ключи
             all_keys = server.max_client  # всего ключей
             percent_active = active_keys / all_keys  # процент свободных ключей
-            print("#"*30)
-            print(f"Server_id={server.id}: {len(objs)}")
-            print("active_keys:", active_keys)
-            print(f"max_client: {server.max_client}")
-            print(f"percent: {percent_active}")
-
             if percent_active >= the_best_percentage_of_free_keys and active_keys != 0:
                 the_best_percentage_of_free_keys = percent_active
                 good_key = objs[0]
-                print("good_key:", good_key.id)
+        # если нет ни одного свободного ключа
         if good_key is None:
             # TODO отправить смс в телегу, сообщить что ключи закончились
             return None, self.no_keys_available, None
