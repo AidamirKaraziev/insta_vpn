@@ -120,17 +120,6 @@ class CrudOutlineKey(CRUDBase[OutlineKey, OutlineKeyCreate, OutlineKeyUpdate]):
         quantity_free_keys = len(response.all())
         return quantity_free_keys, 0, None
 
-    async def get_good_key(self, *, db: AsyncSession):
-        """Возвращает один свободный ключ"""
-        res = select(self.model).select_from(self.model).outerjoin(Profile).where(
-            Profile.outline_key_id == None, self.model.is_active == True).limit(1)
-        response = await db.execute(res)
-        obj = response.scalar()
-        if not obj:
-            # TODO сделать отправку письма телеграм бота или какая-то другая логика. ВАЖНО!!!
-            return None, self.no_keys_available, None
-        return obj, 0, None
-
     async def get_replacement_key(self, *, db: AsyncSession, outline_key_id: int):
         outline_key, code, indexes = await self.get_key_by_id(db=db, id=outline_key_id)
         if code != 0:
