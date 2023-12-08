@@ -78,6 +78,64 @@ async def dynamic_connection_to_online_servers(
     return res_for_app
 
 
+@router.get(
+    path="/outline-new/{profile_id}",
+    name='dynamic_connection_to_online_servers',
+    description='Динамическое подключение к online серверам'
+)
+async def dynamic_connection_to_online_servers(
+        profile_id: UUID4,
+        session: AsyncSession = Depends(get_async_session),
+):
+    # Вернем профиль если такой есть
+    profile, code, indexes = await crud_profile.get_profile_by_id(db=session, id=profile_id)
+    await get_raise_new(code)
+    # если профиль активен
+    if profile.is_active is True:
+        # если есть привязанный ключ
+        if profile.outline_key_id is not None:
+            outline_key, code, indexes = await crud_outline_key.get_key_by_id(db=session, id=profile.outline_key_id)
+            await get_raise_new(code)
+            # если привязанный ключ неактивен
+            if outline_key.is_active is False:
+                outline_key, code, indexes = await crud_outline_key.get_good_key_new(db=session)
+                await get_raise_new(code)
+                data = ProfileUpdate(outline_key_id=outline_key.id)
+                profile, code, indexes = await crud_profile.update_profile(db=session, id=profile_id, update_data=data)
+                await get_raise_new(code)
+        elif profile.outline_key_id is None:
+            outline_key, code, indexes = await crud_outline_key.get_good_key_new(db=session)
+            await get_raise_new(code)
+            data = ProfileUpdate(outline_key_id=outline_key.id)
+            profile, code, indexes = await crud_profile.update_profile(db=session, id=profile_id, update_data=data)
+            await get_raise_new(code)
+
+        outline_key, code, indexes = await crud_outline_key.get_key_by_id(db=session, id=profile.outline_key_id)
+        await get_raise_new(code)
+        # Если привязанный ключ неактивен
+        if outline_key.is_active is False:
+            outline_key, code, indexes = await crud_outline_key.get_good_key_new(db=session)
+            await get_raise_new(code)
+            data = ProfileUpdate(outline_key_id=outline_key.id)
+            profile, code, indexes = await crud_profile.update_profile(db=session, id=profile_id, update_data=data)
+            await get_raise_new(code)
+    # ответ если профиль не активен
+    elif profile.is_active is False:
+        # TODO отправить смс в телегу
+        await get_raise_new({"num": 403, "message": f"Подписка неактивна"})
+    # Получаем
+    outline_key, code, indexes = await crud_outline_key.get_key_by_id(db=session, id=profile.outline_key_id)
+    await get_raise_new(code)
+    access_url = re.findall(r'@(.*):', outline_key.access_url)
+    res_for_app = {
+        "server": f"{access_url[0]}",
+        "server_port": f"{outline_key.port}",
+        "password": f"{outline_key.password}",
+        "method": f"{outline_key.method}"
+    }
+    return res_for_app
+
+
 if __name__ == "__main__":
     logging.info('Running...')
 

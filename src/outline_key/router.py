@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.raise_template import get_raise_new
-from core.response import SingleEntityResponse, ListOfEntityResponse
+from core.response import SingleEntityResponse, ListOfEntityResponse, OkResponse
 from database import get_async_session
 from auth.base_config import fastapi_users
 from auth.models import User
@@ -85,6 +85,20 @@ async def output_how_many_free_keys(
     response = f"Всего ключей: {len(keys)} | Свободных: {quantity_free_keys}"
     return SingleEntityResponse(data=response)
 
+
+@router.get(
+            path="/test-test/",
+            response_model=SingleEntityResponse,
+            name='get_outline_key',
+            description='Вывод Outline ключа по id'
+            )
+async def get_outline_key(
+        # user: User = Depends(current_active_superuser),
+        session: AsyncSession = Depends(get_async_session),
+):
+    obj, code, indexes = await crud_outline_key.get_good_key_new(db=session)
+    await get_raise_new(code)
+    return SingleEntityResponse(data=getting_outline_key(obj=obj))
 # TODO отложенная задача, которая отправляет уведомление если количество хороших ключей опускается до 100 шт
 
 
