@@ -145,12 +145,12 @@ class CrudOutlineKey(CRUDBase[OutlineKey, OutlineKeyCreate, OutlineKeyUpdate]):
             return None, self.no_keys_available, None
         return obj, 0, None
 
-    # TODO do it
     async def get_good_key_new(self, *, db: AsyncSession):
         """
-            Получить список свободных ключей, г
-            Выбрать из них в процентном соотношении самый свободный сервак
-            Нам надо получить ключ с самого свободного сервера.
+            Получить список всех серверов.
+            Выбрать из них в процентном соотношении самый свободный сервак.
+            Выбрать один свободный ключ.
+            Если свободных ключей нет - вывести ошибку с описанием.
         """
         servers, code, indexes = await crud_server.get_all_servers(db=db, skip=0, limit=1000000000)
         the_best_percentage_of_free_keys = 0
@@ -175,6 +175,7 @@ class CrudOutlineKey(CRUDBase[OutlineKey, OutlineKeyCreate, OutlineKeyUpdate]):
 
 
 crud_outline_key = CrudOutlineKey(OutlineKey)
+
 
 # # TODO change_max_client_to_server
 # async def change_max_client_to_server(self, *, db: AsyncSession, server_id: int):
