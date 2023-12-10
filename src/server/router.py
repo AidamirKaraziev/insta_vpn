@@ -156,6 +156,9 @@ async def activate_outline_server_and_keys(
     await get_raise_new(code)
     keys, code, indexes = await crud_outline_key.activate_keys_by_server_id(db=session, server_id=server_id)
     await get_raise_new(code)
+    update_data = ServerUpdate(is_active=True)
+    server, code, indexes = await crud_server.update_server(db=session, id=server_id, update_data=update_data)
+    await get_raise_new(code)
     d = f"""Сервер {obj.name} активирован и его Outline ключи в количестве: {len(keys)}"""
     return SingleEntityResponse(data=d)
 
