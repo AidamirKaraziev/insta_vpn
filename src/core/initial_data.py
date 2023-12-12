@@ -36,15 +36,24 @@ async def create_vpn_type():
 
 async def check_tariff(session: AsyncSession = Depends(get_async_session)):
     check_list = [
-        Tariff(id=ONE_MONTH_TARIFF.id, name=ONE_MONTH_TARIFF.name,
-               price=ONE_MONTH_TARIFF.price, period_days=ONE_MONTH_TARIFF.period_days,
-               photo_url=ONE_MONTH_TARIFF.photo_url, is_active=ONE_MONTH_TARIFF.is_active),
-        Tariff(id=TWO_MONTH_TARIFF.id, name=TWO_MONTH_TARIFF.name,
-               price=TWO_MONTH_TARIFF.price, period_days=TWO_MONTH_TARIFF.period_days,
-               photo_url=TWO_MONTH_TARIFF.photo_url, is_active=TWO_MONTH_TARIFF.is_active),
-        Tariff(id=THREE_MONTH_TARIFF.id, name=THREE_MONTH_TARIFF.name,
-               price=THREE_MONTH_TARIFF.price, period_days=THREE_MONTH_TARIFF.period_days,
-               photo_url=THREE_MONTH_TARIFF.photo_url, is_active=THREE_MONTH_TARIFF.is_active)
+        Tariff(id=ONE_MONTH_TARIFF.id,
+               name=ONE_MONTH_TARIFF.name,
+               price=ONE_MONTH_TARIFF.price,
+               period_days=ONE_MONTH_TARIFF.period_days,
+               photo_url=ONE_MONTH_TARIFF.photo_url,
+               is_active=ONE_MONTH_TARIFF.is_active),
+        Tariff(id=TWO_MONTH_TARIFF.id,
+               name=TWO_MONTH_TARIFF.name,
+               price=TWO_MONTH_TARIFF.price,
+               period_days=TWO_MONTH_TARIFF.period_days,
+               photo_url=TWO_MONTH_TARIFF.photo_url,
+               is_active=TWO_MONTH_TARIFF.is_active),
+        Tariff(id=THREE_MONTH_TARIFF.id,
+               name=THREE_MONTH_TARIFF.name,
+               price=THREE_MONTH_TARIFF.price,
+               period_days=THREE_MONTH_TARIFF.period_days,
+               photo_url=THREE_MONTH_TARIFF.photo_url,
+               is_active=THREE_MONTH_TARIFF.is_active)
     ]
     creation_list = []
     for obj in check_list:
