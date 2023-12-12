@@ -119,7 +119,8 @@ async def startup_event():
     redis = aioredis.from_url(f"redis://{REDIS_HOST:{REDIS_PORT}}", encoding="utf8", decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     try:
-        await create_initial_data()
+        pass
+        # await create_initial_data()
     except Exception as ex:
         print(f"Не получилось создать базовые данные: {ex}")
 
