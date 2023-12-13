@@ -15,7 +15,8 @@ from auth.models import User
 from payment.crud import crud_payment
 from payment.schemas import PaymentCreate
 from config import THE_AMOUNT_OF_PAYMENT_FOR_A_REFERRAL
-
+from referent.crud import crud_referent
+from referent.schemas import ReferentCreate
 
 current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
 
@@ -75,6 +76,9 @@ async def add_account(
         payment_data = PaymentCreate(referent_id=new_data.referent_id, amount=THE_AMOUNT_OF_PAYMENT_FOR_A_REFERRAL)
         payment, code, indexes = await crud_payment.create_payment(db=session, new_data=payment_data)
         await get_raise_new(code)
+    referent_data = ReferentCreate(telegram_id=obj.id)
+    referent, code, indexes = await crud_referent.create_native_referent(db=session, new_data=referent_data)
+    await get_raise_new(code)
     return SingleEntityResponse(data=getting_account(obj=obj))
 
 
