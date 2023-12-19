@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 
 from partner.schemas import PartnerCreate
+from payment_type.schemas import PaymentTypeCreate
 from referent_type.schemas import ReferentTypeCreate
 from status.schemas import StatusCreate
 from tariff.schemas import TariffCreate
@@ -60,6 +61,10 @@ BASE_REGISTER_REFERENT_LINK = "https://t.me/financier_tgrm_bot?start="  # bot/re
 STATUS_CREATE = StatusCreate(id=1, name='Создан')
 STATUS_ERROR = StatusCreate(id=2, name='Ошибка')
 STATUS_DONE = StatusCreate(id=3, name='Готов')
+
+"""PaymentType"""
+PAYMENT_TYPE_REPLACEMENT = PaymentTypeCreate(id=1, name='Пополнение баланса')
+PAYMENT_TYPE_WITHDRAWAL = PaymentTypeCreate(id=2, name='Снятие средств')
 
 """Partner"""
 GENERAL_PARTNER = PartnerCreate(id=1, name='Общие')

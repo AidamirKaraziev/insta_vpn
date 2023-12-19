@@ -14,7 +14,7 @@ from auth.base_config import fastapi_users
 from auth.models import User
 from payment.crud import crud_payment
 from payment.schemas import PaymentCreate
-from config import THE_AMOUNT_OF_PAYMENT_FOR_A_REFERRAL
+from config import THE_AMOUNT_OF_PAYMENT_FOR_A_REFERRAL, PAYMENT_TYPE_REPLACEMENT
 from referent.crud import crud_referent
 from referent.schemas import ReferentCreate
 
@@ -73,7 +73,9 @@ async def add_account(
     await get_raise_new(code)
     # создает payment на начисление реферальных рублей за привлечение клиента референту
     if new_data.referent_id is not None:
-        payment_data = PaymentCreate(referent_id=new_data.referent_id, amount=THE_AMOUNT_OF_PAYMENT_FOR_A_REFERRAL)
+        payment_data = PaymentCreate(referent_id=new_data.referent_id,
+                                     amount=THE_AMOUNT_OF_PAYMENT_FOR_A_REFERRAL,
+                                     payment_type_id=PAYMENT_TYPE_REPLACEMENT.id)
         payment, code, indexes = await crud_payment.create_payment(db=session, new_data=payment_data)
         await get_raise_new(code)
     referent_data = ReferentCreate(telegram_id=obj.id)

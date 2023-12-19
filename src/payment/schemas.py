@@ -2,6 +2,8 @@ from typing import Optional
 from pydantic import BaseModel, UUID4
 from sqlite3 import Timestamp
 
+from config import STATUS_CREATE, PAYMENT_TYPE_WITHDRAWAL
+from payment_type.schemas import PaymentTypeGet
 from status.schemas import StatusGet
 
 
@@ -12,6 +14,7 @@ class PaymentGet(BaseModel):
     spb_number: Optional[str]
     card_number: Optional[str]
     created_at: Optional[Timestamp]
+    payment_type: Optional[PaymentTypeGet]
     status: Optional[StatusGet]
 
 
@@ -21,7 +24,8 @@ class PaymentCreate(BaseModel):
     amount: int
     spb_number: Optional[str]
     card_number: Optional[str]
-    status_id: Optional[int] = 1
+    payment_type_id: int = PAYMENT_TYPE_WITHDRAWAL.id
+    status_id: Optional[int] = STATUS_CREATE.id
 
 
 class PaymentUpdate(BaseModel):
