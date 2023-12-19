@@ -59,7 +59,6 @@ async def get_account(
     return SingleEntityResponse(data=getting_account(obj=obj))
 
 
-# TODO test
 @router.post(path="/",
              response_model=SingleEntityResponse,
              name='add_account',
