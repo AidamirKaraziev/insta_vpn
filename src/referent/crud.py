@@ -1,11 +1,8 @@
-from datetime import datetime
-from typing import Optional
-from uuid import uuid4
-
 from pydantic import UUID4
-from sqlalchemy import select, extract, func
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from config import PAYMENT_TYPE_REPLACEMENT, PAYMENT_TYPE_WITHDRAWAL, GENERAL_PARTNER, NATIVE_REFERENT_TYPE
 from core.base_crud import CRUDBase
 
 
@@ -61,27 +58,35 @@ class CrudReferent(CRUDBase[Referent, ReferentCreate, ReferentUpdate]):
         if referent is not None:
             return referent, 0, None
         else:
-            new_data.referent_type_id = 1
-            new_data.partner_id = 1
+            new_data.referent_type_id = NATIVE_REFERENT_TYPE.id
+            new_data.partner_id = GENERAL_PARTNER.id
             new_data.description = None
             new_data.password = None
 
             objects = await super().create(db_session=db, obj_in=new_data)
             return objects, 0, None
 
-    async def change_balance(self, *, db: AsyncSession, id: UUID4, amount: int):
+    async def change_balance(self, *, db: AsyncSession, id: UUID4, amount: int, payment_type_id: int):
         """
-            amount - это сумма на которую изменится баланс.
+            Amount - это сумма на которую изменится баланс.
+            В payment есть проверка чтобы amount был больше нуля.
             Проверяем есть ли такой референт по referent_id, если нет - выводим ошибку с описанием.
+            Дополнительная проверка, чтобы баланс не мог стать отрицательным.
             balance: Optional[int]
+
         """
         this_obj, code, indexes = await self.get_referent_by_id(db=db, id=id)
         if code != 0:
             return None, code, None
+
+        if payment_type_id == PAYMENT_TYPE_REPLACEMENT.id:  # Увеличить баланс
+            balance = int(this_obj.balance) + amount
+        elif payment_type_id == PAYMENT_TYPE_WITHDRAWAL.id:  # Уменьшить баланс
+            balance = int(this_obj.balance) - amount
+            if balance < 0:
+                return None, self.balance_less_than_zero, None
+
         # расчет нового баланса
-        balance = int(this_obj.balance) + amount
-        if balance < 0:
-            return None, self.balance_less_than_zero, None
         update_data = ReferentUpdate(balance=balance)
         objects = await super().update(db_session=db, obj_current=this_obj, obj_new=update_data)
         return objects, 0, None
