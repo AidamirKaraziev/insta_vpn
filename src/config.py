@@ -62,8 +62,8 @@ STATUS_ERROR = StatusCreate(id=2, name='Ошибка')
 STATUS_DONE = StatusCreate(id=3, name='Готов')
 
 """PaymentType"""
-PAYMENT_TYPE_REPLACEMENT = PaymentTypeCreate(id=1, name='Пополнение баланса')
-PAYMENT_TYPE_WITHDRAWAL = PaymentTypeCreate(id=2, name='Снятие средств')
+PAYMENT_TYPE_INCREASE = PaymentTypeCreate(id=1, name='Пополнение баланса')
+PAYMENT_TYPE_DECREASE = PaymentTypeCreate(id=2, name='Снятие средств')
 
 """Partner"""
 GENERAL_PARTNER = PartnerCreate(id=1, name='Общие')
