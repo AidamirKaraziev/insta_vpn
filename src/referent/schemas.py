@@ -41,7 +41,7 @@ class ReferentCompanyCreate(ReferentCreate):
     gift_days: int = BASE_REFERENT_GIFT_DAYS
     partner_id: int = GENERAL_PARTNER.id
     description: Optional[str]
-    budgeted_amount: Optional[int]
+    budget_amount: Optional[int]
 
 
 class ReferentUpdate(BaseModel):
