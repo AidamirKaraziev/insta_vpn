@@ -116,7 +116,7 @@ class CrudPayment(CRUDBase[Payment, PaymentCreate, PaymentUpdate]):
         this_obj = await super().update(db_session=db, obj_current=this_obj, obj_new=update_data)
         return this_obj, 0, None
 
-    async def make_all_new_payments(self, *, db: AsyncSession, status_id: int, payment_type_id: int):
+    async def make_all_new_payments(self, *, db: AsyncSession, payment_type_id: int):
         """
             Получение списка платежей отфильтрованных по status_id = STATUS_CREATE.id.
             Если нет такого status_id, выводит ошибку с описанием.
@@ -124,7 +124,7 @@ class CrudPayment(CRUDBase[Payment, PaymentCreate, PaymentUpdate]):
         done_list = []
         error_list = []
         created_payments, code, indexes = await self.get_by_status_id_and_payment_type_id(
-            db=db, status_id=status_id, payment_type_id=payment_type_id)
+            db=db, status_id=STATUS_CREATE, payment_type_id=payment_type_id)
         if code != 0:
             return None, code, None
         for payment in created_payments:
