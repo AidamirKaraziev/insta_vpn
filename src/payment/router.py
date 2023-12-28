@@ -107,19 +107,18 @@ async def execution_payment(
     return SingleEntityResponse(data=getting_payment(obj=obj))
 
 
-@router.put(path="/make-all-new/{status_id}{payment_type_id}",
+@router.put(path="/make-all-new/{payment_type_id}",
             response_model=SingleEntityResponse,
             name='make_all_new_payments',
             description='Исполнить все новые платежи'
             )
 async def make_all_new_payments(
-        status_id: int,
         payment_type_id: int,
         user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     data, code, indexes = await crud_payment.make_all_new_payments(
-        db=session, status_id=status_id, payment_type_id=payment_type_id)
+        db=session, payment_type_id=payment_type_id)
     await get_raise_new(code)
     return SingleEntityResponse(data=data)
 
