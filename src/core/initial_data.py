@@ -10,7 +10,7 @@ from tariff.models import Tariff
 from vpn_type.models import VpnType
 from config import STATUS_CREATE, STATUS_DONE, STATUS_ERROR, GENERAL_PARTNER, AIDAMIR_PARTNER, AZAMAT_PARTNER, \
     NASTYA_PARTNER, KARA_PARTNER, BLOGGER_REFERENT_TYPE, NATIVE_REFERENT_TYPE, ONE_MONTH_TARIFF, TWO_MONTH_TARIFF, \
-    THREE_MONTH_TARIFF, PAYMENT_TYPE_DECREASE, PAYMENT_TYPE_INCREASE
+    THREE_MONTH_TARIFF, PAYMENT_TYPE_WITHDRAWAL, PAYMENT_TYPE_REPLACEMENT
 
 
 async def check_vpn_type(session: AsyncSession = Depends(get_async_session)):
@@ -150,8 +150,8 @@ async def create_referent_type():
 
 async def check_payment_type(session: AsyncSession = Depends(get_async_session)):
     check_list = [
-        PaymentType(id=PAYMENT_TYPE_INCREASE.id, name=PAYMENT_TYPE_INCREASE.name),
-        PaymentType(id=PAYMENT_TYPE_DECREASE.id, name=PAYMENT_TYPE_DECREASE.name)
+        PaymentType(id=PAYMENT_TYPE_REPLACEMENT.id, name=PAYMENT_TYPE_REPLACEMENT.name),
+        PaymentType(id=PAYMENT_TYPE_WITHDRAWAL.id, name=PAYMENT_TYPE_WITHDRAWAL.name)
     ]
 
     creation_list = []
