@@ -11,7 +11,7 @@ from auth.base_config import fastapi_users
 from auth.models import User
 from referent.crud import crud_referent
 from referent.getters import getting_referent
-from referent.schemas import ReferentCreate
+from referent.schemas import ReferentCompanyCreate, ReferentNativeCreate
 
 current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
 
@@ -54,17 +54,33 @@ async def get_referent(
     return SingleEntityResponse(data=getting_referent(obj=obj))
 
 
-@router.post(path="/",
+# TODO возможно удалить, хз где это вообще применятся
+@router.post(path="/create-native/",
              response_model=SingleEntityResponse,
-             name='add_referent',
-             description='Добавить референта'
+             name='create_native_referent',
+             description='Создает нативного референта(создается автоматически после регистрации в основном боте).'
              )
 async def add_referent(
-        new_data: ReferentCreate,
+        new_data: ReferentNativeCreate,
         user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     obj, code, indexes = await crud_referent.create_native_referent(db=session, new_data=new_data)
+    await get_raise_new(code)
+    return SingleEntityResponse(data=getting_referent(obj=obj))
+
+
+@router.post(path="/create-for-us/",
+             response_model=SingleEntityResponse,
+             name='create_referent_for_us',
+             description='Создать референта для нас, чтобы мы могли делать различные рекламные компании.'
+             )
+async def create_referent_for_us(
+        new_data: ReferentCompanyCreate,
+        user: User = Depends(current_active_superuser),
+        session: AsyncSession = Depends(get_async_session),
+):
+    obj, code, indexes = await crud_referent.create_referent_for_us(db=session, new_data=new_data)
     await get_raise_new(code)
     return SingleEntityResponse(data=getting_referent(obj=obj))
 
@@ -101,26 +117,7 @@ async def change_balance(
     await get_raise_new(code=code)
     return SingleEntityResponse(data=getting_referent(obj=obj))
 
+# TODO select referents where is referent_type_id: int
 
 if __name__ == "__main__":
     logging.info('Running...')
-
-#
-#
-# @router.put(path="/{account_id}",
-#             response_model=SingleEntityResponse,
-#             name='update_account',
-#             description='Изменить аккаунт'
-#             )
-# async def update_account(
-#         update_data: AccountUpdate,
-#         account_id: int,
-#         user: User = Depends(current_active_superuser),
-#         session: AsyncSession = Depends(get_async_session),
-# ):
-#     obj, code, indexes = await crud_account.update_account(db=session, update_data=update_data, id=account_id)
-#     if code != 0:
-#         await get_raise(num=code["num"], message=code["message"])
-#     return SingleEntityResponse(data=getting_account(obj=obj))
-#
-#

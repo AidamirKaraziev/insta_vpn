@@ -24,7 +24,7 @@ class Referent(Base):
     balance = Column(Integer, default=0)
 
     description = Column(String)
-    password = Column(String)
+    budget_amount = Column(Integer)
 
     partner = relationship(Partner, backref="referents", lazy="joined")
     referent_type = relationship(ReferentType, backref="referents", lazy="joined")

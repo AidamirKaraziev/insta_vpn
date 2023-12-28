@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from config import STATUS_CREATE, PAYMENT_TYPE_WITHDRAWAL
+from config import STATUS_CREATE, PAYMENT_TYPE_DECREASE
 from core.raise_template import get_raise_new
 from core.response import SingleEntityResponse, ListOfEntityResponse
 from database import get_async_session
@@ -86,7 +86,7 @@ async def create_payment_withdrawal(
         user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
-    new_data.payment_type_id = PAYMENT_TYPE_WITHDRAWAL.id
+    new_data.payment_type_id = PAYMENT_TYPE_DECREASE.id
     obj, code, indexes = await crud_payment.create_payment(db=session, new_data=new_data)
     await get_raise_new(code)
     return SingleEntityResponse(data=getting_payment(obj=obj))
@@ -107,19 +107,18 @@ async def execution_payment(
     return SingleEntityResponse(data=getting_payment(obj=obj))
 
 
-@router.put(path="/make-all-new/{status_id}{payment_type_id}",
+@router.put(path="/make-all-new/{payment_type_id}",
             response_model=SingleEntityResponse,
             name='make_all_new_payments',
             description='Исполнить все новые платежи'
             )
 async def make_all_new_payments(
-        status_id: int,
         payment_type_id: int,
         user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
     data, code, indexes = await crud_payment.make_all_new_payments(
-        db=session, status_id=status_id, payment_type_id=payment_type_id)
+        db=session, payment_type_id=payment_type_id)
     await get_raise_new(code)
     return SingleEntityResponse(data=data)
 

@@ -43,32 +43,6 @@ async def update_fact_clients(*, db: AsyncSession):
     return good_servers, 0, None
 
 
-async def deactivate_profile(*, db: AsyncSession, skip: int = 0):
-    good_profile = []
-    bad_profile = []
-    res = {}
-    # get all profiles
-    profiles, code, indexes = await crud_profile.get_all_profiles(db=db, skip=skip, limit=LIMIT_PROFILES)
-    for profile in profiles:
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f%z")
-        if str(profile.date_end) <= now:
-            # add data_limit
-            server, code, indexes = await crud_server.get_server_by_id(db=db, id=profile.server_id)
-            try:
-                client = OutlineVPN(api_url=server.api_url, cert_sha256=server.cert_sha256)
-                obj = client.add_data_limit(key_id=profile.key_id, limit_bytes=FREE_TRAFFIC)
-                if obj is True:
-                    good_profile.append(profile.id)
-                else:
-                    bad_profile.append(profile.id)
-            except Exception as ex:
-                pass
-            update_data = ProfileUpdate(data_limit=FREE_TRAFFIC, is_active=False)
-            obj, code, indexes = await crud_profile.update_profile(db=db, update_data=update_data, id=profile.id)
-        res[f"Не деактивировались:"] = f"{bad_profile}"
-    return res, code, indexes
-
-
 async def deleting_an_outdated_profile(db: AsyncSession):
     # получить profile
     profiles, code, indexes = await crud_profile.get_all_profiles(db=db, skip=0, limit=LIMIT_PROFILES)

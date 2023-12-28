@@ -43,7 +43,6 @@ TRIAL_DAYS = 3  # Количество пробных дней
 
 """REFERENT"""
 BASE_REFERENT_GIFT_DAYS = 5  # базовое количество подарочных дней
-BASE_PARTNER = 1  # базовый партнер - лицо привело референта 1="Общие", нужно для KPI
 THE_AMOUNT_OF_PAYMENT_FOR_A_REFERRAL = 50  # Реферальная выплата за нового клиента
 
 OUTLINE_USERS_GATEWAY = os.environ.get("OUTLINE_USERS_GATEWAY")
@@ -63,8 +62,8 @@ STATUS_ERROR = StatusCreate(id=2, name='Ошибка')
 STATUS_DONE = StatusCreate(id=3, name='Готов')
 
 """PaymentType"""
-PAYMENT_TYPE_REPLACEMENT = PaymentTypeCreate(id=1, name='Пополнение баланса')
-PAYMENT_TYPE_WITHDRAWAL = PaymentTypeCreate(id=2, name='Снятие средств')
+PAYMENT_TYPE_INCREASE = PaymentTypeCreate(id=1, name='Пополнение баланса')
+PAYMENT_TYPE_DECREASE = PaymentTypeCreate(id=2, name='Снятие средств')
 
 """Partner"""
 GENERAL_PARTNER = PartnerCreate(id=1, name='Общие')
