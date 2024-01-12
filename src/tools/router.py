@@ -3,7 +3,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from config import FREE_TRAFFIC, LIMIT_SERVERS
+from config import LIMIT_SERVERS
 from core.response import SingleEntityResponse, ListOfEntityResponse, OkResponse
 from database import get_async_session
 from server.crud import crud_server

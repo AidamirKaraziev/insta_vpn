@@ -3,13 +3,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 from database import get_async_session
 from partner.models import Partner
+from payment_type.models import PaymentType
 from referent_type.models import ReferentType
 from status.models import Status
 from tariff.models import Tariff
 from vpn_type.models import VpnType
 from config import STATUS_CREATE, STATUS_DONE, STATUS_ERROR, GENERAL_PARTNER, AIDAMIR_PARTNER, AZAMAT_PARTNER, \
     NASTYA_PARTNER, KARA_PARTNER, BLOGGER_REFERENT_TYPE, NATIVE_REFERENT_TYPE, ONE_MONTH_TARIFF, TWO_MONTH_TARIFF, \
-    THREE_MONTH_TARIFF
+    THREE_MONTH_TARIFF, PAYMENT_TYPE_DECREASE, PAYMENT_TYPE_INCREASE
 
 
 async def check_vpn_type(session: AsyncSession = Depends(get_async_session)):
@@ -147,6 +148,29 @@ async def create_referent_type():
         await db.close()
 
 
+async def check_payment_type(session: AsyncSession = Depends(get_async_session)):
+    check_list = [
+        PaymentType(id=PAYMENT_TYPE_INCREASE.id, name=PAYMENT_TYPE_INCREASE.name),
+        PaymentType(id=PAYMENT_TYPE_DECREASE.id, name=PAYMENT_TYPE_DECREASE.name)
+    ]
+
+    creation_list = []
+    for obj in check_list:
+        query = select(PaymentType).where(PaymentType.name == obj.name, PaymentType.id == obj.id)
+        obj_type = await session.execute(query)
+        if obj_type.scalar_one_or_none() is None:
+            creation_list.append(obj)
+    return creation_list
+
+
+async def create_payment_type():
+    async for db in get_async_session():
+        creation_list = await check_payment_type(db)
+        [db.add(obj) for obj in creation_list]
+        await db.commit()
+        await db.close()
+
+
 async def create_initial_data():
     try:
         await create_vpn_type()
@@ -168,4 +192,7 @@ async def create_initial_data():
         await create_referent_type()
     except Exception as ex:
         print(ex)
-
+    try:
+        await create_payment_type()
+    except Exception as ex:
+        print(ex)

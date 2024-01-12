@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from config import STATUS_CREATE
+from config import STATUS_CREATE, PAYMENT_TYPE_DECREASE
 from core.raise_template import get_raise_new
 from core.response import SingleEntityResponse, ListOfEntityResponse
 from database import get_async_session
@@ -42,18 +42,20 @@ async def get_payments(
 
 
 @router.get(
-            path='/get-payments-by/{status_id}',
+            path='/get-payments-by/{status_id}{payment_type_id}',
             response_model=ListOfEntityResponse,
-            name='get_payments_by_status_id',
-            description='Получение списка платежей отфильтрованных по status_id'
+            name='get_by_status_id_and_payment_type_id',
+            description='Получение списка платежей отфильтрованных по status_id и payment_type_id.'
             )
-async def get_payments_by_status_id(
+async def get_by_status_id_and_payment_type_id(
+        payment_type_id: int,
         status_id: Optional[int] = STATUS_CREATE.id,
         user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
-    objects, code, indexes = await crud_payment.get_payments_by_status_id(
-        db=session, status_id=status_id)
+    objects, code, indexes = await crud_payment.get_by_status_id_and_payment_type_id(
+        db=session, status_id=status_id, payment_type_id=payment_type_id)
+
     await get_raise_new(code)
     return ListOfEntityResponse(data=[getting_payment(obj) for obj in objects])
 
@@ -74,16 +76,17 @@ async def get_payment(
     return SingleEntityResponse(data=getting_payment(obj=obj))
 
 
-@router.post(path="/",
+@router.post(path="/payment-withdrawal/",
              response_model=SingleEntityResponse,
-             name='create_payment',
-             description='Создать новую оплату'
+             name='create_payment_withdrawal',
+             description='Создать платеж на вывод средств'
              )
-async def create_payment(
+async def create_payment_withdrawal(
         new_data: PaymentCreate,
         user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
+    new_data.payment_type_id = PAYMENT_TYPE_DECREASE.id
     obj, code, indexes = await crud_payment.create_payment(db=session, new_data=new_data)
     await get_raise_new(code)
     return SingleEntityResponse(data=getting_payment(obj=obj))
@@ -104,18 +107,20 @@ async def execution_payment(
     return SingleEntityResponse(data=getting_payment(obj=obj))
 
 
-@router.put(path="/make-all-new/",
+@router.put(path="/make-all-new/{payment_type_id}",
             response_model=SingleEntityResponse,
             name='make_all_new_payments',
-            description='Выполнить все новые платежи'
+            description='Исполнить все новые платежи'
             )
 async def make_all_new_payments(
+        payment_type_id: int,
         user: User = Depends(current_active_superuser),
         session: AsyncSession = Depends(get_async_session),
 ):
-    obj, code, indexes = await crud_payment.make_all_new_payments(db=session)
+    data, code, indexes = await crud_payment.make_all_new_payments(
+        db=session, payment_type_id=payment_type_id)
     await get_raise_new(code)
-    return SingleEntityResponse(data=obj)
+    return SingleEntityResponse(data=data)
 
 if __name__ == "__main__":
     logging.info('Running...')
