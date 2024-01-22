@@ -22,6 +22,7 @@ from vpn_type.router import router as vpn_type_router
 from referent.router import router as referent_router
 from referent_type.router import router as referent_type_router
 from payment.router import router as payment_router
+from payment_type.router import router as payment_type_router
 
 from user.router import router as router_user, get_users_router
 # from tools.router import router as router_tools
@@ -46,7 +47,10 @@ app.include_router(referent_type_router)
 app.include_router(vpn_type_router)
 app.include_router(dynamic_router)
 
-# пригодится в будущем
+"""Готовые апи которые мы не используем за ненадобностью"""
+app.include_router(payment_type_router)
+
+"""Надо дописать и внедрить"""
 # app.include_router(router_outline)
 # app.include_router(router_tools)
 # app.include_router(router_vless_key)
@@ -118,7 +122,10 @@ app.add_middleware(
 async def startup_event():
     redis = aioredis.from_url(f"redis://{REDIS_HOST:{REDIS_PORT}}", encoding="utf8", decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
-    await create_initial_data()
+    try:
+        await create_initial_data()
+    except Exception as ex:
+        print(f"Не получилось создать базовые данные: {ex}")
 
 
 # @app.get("/protected-route")
@@ -127,4 +134,3 @@ async def startup_event():
 
 """Не удалять!!!Важно для отображения ошибок"""
 from core.errors import *
-"""Внесу некие данные для проверки потом удали ,Айдамир заебал"""

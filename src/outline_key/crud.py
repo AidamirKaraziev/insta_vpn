@@ -120,33 +120,71 @@ class CrudOutlineKey(CRUDBase[OutlineKey, OutlineKeyCreate, OutlineKeyUpdate]):
         quantity_free_keys = len(response.all())
         return quantity_free_keys, 0, None
 
-    async def get_good_key(self, *, db: AsyncSession):
-        """Возвращает один свободный ключ"""
-        res = select(self.model).select_from(self.model).outerjoin(Profile).where(
-            Profile.outline_key_id == None, self.model.is_active == True).limit(1)
-        response = await db.execute(res)
-        obj = response.scalar()
-        if not obj:
-            # TODO сделать отправку письма телеграм бота или какая-то другая логика. ВАЖНО!!!
+    async def get_good_key_new(self, *, db: AsyncSession):
+        """
+            Получить список всех серверов.
+            Выбрать из них в процентном соотношении самый свободный сервак.
+            Выбрать один свободный ключ.
+            Если свободных ключей нет - вывести ошибку с описанием.
+        """
+        servers, code, indexes = await crud_server.get_all_servers(db=db, skip=0, limit=1000000000)
+        the_best_percentage_of_free_keys = 0
+        good_key = None
+        for server in servers:
+            # Получаем самый свободный сервак
+            res = select(self.model).select_from(self.model).outerjoin(Profile).where(
+                Profile.outline_key_id == None, self.model.is_active == True, self.model.server_id == server.id)
+            response = await db.execute(res)
+            objs = response.scalars().all()
+            active_keys = len(objs)  # свободные ключи
+            all_keys = server.max_client  # всего ключей
+            percent_active = active_keys / all_keys  # процент свободных ключей
+            if percent_active >= the_best_percentage_of_free_keys and active_keys != 0:
+                the_best_percentage_of_free_keys = percent_active
+                good_key = objs[0]
+        # если нет ни одного свободного ключа
+        if good_key is None:
+            # TODO отправить смс в телегу, сообщить что ключи закончились
             return None, self.no_keys_available, None
-        return obj, 0, None
+        return good_key, 0, None
 
-    async def get_replacement_key(self, *, db: AsyncSession, outline_key_id: int):
-        outline_key, code, indexes = await self.get_key_by_id(db=db, id=outline_key_id)
+    async def get_replacement_key_new(self, *, db: AsyncSession, outline_key_id: int):
+        """
+            Получить список всех серверов.
+            Выбрать из них в процентном соотношении самый свободный сервак.
+            Выбрать один свободный ключ.
+            Если свободных ключей нет - вывести ошибку с описанием.
+        """
+        this_outline_key, code, indexes = await self.get_key_by_id(db=db, id=outline_key_id)
         if code != 0:
             return None, code, None
+        servers, code, indexes = await crud_server.get_all_servers(db=db, skip=0, limit=1000000000)
 
-        res = select(self.model).select_from(self.model).outerjoin(Profile).where(
-            Profile.outline_key_id == None, self.model.is_active == True,
-            self.model.server_id != outline_key.server_id).limit(1)
-        response = await db.execute(res)
-        obj = response.scalar()
-        if not obj:
+        the_best_percentage_of_free_keys = 0
+        good_key = None
+        for server in servers:
+            if server.id != this_outline_key.server_id:
+                # Получаем самый свободный сервак
+                res = select(self.model).select_from(self.model).outerjoin(Profile).where(
+                    Profile.outline_key_id == None, self.model.is_active == True, self.model.server_id == server.id)
+                response = await db.execute(res)
+                objs = response.scalars().all()
+
+                active_keys = len(objs)  # свободные ключи
+                all_keys = server.max_client  # всего ключей
+                percent_active = active_keys / all_keys  # процент свободных ключей
+                if percent_active >= the_best_percentage_of_free_keys and active_keys != 0:
+                    the_best_percentage_of_free_keys = percent_active
+                    good_key = objs[0]
+        # если нет ни одного свободного ключа
+        if good_key is None:
+            # TODO отправить смс в телегу, сообщить что ключи закончились
             return None, self.no_keys_available, None
-        return obj, 0, None
+        return good_key, 0, None
 
 
 crud_outline_key = CrudOutlineKey(OutlineKey)
+
 
 # # TODO change_max_client_to_server
 # async def change_max_client_to_server(self, *, db: AsyncSession, server_id: int):

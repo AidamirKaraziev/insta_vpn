@@ -46,6 +46,7 @@ services:
     container_name: celery_insta_v2
     command: [ "/insta_vpn/docker/celery.sh", "celery", "--app=celery:app" ]
     depends_on:
+      - db
       - redis
     restart: always
 
@@ -57,6 +58,7 @@ services:
     container_name: celery_beat_insta_v2
     command: [ "/insta_vpn/docker/celery.sh", "beat", "--app=celery:app" ]
     depends_on:
+      - db
       - celery
     restart: always
 
