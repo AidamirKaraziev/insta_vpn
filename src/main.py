@@ -26,11 +26,14 @@ from payment_type.router import router as payment_type_router
 
 from user.router import router as router_user, get_users_router
 # from tools.router import router as router_tools
-# from vless_key.router import router as router_vless_key
+from vless_key.router import router as router_vless_key
 
 current_user = fastapi_users.current_user()
 
 app = FastAPI(title="Insta VPN")
+
+"""В разаработке"""
+app.include_router(router_vless_key)
 
 """Мои API"""
 app.include_router(admin_router)
@@ -53,7 +56,6 @@ app.include_router(payment_type_router)
 """Надо дописать и внедрить"""
 # app.include_router(router_outline)
 # app.include_router(router_tools)
-# app.include_router(router_vless_key)
 
 
 app.include_router(

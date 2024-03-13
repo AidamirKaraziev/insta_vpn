@@ -1,4 +1,5 @@
 import logging
+import requests
 
 from fastapi import APIRouter, Depends, Body, File, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,6 +20,89 @@ router = APIRouter(
     prefix="/vless_key",
     tags=["VlessKey"]
 )
+
+
+async def authorization():
+    """
+    Авторизация в
+    """
+    pass
+
+"""
+Бро будем авторизовываться по одному адресу или будем менять адрес для каждого vless сервера 
+https://vless.insta-vpn.ru/api/admin/token
+
+"""
+
+
+@router.get("/auth")
+def get_user_info():
+    token_url = "https://vless.insta-vpn.ru/api/admin/token"
+    token_payload = {
+        "grant_type": "",
+        "username": "karaziev",
+        "password": "2432546Mb",
+        "scope": "",
+        "client_id": "",
+        "client_secret": ""
+    }
+    token_response = requests.post(token_url, data=token_payload)
+    if token_response.status_code == 200:
+        access_token = token_response.json()["access_token"]
+        user_info_url = "https://vless.insta-vpn.ru/api/user/Aidamir"
+        headers = {
+            "accept": "application/json",
+            "Authorization": f"Bearer {access_token}"
+        }
+        user_info_response = requests.get(user_info_url, headers=headers)
+        return user_info_response.json()
+
+    else:
+        return {"error": "Failed to obtain access token"}
+
+
+@router.get("/profile/{profile_name}")
+def get_user_info(
+        profile_name: str = 'Aidamir',
+):
+    # TODO авторизоваться
+    token_url = "https://vless.insta-vpn.ru/api/admin/token"
+
+    token_payload = {
+        "grant_type": "",
+        "username": "karaziev",
+        "password": "2432546Mb",
+        "scope": "",
+        "client_id": "",
+        "client_secret": ""
+    }
+    response = requests.post(token_url, data=token_payload)
+    url = f"https://vless.insta-vpn.ru/api/user/{profile_name}"
+    print(response)
+    headers = {
+        "accept": "application/json",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJrYXJhemlldiIsImFjY2VzcyI6InN1ZG8iLCJpYXQiOjE3MDgxNzg2ODMsImV4cCI6MTcwODI2NTA4M30.yQseDjf6PGtx-pzyoDxRPh6j2tvjYSEj0FDf3QBskGc"
+    }
+    response = requests.get(token_url, headers=headers)
+    return response.json()
+
+
+@router.get(
+            path='/connect-to-server',
+            # response_model=ListOfEntityResponse,
+            name='connect_to_server',
+            description='Подключение к серверу с получением данных пользователя по имени'
+            )
+async def connect_to_server(
+        username: str,
+        # limit: int = 1000,
+        # user: User = Depends(current_active_superuser),
+        # session: AsyncSession = Depends(get_async_session),
+):
+
+    return "OK"
+    # objects, code, indexes = await crud_vless_key.get_all_vless_keys(db=session, skip=0, limit=limit)
+    # return ListOfEntityResponse(data=[getting_vless_key(obj) for obj in objects])
 
 
 @router.get(
