@@ -1,8 +1,0 @@
-venv/
-.idea/
-/build/
-/outline_vpn_api.egg-info/
-/dist/
-/.pytest_cache/
-/outline-install.log
-__pycache__

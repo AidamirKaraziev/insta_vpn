@@ -9,53 +9,13 @@ from auth.manager import get_user_manager
 from auth.schemas import UserReadOld, UserCreate, UserRead, UserUpdate
 from config import REDIS_HOST, REDIS_PORT
 from core.initial_data import create_initial_data
-from server.router import router as server_router
-from tariff.router import router as tariff_router
-from account.router import router as account_router
-from profiles.router import router as profile_router
-from profiles.dymamic import router as dynamic_router
-from outline_key.router import router as outline_key_router
-from admin.router import router as admin_router
-from partner.router import router as partner_router
-from status.router import router as status_router
-from vpn_type.router import router as vpn_type_router
-from referent.router import router as referent_router
-from referent_type.router import router as referent_type_router
-from payment.router import router as payment_router
-from payment_type.router import router as payment_type_router
 
 from user.router import router as router_user, get_users_router
-# from tools.router import router as router_tools
-from vless_key.router import router as router_vless_key
+
 
 current_user = fastapi_users.current_user()
 
-app = FastAPI(title="Insta VPN")
-
-"""В разаработке"""
-app.include_router(router_vless_key)
-
-"""Мои API"""
-app.include_router(admin_router)
-app.include_router(account_router)
-app.include_router(profile_router)
-app.include_router(outline_key_router)
-app.include_router(referent_router)
-app.include_router(server_router)
-app.include_router(payment_router)
-app.include_router(partner_router)
-app.include_router(status_router)
-app.include_router(tariff_router)
-app.include_router(referent_type_router)
-app.include_router(vpn_type_router)
-app.include_router(dynamic_router)
-
-"""Готовые апи которые мы не используем за ненадобностью"""
-app.include_router(payment_type_router)
-
-"""Надо дописать и внедрить"""
-# app.include_router(router_outline)
-# app.include_router(router_tools)
+app = FastAPI(title="Denis")
 
 
 app.include_router(
